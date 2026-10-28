@@ -1,6 +1,8 @@
 # OD-EARTH2-001: Genuine AI Weather Forecast & Scientific Verification
 
-**Organization:** ORIGIN DATUM
+**Author:** Zhane Daye
+**Organization:** ORIGIN DATUM ([datum.space](https://datum.space))
+**GitHub:** [github.com/zrt219](https://github.com/zrt219)
 **Program:** EO-OBSCURA
 **Experiment ID:** OD-EARTH2-001
 **Execution Date:** 2026-10-26 (Simulated Atmospheric Time: 2024-01-01 00:00 UTC)

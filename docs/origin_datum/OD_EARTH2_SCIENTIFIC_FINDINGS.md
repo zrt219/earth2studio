@@ -1,6 +1,8 @@
 # OD-EARTH2-001: COMPREHENSIVE SCIENTIFIC FINDINGS & BENCHMARK REPORT
 
-**Organization:** ORIGIN DATUM RESEARCH FOUNDATION
+**Author:** Zhane Daye
+**Organization:** ORIGIN DATUM ([datum.space](https://datum.space))
+**GitHub:** [github.com/zrt219](https://github.com/zrt219)
 **Program:** EO-OBSCURA (Atmospheric Context & Incomplete Observation Reconstruction)
 **Study Identifier:** OD-EARTH2-001-REV2
 **Date of Completion:** October 26, 2026
