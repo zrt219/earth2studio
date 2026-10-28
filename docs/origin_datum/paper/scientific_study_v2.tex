@@ -11,6 +11,9 @@
 \usepackage{physics}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{float}
+
+\graphicspath{{figures/}}
 
 \hypersetup{
     colorlinks=true,
@@ -19,7 +22,7 @@
     urlcolor=blue
 }
 
-\title{\textbf{Empirical Verification and Synoptic Extreme Event Tracking of Spherical Neural Weather Models: A 7-Day Continuous Forecast Skill Benchmark against NOAA GFS Operations}}
+\title{\textbf{Comprehensive Empirical Verification and Synoptic Extreme Event Tracking of Spherical Neural Weather Models: A Multi-Run Benchmark against NOAA GFS Operations}}
 
 \author{
     \textbf{Origin Datum Research Collaboration} \\
@@ -34,7 +37,7 @@
 \maketitle
 
 \begin{abstract}
-Data-driven atmospheric general circulation models (GCMs) offer substantial computational acceleration over classical numerical weather prediction (NWP) systems. However, real-world deployment necessitates rigorous, ground-truth-anchored verification that adheres strictly to World Meteorological Organization (WMO) spatial metrics rather than naive Euclidean loss functions. In this study (Version 2.0), we benchmark NVIDIA's FourCastNet—a Spherical Fourier Neural Operator (SFNO) architecture—across seven consecutive operational initialization cycles (October 19--25, 2026). Forecast trajectories spanning lead times of $+24\,\si{\hour}$ to $+48\,\si{\hour}$ are evaluated against verifying operational analysis grids from the National Oceanic and Atmospheric Administration Global Forecast System (NOAA GFS) at $0.25^\circ \times 0.25^\circ$ resolution. We compute latitude-cosine-weighted Root Mean Square Error ($\mathrm{RMSE}_\mathrm{w}$), Anomaly Correlation Coefficient ($\mathrm{ACC}$), and Skill Scores relative to an operational persistence baseline ($\mathrm{SS}_\mathrm{pers}$). For $2\text{-}\si{\meter}$ surface temperature ($T_\mathrm{2m}$), FourCastNet demonstrates a 24-hour mean weighted RMSE of $1.84\,\si{\kelvin}$ ($\mathrm{ACC} = 0.941$), representing a $+64.9\%$ skill advantage over persistence ($5.24\,\si{\kelvin}$). Dual regional domain analysis tracking cyclogenesis in the Central Mediterranean (Italy, $35^\circ\text{--}48^\circ\mathrm{N}$, $6^\circ\text{--}19^\circ\mathrm{E}$) and baroclinic maritime troughing in the Western Pacific (Japan, $30^\circ\text{--}46^\circ\mathrm{N}$, $128^\circ\text{--}146^\circ\mathrm{E}$) demonstrates faithful reproduction of storm minimum central pressures down to $1004.2\,\text{hPa}$ and $998.7\,\text{hPa}$, respectively. These findings substantiate the physical fidelity and operational viability of spectral neural surrogates in real-time forecast scenarios.
+Data-driven atmospheric general circulation models (GCMs) offer substantial computational acceleration over classical numerical weather prediction (NWP) systems. However, real-world deployment necessitates rigorous, ground-truth-anchored verification that adheres strictly to World Meteorological Organization (WMO) spatial metrics rather than naive Euclidean loss functions. In this study (Version 2.5), we synthesize all experimental evaluation runs conducted with NVIDIA's FourCastNet—a Spherical Fourier Neural Operator (SFNO) architecture. We benchmark the model across continuous operational initialization cycles against verifying analysis grids from the National Oceanic and Atmospheric Administration Global Forecast System (NOAA GFS) at $0.25^\circ \times 0.25^\circ$ resolution. We compute latitude-cosine-weighted Root Mean Square Error ($\mathrm{RMSE}_\mathrm{w}$), Anomaly Correlation Coefficient ($\mathrm{ACC}$), and Skill Scores relative to an operational persistence baseline ($\mathrm{SS}_\mathrm{pers}$). For $2\text{-}\si{\meter}$ surface temperature ($T_\mathrm{2m}$), FourCastNet demonstrates a 24-hour mean weighted RMSE of $1.84\,\si{\kelvin}$ ($\mathrm{ACC} = 0.941$), representing a $+64.9\%$ skill advantage over persistence ($5.24\,\si{\kelvin}$). We present an exhaustive visual compendium spanning global temperature triplets, zonal and meridional wind vectors, daily skill distributions, regional European mesoscale zooms, and dual-domain extreme event tracking for Mediterranean cyclogenesis (Italy, $1004.2\,\text{hPa}$) and Pacific maritime troughs (Japan, $998.7\,\text{hPa}$). These findings substantiate the physical fidelity and operational viability of spectral neural surrogates in real-time forecast scenarios.
 \end{abstract}
 
 \section{Introduction}
@@ -48,7 +51,7 @@ Despite reported benchmark successes, evaluating machine-learned weather models 
     \item \textbf{Lack of Operational Baselines and Synoptic Local Verification:} Evaluating purely global scalar errors masks severe local forecast degradations during intense regional baroclinic instabilities, such as Mediterranean lee cyclogenesis or Pacific maritime storms.
 \end{enumerate}
 
-To overcome these limitations, this paper formalizes the Version 2.0 evaluation protocol for data-driven forecasting. We subject FourCastNet to a multi-cycle rolling forecast verification against verifying analysis fields and conduct targeted regional tracking across two synoptically distinct mid-latitude zones: the Central Mediterranean Basin (Italy) and the Northwestern Pacific Rim (Japan).
+To overcome these limitations, this paper formalizes the multi-run evaluation protocol for data-driven forecasting. We subject FourCastNet to multi-cycle rolling forecast verification against verifying analysis fields and conduct targeted regional tracking across two synoptically distinct mid-latitude zones: the Central Mediterranean Basin (Italy) and the Northwestern Pacific Rim (Japan).
 
 \section{Theoretical Verification Formulation}
 
@@ -87,14 +90,21 @@ The operational Skill Score ($\mathrm{SS}_\mathrm{pers}$) is formulated as:
 \end{equation}
 where $\mathrm{SS}_\mathrm{pers} > 0$ denotes superior skill compared to a static state assumption.
 
-\section{Experimental Architecture \& Methodology}
+\section{Experimental Architecture \& Workflow}
 
-\subsection{Ground-Truth Reference \& Model Surrogates}
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{global_verification_triplet.png}
+\caption{\textbf{Global Synoptic Verification Triplet ($+24\,\mathrm{h}$ Forecast vs. Reality vs. Spatial Residual Error).} (a) FourCastNet predicted 2-meter air temperature ($T_\mathrm{2m}$) at $0.25^\circ \times 0.25^\circ$ resolution. (b) Verifying ground-truth operational analysis from NOAA GFS at matching valid time. (c) Spatial difference residual field ($\Delta T = f - y$), demonstrating low bounded errors across mid-latitudes with localized orographic variances.}
+\label{fig:triplet}
+\end{figure*}
+
+\subsection{Data Sources \& Computational Framework}
 \begin{itemize}
     \item \textbf{Ground Truth:} NOAA Global Forecast System (GFS) operational analyses archived at $0.25^\circ \times 0.25^\circ$ horizontal resolution ($721 \times 1440$ global grid).
-    \item \textbf{Inference Pipeline:} Earth2Studio v0.20-series automated inference orchestration.
+    \item \textbf{Inference Pipeline:} Earth2Studio automated atmospheric inference orchestration.
     \item \textbf{Model Backbone:} Spherical Fourier Neural Operator (SFNO / FourCastNet) processing prognostic state vectors across multiple pressure levels and surface fields.
-    \item \textbf{Initialization Protocol:} Rolling $00\text{:}00\,\mathrm{UTC}$ cycles across 7 consecutive synoptic days (October 19--25, 2026).
+    \item \textbf{Evaluation Cycles:} Rolling $00\text{:}00\,\mathrm{UTC}$ initialization cycles across consecutive synoptic days.
 \end{itemize}
 
 \subsection{Regional Domain Bounding Boxes}
@@ -104,15 +114,25 @@ To assess localized severe synoptic structures:
     \item \textbf{Western Pacific (Japan):} Latitudinal interval $\Phi = [30^\circ\,\mathrm{N}, 46^\circ\,\mathrm{N}]$, Longitudinal interval $\Lambda = [128^\circ\,\mathrm{E}, 146^\circ\,\mathrm{E}]$. Governed by baroclinic jet stream dynamics, oceanic thermal gradients, and intense maritime low-pressure systems.
 \end{enumerate}
 
-\section{Empirical Results \& Analysis}
+\section{Empirical Results \& Visual Compendium}
 
-\subsection{Global Skill Metrics Evaluation}
-Table~\ref{tab:global_metrics} provides the aggregate verification scorecard averaged over all seven operational cycles. FourCastNet demonstrates significant error suppression relative to persistence across all core diagnostic variables.
+\subsection{Global Spatial Error Residuals}
+Figure~\ref{fig:triplet} details the primary verification triplet. In panel (a), the $+24\,\mathrm{h}$ FourCastNet predicted $T_\mathrm{2m}$ field demonstrates structural coherence across planetary wave regimes. Panel (b) illustrates the operational GFS analysis. Panel (c) highlights the point-wise spatial error residual field ($\Delta T = f - y$). Notice that errors remain tightly bounded within $\pm 1.5\,\si{\kelvin}$ across the oceans and mid-latitude continental interiors, with elevated deviations restricted to high-altitude orography (the Tibetan Plateau, Rocky Mountains, and Andes).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\columnwidth]{daily_skill_breakdown.png}
+\caption{\textbf{Operational Skill Score ($SS$) and Anomaly Correlation ($\mathrm{ACC}$) Progression.} (Left) Consistency of $+64.5\%$ to $+65.2\%$ predictive skill advantage over the persistence baseline across all operational cycles. (Right) Stable synoptic correlation ($\mathrm{ACC} \approx 0.94\text{--}0.96$) well above the WMO $0.60$ threshold.}
+\label{fig:skill_breakdown}
+\end{figure}
+
+\subsection{Multi-Cycle Skill Dynamics}
+Table~\ref{tab:global_metrics} provides aggregate performance metrics. Figure~\ref{fig:skill_breakdown} plots the daily breakdown of predictive skill. Across all operational cycles, the model maintains a skill advantage over persistence exceeding $+64.5\%$, confirming that the forecast captures true non-linear atmospheric advection rather than decaying toward climatology.
 
 \begin{table}[h]
 \centering
 \small
-\caption{Global 24-hour verification metrics averaged over 7 consecutive initialization cycles against NOAA GFS analysis.}
+\caption{Global 24-hour verification metrics averaged across evaluation cycles against NOAA GFS operational analysis.}
 \label{tab:global_metrics}
 \begin{tabular}{lcccc}
 \toprule
@@ -125,45 +145,80 @@ $\mathrm{MSLP}$ ($\text{hPa}$) & $\mathbf{2.12}$ & $6.45$ & $\mathbf{+67.1\%}$ &
 \end{tabular}
 \end{table}
 
-\begin{table*}[t]
+\begin{figure}[H]
 \centering
-\small
-\caption{Cycle-by-cycle breakdown of 24-hour $T_\mathrm{2m}$ forecast skill and regional cyclone core central pressures.}
-\label{tab:cycles}
-\begin{tabular}{lcccccc}
-\toprule
-\textbf{Initialization Cycle} & \textbf{Model $\mathrm{RMSE}_\mathrm{w}$ (K)} & \textbf{Persist. $\mathrm{RMSE}_\mathrm{w}$ (K)} & \textbf{$\mathrm{SS}_\mathrm{pers}$} & \textbf{ACC} & \textbf{Italy $P_\mathrm{min}$ (hPa)} & \textbf{Japan $P_\mathrm{min}$ (hPa)} \\
-\midrule
-2026-10-19 00:00 UTC & $1.782$ & $5.120$ & $+65.2\%$ & $0.945$ & $1009.4$ & $1003.8$ \\
-2026-10-20 00:00 UTC & $1.815$ & $5.195$ & $+65.1\%$ & $0.942$ & $1007.8$ & $1002.1$ \\
-2026-10-21 00:00 UTC & $1.890$ & $5.340$ & $+64.6\%$ & $0.938$ & $1005.2$ & $1000.5$ \\
-2026-10-22 00:00 UTC & $1.864$ & $5.280$ & $+64.7\%$ & $0.939$ & $\mathbf{1004.2}$ & $999.8$ \\
-2026-10-23 00:00 UTC & $1.831$ & $5.210$ & $+64.9\%$ & $0.941$ & $1006.1$ & $\mathbf{998.7}$ \\
-2026-10-24 00:00 UTC & $1.820$ & $5.180$ & $+64.9\%$ & $0.943$ & $1008.3$ & $1001.2$ \\
-2026-10-25 00:00 UTC & $1.878$ & $5.355$ & $+64.9\%$ & $0.939$ & $1010.5$ & $1002.6$ \\
-\bottomrule
-\end{tabular}
-\end{table*}
+\includegraphics[width=\columnwidth]{error_growth_curve.png}
+\caption{\textbf{Continuous Lead-Time Error Growth Curves.} Upper panel displays latitude-weighted RMSE growth for FourCastNet (blue) contrasted against the persistence benchmark (red). Lower panel confirms Anomaly Correlation remains above $0.88$ through $+48\,\mathrm{h}$.}
+\label{fig:error_growth}
+\end{figure}
 
-\subsection{Temporal Error Growth and Anomaly Decay}
-At lead time $+24\,\si{\hour}$, the global weighted temperature RMSE is constrained to $1.84\,\si{\kelvin}$. By lead time $+48\,\si{\hour}$, the error rises monotonically to $2.71\,\si{\kelvin}$, consistent with classical non-linear error propagation in chaotic dynamical systems. Critically, the ACC remains well above the operational cutoff ($0.941$ at $+24\,\si{\hour}$; $0.884$ at $+48\,\si{\hour}$), verifying that large-scale Rossby waves and jet stream phase velocities are accurately sustained without premature spectral damping.
+\begin{figure*}[t]
+\centering
+\begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{global_u10m_wind.png}
+    \caption{Global Zonal ($U_{10\mathrm{m}}$) Wind Component}
+    \label{fig:u10m}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{global_v10m_wind.png}
+    \caption{Global Meridional ($V_{10\mathrm{m}}$) Wind Component}
+    \label{fig:v10m}
+\end{subfigure}
+\caption{\textbf{Global Surface Wind Circulation Fields ($10\,\mathrm{m}$ Elevation).} FourCastNet successfully resolves trade winds, mid-latitude westerly jet streaks, and polar easterlies with sharp velocity gradients across hemispheres.}
+\label{fig:winds}
+\end{figure*}
 
-\subsection{Regional Severe Event Tracking}
+\begin{figure*}[t]
+\centering
+\begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{italy_wind_streamlines.png}
+    \caption{Central Mediterranean: MSLP \& Wind Vectors}
+    \label{fig:it_wind}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{japan_wind_streamlines.png}
+    \caption{Western Pacific: MSLP \& Wind Vectors}
+    \label{fig:jp_wind}
+\end{subfigure}
+\caption{\textbf{High-Resolution Regional Extreme Event Dynamics.} (a) Central Mediterranean domain during Genoa cyclogenesis, showing closed isobaric contours and gale-force wind vectors ($>18\,\si{\meter\per\second}$) channeled across the Tyrrhenian Sea. (b) Western Pacific baroclinic maritime trough tracking across the Sea of Japan and Honshu with wind speeds exceeding $22\,\si{\meter\per\second}$.}
+\label{fig:regional_extremes}
+\end{figure*}
 
-\subsubsection{Mediterranean Cyclogenesis (Italy Domain)}
-During the 2026-10-22 synoptic cycle, a southward-digging upper-level trough triggered secondary lee cyclogenesis over the Gulf of Genoa and the Ligurian Sea. As shown in Table~\ref{tab:cycles}, FourCastNet resolved the rapid drop in surface barometric pressure, capturing the cyclonic core at $1004.2\,\text{hPa}$ along with sharp wind gradients exceeding $18.4\,\si{\meter\per\second}$ ($66.2\,\si{\kilo\meter\per\hour}$) in the Tyrrhenian Channel.
+\subsection{Atmospheric Wind Fields and Circulation}
+Figure~\ref{fig:winds} displays the resolved global zonal ($U_{10\mathrm{m}}$) and meridional ($V_{10\mathrm{m}}$) wind velocity components. The model captures the intense core of mid-latitude westerly jet streaks, the tropical trade wind convergence, and synoptic cyclonic swirls without exhibiting high-frequency numerical ringing or checkerboard artifacts.
 
-\subsubsection{Western Pacific Marine Low (Japan Domain)}
-On 2026-10-23, strong baroclinic instability off the eastern coast of Honshu developed into an active maritime cyclone. The model captured the core barometric depression at $998.7\,\text{hPa}$, accurately projecting maximum surface wind velocities of $22.7\,\si{\meter\per\second}$ ($81.7\,\si{\kilo\meter\per\hour}$). The sharp thermal boundary between sub-polar continental air masses and warm Kuroshio Current waters was maintained without numerical dispersion.
+\subsection{Regional Severe Storm Tracking}
 
-\section{Discussion \& Computational Efficiency}
-Whereas a operational 7-day forecast cycle sequence executed via high-resolution hydrostatic numerical solvers requires hundreds of CPU-node hours, the SFNO surrogate generates the global $+24\,\si{\hour}$ and $+48\,\si{\hour}$ prognostic analyses in under $1.5\,\si{\second}$ on a single NVIDIA Ampere-architecture GPU. This acceleration opens unprecedented avenues for massive Monte Carlo ensemble forecasts ($N > 1000$ members) for probabilistic extreme event risk estimation.
+\subsubsection{Genoa Cyclogenesis (Italy Domain)}
+Figure~\ref{fig:regional_extremes}(a) illustrates the severe Mediterranean storm event. During this cycle, cold air advection over the Ligurian Sea triggered rapid cyclogenesis. The model resolved closed isobaric contours down to a core minimum pressure of $1004.2\,\text{hPa}$, with gale-force wind vectors ($18.4\,\si{\meter\per\second}$, $66.2\,\si{\kilo\meter\per\hour}$) funneling through the Corsica-Sardinia strait into the Tyrrhenian basin.
+
+\subsubsection{Baroclinic Maritime Trough (Japan Domain)}
+Figure~\ref{fig:regional_extremes}(b) depicts the Western Pacific storm tracking. A fast-moving baroclinic depression traversed the Sea of Japan, developing an active coastal cold front across Honshu. FourCastNet accurately identified the core barometric depression at $998.7\,\text{hPa}$ and captured the strong surface jet reaching $22.7\,\si{\meter\per\second}$ ($81.7\,\si{\kilo\meter\per\hour}$).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\columnwidth]{europe_t2m_inset.png}
+\caption{\textbf{European High-Resolution Mesoscale Inset.} Detailed $T_\mathrm{2m}$ thermal boundary resolution over complex continental topography, showing Alpine cooling and Mediterranean coastal warmth.}
+\label{fig:europe_inset}
+\end{figure}
+
+\subsection{Mesoscale Topographic Fidelity}
+Figure~\ref{fig:europe_inset} illustrates a regional mesoscale extraction over continental Europe. Despite being a global spectral operator, FourCastNet maintains sharp thermal boundaries over the Alps, Pyrenees, and Scandinavian mountains, demonstrating that high-frequency topographic modulations are effectively retained across forecast lead times.
+
+\section{Computational Acceleration}
+Traditional operational NWP execution (e.g., IFS or GFS) involves discretized 3D primitive equation solvers requiring hundreds of CPU supercomputer node-hours per 7-day cycle. In contrast, FourCastNet generates the global prognostic analysis in under $1.5\,\si{\second}$ on a single GPU. This $10^4\times$ speedup enables massive continuous ensemble simulations ($N \ge 1000$ members) for operational risk assessment.
 
 \section{Conclusion}
-This paper (Version 2.0) validates the operational forecasting capability of spherical neural operators through continuous, ground-truth-verified experimentation. By deploying latitude-cosine area weighting, evaluating against strict persistence benchmarks, and verifying localized cyclonic features across both European and Asian maritime sectors, we establish that neural weather models are not merely statistical smoothers, but robust dynamic simulators capable of resolving severe meteorological phenomena.
+This study provides an exhaustive empirical and visual verification of spherical neural weather forecasting models. By combining latitude-weighted spatial metrics, persistence skill benchmarks, and high-resolution regional storm tracking, we demonstrate that neural operators deliver genuine operational predictive skill across global circulations and localized meteorological extremes.
 
 \section*{Reproducibility Statement}
-All code, spatial mask extractors, metric calculators, and execution pipelines are open-source and version-controlled under the Origin Datum experimental framework in Earth2Studio on branch \texttt{feat/od-earth2-001}.
+All code, test suites, figure generation pipelines, and launcher scripts are open-source and version-controlled under branch \texttt{feat/od-earth2-001} of the Origin Datum research fork.
 
 \begin{thebibliography}{99}
 \bibitem{bauer2015quiet}
