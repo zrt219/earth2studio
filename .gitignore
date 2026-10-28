@@ -117,3 +117,8 @@ skills/*/evals/results/
 
 .env*
 !.env.example
+
+*.aux
+*.log
+*.out
+
