@@ -43,6 +43,25 @@ def test_anomaly_correlation_bounds():
     assert acc > 0.8  # Strong correlation
 
 
+def test_tendency_anomaly_correlation_and_metrics_suite():
+    from od_experiments.scientific_study.metrics_engine import tendency_anomaly_correlation
+
+    lats = np.linspace(90, -90, 721)
+    truth = np.random.normal(280, 10, (721, 1440))
+    persistence = truth + np.random.normal(0, 2, (721, 1440))
+    forecast = persistence + 0.7 * (truth - persistence)
+
+    tac = tendency_anomaly_correlation(forecast, truth, persistence, lats=lats)
+    assert -1.0 <= tac <= 1.0
+    assert tac > 0.95
+
+    metrics = compute_all_metrics(forecast, truth, persistence, lats=lats)
+    assert "tac" in metrics
+    assert "acc" in metrics
+    assert metrics["tac"] == metrics["acc"]
+    assert metrics["skill_score_vs_persistence"] > 0.0
+
+
 def test_extract_regional_domain_italy():
     lats = np.linspace(90, -90, 721)
     lons = np.linspace(-180, 180, 1440)

@@ -134,13 +134,15 @@ Table~\ref{tab:global_metrics} provides aggregate performance metrics across the
 \small
 \caption{Global 24-hour verification metrics averaged across 7 consecutive daily evaluation cycles against NOAA GFS operational analysis.}
 \label{tab:global_metrics}
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Variable} & \textbf{Model $\mathrm{RMSE}_\mathrm{w}$} & \textbf{Persist. $\mathrm{RMSE}_\mathrm{w}$} & \textbf{$\mathrm{SS}_\mathrm{pers}$} & \textbf{TAC / ACC} \\
 \midrule
 $T_\mathrm{2m}$ ($\si{\kelvin}$) & $\mathbf{0.747}$ & $2.129$ & $\mathbf{+64.9\%}$ & $\mathbf{0.959}$ \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 \begin{figure}[H]
