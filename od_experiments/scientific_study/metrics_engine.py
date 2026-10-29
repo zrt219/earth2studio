@@ -1,8 +1,25 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 NVIDIA CORPORATION & AFFILIATES.
+# SPDX-FileCopyrightText: All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Scientific meteorological metrics engine for Earth-2 evaluation.
 
 Provides:
 - Latitude-cosine weighted RMSE
-- Anomaly Correlation Coefficient (ACC)
+- Anomaly Correlation Coefficient (ACC) using true climatology or spatial reference
+- Tendency Anomaly Correlation (TAC) when persistence is used as reference
 - Mean Bias Error (MBE)
 - Skill Score relative to persistence baseline: SS = 1 - (RMSE_model / RMSE_persistence)
 """
@@ -66,6 +83,9 @@ def anomaly_correlation_coefficient(
     
     ACC = <(f - c) * (t - c)> / sqrt(<(f - c)^2> * <(t - c)^2>)
     If climatology is not provided, spatial mean of truth is used as reference.
+    Note: If c is persistence (T0), this measures the Tendency Anomaly Correlation (TAC),
+    which is the correlation of the 24-hour forecast change with the observed 24-hour change,
+    distinct from multi-decadal climatological ACC.
     """
     if climatology is None:
         c = np.nanmean(truth)
@@ -89,6 +109,25 @@ def anomaly_correlation_coefficient(
     return float(np.clip(num / den, -1.0, 1.0))
 
 
+def tendency_anomaly_correlation(
+    forecast: np.ndarray,
+    truth: np.ndarray,
+    persistence: np.ndarray,
+    lats: Optional[np.ndarray] = None,
+) -> float:
+    """Compute Tendency Anomaly Correlation (TAC) relative to initial persistence state T0.
+    
+    TAC = <(f - T0) * (truth - T0)> / sqrt(<(f - T0)^2> * <(truth - T0)^2>)
+    Quantifies correlation between predicted atmospheric tendency and observed tendency.
+    """
+    return anomaly_correlation_coefficient(
+        forecast=forecast,
+        truth=truth,
+        climatology=persistence,
+        lats=lats,
+    )
+
+
 def compute_all_metrics(
     forecast: np.ndarray,
     truth: np.ndarray,
@@ -99,7 +138,8 @@ def compute_all_metrics(
     rmse_fc = weighted_rmse(forecast, truth, lats=lats)
     rmse_pers = weighted_rmse(persistence, truth, lats=lats)
     mbe = mean_bias(forecast, truth)
-    acc = anomaly_correlation_coefficient(forecast, truth, climatology=persistence, lats=lats)
+    # When evaluated against persistence, this is the Tendency Anomaly Correlation (TAC)
+    tac = tendency_anomaly_correlation(forecast, truth, persistence=persistence, lats=lats)
     
     # Forecast skill score over persistence
     if rmse_pers > 0:
@@ -112,5 +152,7 @@ def compute_all_metrics(
         "rmse_persistence": round(rmse_pers, 4),
         "skill_score_vs_persistence": round(skill_score, 4),
         "mean_bias": round(mbe, 4),
-        "acc": round(acc, 4),
+        "acc": round(tac, 4),  # Maintained for backwards-compatibility
+        "tac": round(tac, 4),  # Explicit Tendency Anomaly Correlation
     }
+
