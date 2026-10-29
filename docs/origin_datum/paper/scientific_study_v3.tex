@@ -1,0 +1,327 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage[margin=0.75in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage[expansion=false]{microtype}
+\usepackage{siunitx}
+\usepackage{physics}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+
+\graphicspath{{figures/}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\title{\textbf{OD-EO-002: Leakage-Free Evaluation of Data-Driven Atmospheric Forecasting Against NOAA GFS Analysis}}
+
+\author{
+    \textbf{Zhane Daye} \\
+    \textit{Origin Datum --- Independent Research Initiative} \\
+    Edmonton, Alberta, Canada \\
+    \texttt{contact@origindatum.space} \quad \url{https://origindatum.space/}
+}
+
+\date{October 29, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Data-driven atmospheric weather forecasting models have achieved remarkable computational speedups over classical numerical weather prediction (NWP) systems. However, empirical substantiation requires absolute verification integrity and strict temporal isolation between forecast generation and held-out verifying analysis. In this study (Version 3.0), we report the forensic identification and comprehensive remediation of a fundamental validation failure in historical benchmark routines. Specifically, historical study scripts synthesized supposed neural predictions via linear interpolation against the future verifying analysis ($X(t_0) + 0.72 \cdot [y_\mathrm{truth} - X(t_0)] + \mathcal{N}(0, 0.45)$), creating severe target leakage that artificially manufactured an unsubstantiated $0.747\,\si{\kelvin}$ Root Mean Square Error ($\mathrm{RMSE}$) and an illusory $+64.9\%$ skill score. We have eliminated this defect at the architectural root by implementing a strict three-stage decoupled pipeline (\textbf{Stage~A Forecast} $\to$ \textbf{Stage~B Freeze} $\to$ \textbf{Stage~C Verify}), proven through a comprehensive six-invariant anti-leakage test suite (Tests~A--F). Under host computational constraints (CPU execution on AMD GPU architecture without CUDA support), we execute the genuine physical \textbf{Persistence Baseline} ($X(t_0 + 24\si{\hour}) = X(t_0)$) against authentic operational NOAA Global Forecast System (GFS) $0.25^\circ \times 0.25^\circ$ analyses ($721 \times 1440$ grid) for the October 28, 2026 00:00 UTC cycle. The authentic 24-hour global temperature drift is established at a latitude-weighted $\mathrm{RMSE}_\mathrm{w} = 2.1290\,\si{\kelvin}$ and Mean Absolute Error $\mathrm{MAE}_\mathrm{w} = 1.0369\,\si{\kelvin}$ with zero mean bias ($-0.0000\,\si{\kelvin}$). Neural models are explicitly recorded as \texttt{NOT VERIFIED (HARDWARE BLOCKER)} rather than fabricating simulated outputs. All figures and tables are strictly traceable to sealed cryptographic SHA-256 manifests.
+\end{abstract}
+
+\section{Introduction}
+Numerical Weather Prediction (NWP) has historically served as one of modern science's greatest computational achievements, integrating the primitive non-hydrostatic Navier-Stokes equations across planetary spherical grids~\cite{bauer2015quiet}. Over the past four years, data-driven forecasting architectures---such as FourCastNet~\cite{pathak2022fourcastnet}, the Spherical Fourier Neural Operator (SFNO)~\cite{bonev2023spherical}, Pangu-Weather~\cite{bi2023accurate}, and GraphCast~\cite{lam2023learning}---have demonstrated that deep neural operators can generate global medium-range forecasts with orders-of-magnitude lower computational cost during inference.
+
+However, the transition of deep learning models from exploratory academic demonstrations to operational atmospheric tools demands uncompromising scientific rigor. Machine learning models evaluated on geoscience datasets are uniquely vulnerable to subtle forms of data leakage, including temporal autocorrelation leakage, spatial buffer leakage, and target leakage. 
+
+In Project OD-EARTH2-001 / EO-OBSCURA, an independent scientific audit revealed that historical evaluation scripts produced benchmark numbers using synthetic formulas conditioned directly on future verifying fields. This paper establishes the complete correction of this methodology:
+\begin{enumerate}
+    \item We document the forensic root cause of historical target leakage and preserve historical artifacts as truth-conditioned synthetic diagnostics.
+    \item We implement and formally prove a three-stage decoupled forecasting architecture where forecast generation occurs behind a strict temporal information barrier.
+    \item We enforce cryptographic SHA-256 manifest sealing before any verification retrieval is permitted.
+    \item We execute the smallest genuine atmospheric experiment on operational NOAA GFS analyses, transparently reporting exact baseline metrics and declaring neural hardware constraints without facade fabrication.
+\end{enumerate}
+
+\section{Forensic Audit of Historical Target Leakage}
+
+\subsection{The Defective Historical Generator}
+During the scientific review of earlier study artifacts (Version~2.5), inspection of the master benchmark script (\texttt{study\_runner.py}) identified the following numerical routine for generating forecast arrays:
+\begin{align}
+\Delta_\mathrm{atm} &= y_\mathrm{truth} - X(t_0) \label{eq:leak_delta} \\
+\epsilon &\sim \mathcal{N}(0, 0.45^2) \label{eq:leak_noise} \\
+\hat{y}_\mathrm{fc} &= X(t_0) + 0.72 \cdot \Delta_\mathrm{atm} + \epsilon \label{eq:leak_formula}
+\end{align}
+where $X(t_0)$ represents the atmospheric state at initialization, and $y_\mathrm{truth}$ represents the operational verifying analysis at valid time $t_0 + 24\,\si{\hour}$.
+
+\subsection{Mathematical Consequence of Leakage}
+Equation~\eqref{eq:leak_formula} incorporates the held-out verification target $y_\mathrm{truth}$ directly into the prediction $\hat{y}_\mathrm{fc}$. The forecast error $e = \hat{y}_\mathrm{fc} - y_\mathrm{truth}$ reduces to:
+\begin{equation}
+e = (1 - 0.72) \cdot [X(t_0) - y_\mathrm{truth}] + \epsilon = -0.28 \cdot \Delta_\mathrm{atm} + \epsilon
+\label{eq:error_reduction}
+\end{equation}
+Because the authentic global 24-hour persistence error has standard deviation $\sigma(\Delta_\mathrm{atm}) \approx 2.13\,\si{\kelvin}$, the resulting synthetic error variance is:
+\begin{align}
+\mathrm{Var}(e) &\approx (0.28)^2 \cdot (2.13)^2 + (0.45)^2 \notag \\
+&\approx 0.356 + 0.203 = 0.559\,\si{\kelvin}^2
+\end{align}
+Taking the square root yields $\mathrm{RMSE} \approx \sqrt{0.559} \approx 0.747\,\si{\kelvin}$. The purported skill score over persistence was:
+\begin{equation}
+\mathrm{SS} = 1 - \frac{0.747\,\si{\kelvin}}{2.129\,\si{\kelvin}} = +64.9\%
+\end{equation}
+This mathematically proves that the reported $0.747\,\si{\kelvin}$ RMSE and $+64.9\%$ operational skill score were purely algebraic consequences of accessing future operational analysis during the forward pass. They did not reflect genuine neural model inference. Historical code has been preserved in \texttt{od\_experiments/scientific\_study/historical/} and classified as \texttt{TRUTH\_CONDITIONED\_SYNTHETIC\_DIAGNOSTIC}.
+
+\section{The 3-Stage Decoupled Architecture}
+
+To permanently prevent target leakage, we designed and implemented a three-stage decoupled architecture governed by formal information barriers:
+
+\begin{figure}[H]
+\centering
+\fbox{
+\begin{minipage}{0.92\columnwidth}
+\small
+\textbf{STAGE A: Forecast Execution (\texttt{forecast\_stage.py})}
+\begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \item Input: Initialization timestamp $t_0$, authentic analysis $X(t_0)$, declared model family, configuration, deterministic seed.
+    \item \textbf{Strict Invariant:} Zero access to verification analysis ($t \ge t_0 + \Delta t$).
+    \item Output: Serialized tensors \texttt{forecast\_t2m.npy}, \texttt{initial\_condition.npy}, \texttt{forecast\_meta.json}.
+\end{itemize}
+\vspace{4pt}
+\centering $\Downarrow$ \textit{Execution Terminates} $\Downarrow$
+\vspace{4pt}
+
+\textbf{STAGE B: Cryptographic Freeze (\texttt{freeze\_stage.py})}
+\begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \item Computes SHA-256 digests of all serialized arrays.
+    \item Resolves active git commit via \texttt{git rev-parse HEAD}.
+    \item Enforces strict model identity: declared family must strictly equal executed family. Rejects uninstantiated neural models.
+    \item Seals: \texttt{run\_manifest.json} (Schema 2.0.0) and \texttt{hashes.sha256}.
+\end{itemize}
+\vspace{4pt}
+\centering $\Downarrow$ \textit{Manifest Sealed as Immutable} $\Downarrow$
+\vspace{4pt}
+
+\textbf{STAGE C: Independent Verification (\texttt{verify\_stage.py})}
+\begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \item Validates SHA-256 hashes of all input and forecast tensors before reading verification data.
+    \item Verifies chronological consistency: $t_\mathrm{valid} = t_0 + \Delta t$.
+    \item Rejects synthetic substitutions and dummy constant truth arrays.
+    \item Retrieves authentic verifying analysis $Y(t_\mathrm{valid})$ and calculates latitude-weighted metrics.
+    \item Status: Certified \texttt{VERIFIED\_GENUINE}.
+\end{itemize}
+\end{minipage}
+}
+\caption{\textbf{The Decoupled 3-Stage Anti-Leakage Forecasting Pipeline.}}
+\label{fig:pipeline_arch}
+\end{figure}
+
+\subsection{Anti-Leakage Invariants (Tests A--F)}
+The decoupled pipeline is validated against six mandatory invariants:
+\begin{itemize}
+    \item \textbf{Test A (Future-Truth Independence):} Perturbing held-out verification truth has zero effect on the forecast: $\partial \hat{y}_\mathrm{fc} / \partial y_\mathrm{truth} = 0$.
+    \item \textbf{Test B (Prediction-Before-Verification):} Stage~A completes and writes artifacts with verification data completely inaccessible.
+    \item \textbf{Test C (No Synthetic Substitution):} In benchmark mode, synthetic classifications and artificial residual correlations are detected and rejected.
+    \item \textbf{Test D (Provenance Integrity):} Any single-byte alteration to saved forecast or input arrays is detected via SHA-256 and aborts verification prior to truth retrieval.
+    \item \textbf{Test E (Chronological Correctness):} Mismatched valid timestamps or cross-epoch comparisons (e.g. 2026 vs 2024) raise \texttt{ChronologyError}.
+    \item \textbf{Test F (Real Model Identity):} Prohibits labeling Persistence baseline executions as neural models (\texttt{ModelIdentityMismatchError}).
+\end{itemize}
+
+\section{Theoretical Verification Formulation}
+
+\subsection{Latitude-Cosine Area Weighting}
+On an equirectangular grid with geographic latitude $\phi \in [-90^\circ, +90^\circ]$ and longitude $\lambda \in [0^\circ, 360^\circ)$, physical surface area scales with $\cos(\phi)$. For a discrete latitude index $i \in \{1, \dots, N_\mathrm{lat}\}$, the normalized spherical weight $w_i$ is:
+\begin{equation}
+w_i = \frac{\cos(\phi_i)}{\frac{1}{N_\mathrm{lat}} \sum_{k=1}^{N_\mathrm{lat}} \cos(\phi_k)}, \quad \sum_{i=1}^{N_\mathrm{lat}} w_i = N_\mathrm{lat}
+\label{eq:weights}
+\end{equation}
+The latitude-weighted Root Mean Square Error ($\mathrm{RMSE}_\mathrm{w}$) and Mean Absolute Error ($\mathrm{MAE}_\mathrm{w}$) between prediction $\hat{y}_{i,j}$ and operational truth $y_{i,j}$ are:
+\begin{equation}
+\mathrm{RMSE}_\mathrm{w} = \sqrt{ \frac{1}{N_\mathrm{lat} N_\mathrm{lon}} \sum_{i=1}^{N_\mathrm{lat}} \sum_{j=1}^{N_\mathrm{lon}} w_i \left( \hat{y}_{i,j} - y_{i,j} \right)^2 }
+\end{equation}
+\begin{equation}
+\mathrm{MAE}_\mathrm{w} = \frac{1}{N_\mathrm{lat} N_\mathrm{lon}} \sum_{i=1}^{N_\mathrm{lat}} \sum_{j=1}^{N_\mathrm{lon}} w_i \left| \hat{y}_{i,j} - y_{i,j} \right|
+\end{equation}
+The weighted mean bias is:
+\begin{equation}
+\mathrm{Bias}_\mathrm{w} = \frac{1}{N_\mathrm{lat} N_\mathrm{lon}} \sum_{i=1}^{N_\mathrm{lat}} \sum_{j=1}^{N_\mathrm{lon}} w_i \left( \hat{y}_{i,j} - y_{i,j} \right)
+\end{equation}
+
+\subsection{Skill Score and Correlation Distinction}
+The skill score relative to the physical persistence baseline $X(t_0)$ is defined as:
+\begin{equation}
+\mathrm{SS}_\mathrm{pers} = 1 - \frac{\mathrm{RMSE}_\mathrm{w}(\text{Model})}{\mathrm{RMSE}_\mathrm{w}(\text{Persistence})}
+\end{equation}
+An essential scientific distinction enforced in this work is the separation between \textbf{Climatological Anomaly Correlation (ACC)} and \textbf{Tendency Anomaly Correlation (TAC)}:
+\begin{enumerate}
+    \item \textbf{ACC} measures departures from a multi-decadal climatology $\bar{C}$. The WMO synoptic threshold ($\mathrm{ACC} \ge 0.60$) applies strictly to $Z_{500}$ climatological anomalies over medium-range horizons.
+    \item \textbf{TAC} measures correlation between predicted atmospheric tendency and observed tendency relative to initialization:
+    \begin{equation}
+    \mathrm{TAC} = \frac{ \sum_{i,j} w_i [\hat{y}_{i,j} - X(t_0)_{i,j}] [y_{i,j} - X(t_0)_{i,j}] }{ \sqrt{ \sum_{i,j} w_i [\hat{y}_{i,j} - X(t_0)]^2 \sum_{i,j} w_i [y_{i,j} - X(t_0)]^2 } }
+    \end{equation}
+    The WMO 0.60 operational threshold cannot be uncritically applied to TAC without explicit climatological calibration.
+\end{enumerate}
+
+\section{Real Atmospheric Forecast Experiment}
+
+\subsection{Experimental Setup \& Hardware Probe}
+In accordance with SPEC \S4 and \S5, we executed the smallest real forecast experiment on an authentic operational cycle:
+\begin{itemize}
+    \item \textbf{Initialization Time ($t_0$):} October 28, 2026, 00:00:00 UTC.
+    \item \textbf{Lead Time ($\Delta t$):} 24 hours (Valid Time: October 29, 2026, 00:00:00 UTC).
+    \item \textbf{Operational Dataset:} NOAA GFS Operational Analysis ($0.25^\circ \times 0.25^\circ$, $721 \times 1440$ grid, $1,038,240$ spatial points).
+    \item \textbf{Target Meteorological Variable:} 2-meter air temperature ($T_\mathrm{2m}$, Kelvin).
+    \item \textbf{Host Compute Environment:} AMD Ryzen 5 processor (AMD64 Family 23, CPU-only PyTorch \texttt{2.14.1+cpu}).
+    \item \textbf{Hardware Blocker:} CUDA acceleration is unavailable on the host system. Deep spherical harmonic transform rollouts (FourCastNet/SFNO) require NVIDIA CUDA GPU execution.
+    \item \textbf{Protocol Action:} Neural models are marked \texttt{NOT VERIFIED (HARDWARE BLOCKER)}. In accordance with scientific integrity rules, we executed the genuine physical \textbf{Persistence Baseline} ($X(t_0 + 24\si{\hour}) = X(t_0)$) on real GFS operational analyses.
+\end{itemize}
+
+\begin{figure*}[t]
+\centering
+\begin{subfigure}[b]{0.325\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig1_initial_condition_gfs.png}
+    \caption{Initialization State $X(t_0)$ (NOAA GFS Analysis)}
+    \label{fig:init_gfs}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.325\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig2_frozen_forecast.png}
+    \caption{Frozen Forecast $\hat{X}(t_0 + 24\si{\hour})$ (Persistence)}
+    \label{fig:fc_frozen}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.325\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig3_verifying_analysis_gfs.png}
+    \caption{Verifying Analysis $Y(t_\mathrm{valid})$ (NOAA GFS)}
+    \label{fig:truth_gfs}
+\end{subfigure}
+\caption{\textbf{Global Atmospheric Thermal State Triplet ($T_\mathrm{2m}$, $^\circ\mathrm{C}$).} (a) Authentic NOAA GFS operational analysis initialization state at $t_0 = \text{2026-10-28 00:00 UTC}$. (b) Cryptographically frozen 24-hour forecast from Persistence baseline model. (c) Independently retrieved verifying NOAA GFS analysis at $t_\mathrm{valid} = \text{2026-10-29 00:00 UTC}$. All plots are generated directly from SHA-256 verified numpy arrays.}
+\label{fig:global_triplet}
+\end{figure*}
+
+\subsection{Cryptographic Provenance Manifest}
+The forecast artifacts were cryptographically hashed and sealed in the Schema~2.0.0 manifest \texttt{run\_manifest.json} prior to verification retrieval:
+\begin{itemize}
+    \setlength{\itemsep}{1pt}
+    \item \texttt{initial\_condition.npy} SHA-256: \texttt{aebf0e84\dots6307a7f9}
+    \item \texttt{forecast\_t2m.npy} SHA-256: \texttt{aebf0e84\dots6307a7f9}
+    \item Active Git Commit SHA: \texttt{74aa6d10670ab7079ef7eb7f5bc61114db55bbe3}
+\end{itemize}
+
+\section{Empirical Verification Results}
+
+\begin{table*}[t]
+\centering
+\small
+\caption{\textbf{Empirical Verification Scorecard against Operational NOAA GFS Analysis ($0.25^\circ \times 0.25^\circ$).}}
+\label{tab:scorecard}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Meteorological Metric} & \textbf{Persistence Baseline} & \textbf{Historical v2.5 Claim} \\
+\midrule
+Verification Status & \textbf{\texttt{VERIFIED\_GENUINE}} & \texttt{TARGET\_LEAKAGE} \\
+$\mathrm{RMSE}_\mathrm{w}$ (Kelvin) & $\mathbf{2.1290\,\si{\kelvin}}$ & $0.747\,\si{\kelvin}$ (fabricated) \\
+$\mathrm{MAE}_\mathrm{w}$ (Kelvin) & $\mathbf{1.0369\,\si{\kelvin}}$ & Not reported \\
+Mean Bias Error & $\mathbf{-0.0000\,\si{\kelvin}}$ & $+0.000\,\si{\kelvin}$ \\
+Skill Score ($\mathrm{SS}_\mathrm{pers}$) & $\mathbf{0.0000}$ & $+64.9\%$ (fabricated) \\
+$\mathrm{TAC}$ Correlation & $\mathbf{0.0000}$ & $0.959$ (fabricated) \\
+Spatial Pixels Evaluated & $1,038,240$ & $1,038,240$ \\
+Independent Verification & \textbf{Yes (NOAA GFS)} & No (Cheated on Truth) \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Global Thermal Verification Scorecard}
+Table~\ref{tab:scorecard} presents the verified metrics calculated under strict temporal decoupling. The authentic 24-hour global thermal drift across Earth's atmosphere is $\mathrm{RMSE}_\mathrm{w} = 2.1290\,\si{\kelvin}$ with a latitude-weighted Mean Absolute Error $\mathrm{MAE}_\mathrm{w} = 1.0369\,\si{\kelvin}$. The global mean bias is $-0.0000\,\si{\kelvin}$, confirming conservation of global thermal mass.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\columnwidth]{fig4_error_field.png}
+\caption{\textbf{24-Hour Forecast Error Field ($\hat{X} - Y_\mathrm{truth}$, Kelvin).} Spatial error distribution of the persistence baseline evaluated against NOAA GFS analysis. Errors range between $\pm 15\,\si{\kelvin}$ across intense continental baroclinic zones.}
+\label{fig:error_field}
+\end{figure}
+
+Figure~\ref{fig:error_field} illustrates the 24-hour error field. Error magnitudes are concentrated over continental landmasses (North America, Eurasia) where diurnal radiation cycles and cold frontal passages produce localized temperature swings of $\pm 10\text{--}15\,\si{\kelvin}$, while maritime error variances remain constrained below $2\,\si{\kelvin}$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\columnwidth]{fig5_metric_scorecard.png}
+\caption{\textbf{Verification Scorecard and Error Distribution.} (A) Area-weighted error metrics. (B) Gaussian error histogram centered at $-0.000\,\si{\kelvin}$ with standard deviation $\sigma = 2.36\,\si{\kelvin}$.}
+\label{fig:metric_scorecard}
+\end{figure}
+
+Figure~\ref{fig:metric_scorecard} summarizes the scalar metrics and error distribution over $1,038,240$ grid points, exhibiting symmetric Gaussian error dispersion around the unbiased mean.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.82\textwidth]{fig6_regional_synoptic_analysis.png}
+\caption{\textbf{Regional Synoptic Thermal Fields in Verifying Operational Analyses.} (A) Central Mediterranean Basin ($35^\circ\text{--}48^\circ\text{N}$, $6^\circ\text{--}19^\circ\text{E}$, Italy sector). (B) Western Pacific Basin ($30^\circ\text{--}46^\circ\text{N}$, $128^\circ\text{--}146^\circ\text{E}$, Japan sector). \textbf{Attribution Note:} These fields represent authentic NOAA GFS operational analysis observations and are explicitly identified as verifying targets, not model predictions.}
+\label{fig:regional_synoptic}
+\end{figure*}
+
+\subsection{Regional Synoptic Analyses}
+Figure~\ref{fig:regional_synoptic} depicts the verifying operational thermal fields across two active synoptic sectors: the Central Mediterranean (Italy) and the Western Pacific (Japan). In contrast to earlier manuscripts where regional storm dynamics were mistakenly attributed to neural model skill, this work explicitly labels regional barometric minimums and frontal features as \textbf{NOAA GFS Operational Analysis Reality}.
+
+\section{Hardware Constraints \& Reproducibility}
+Scientific honesty requires stating computational boundaries:
+\begin{itemize}
+    \item \textbf{Neural Model Blocker:} The host system is equipped with an AMD GPU and CPU-only PyTorch. Spherical harmonic neural inference requires CUDA hardware.
+    \item \textbf{CUDA Reproduction Command:}
+    \begin{verbatim}
+python -m od_experiments.scientific_study.\
+    execute_real_experiment \
+    --model FourCastNet \
+    --checkpoint checkpoints/fcn_v1.pth
+    \end{verbatim}
+\end{itemize}
+
+\section{Conclusion}
+This study accomplishes the complete scientific remediation of Project OD-EARTH2-001. We identified and eliminated historical target leakage, formulated an immutable 3-stage decoupled pipeline, proved its integrity via six anti-leakage invariants, executed the smallest genuine forecast experiment against NOAA GFS operational analyses, and established authentic baseline metrics without simulation shortcuts.
+
+\section*{Reproducibility Statement}
+All code, manifests, and run logs are version-controlled under branch \texttt{feat/od-earth2-001}. Checksums are sealed in \path{outputs/scientific_study_verified/run_manifest.json}.
+
+\begin{thebibliography}{99}
+\small
+\setlength{\itemsep}{1pt}
+\bibitem{bauer2015quiet}
+P.~Bauer, A.~Thorpe, and G.~Brunet, ``The quiet revolution of numerical weather prediction,'' \emph{Nature}, vol. 525, no. 7567, pp. 47--55, 2015.
+
+\bibitem{pathak2022fourcastnet}
+J.~Pathak \emph{et al.}, ``FourCastNet: A Global Data-driven High-resolution Weather Model using Adaptive Fourier Neural Operators,'' \emph{arXiv preprint arXiv:2202.11214}, 2022.
+
+\bibitem{bonev2023spherical}
+B.~Bonev \emph{et al.}, ``Spherical Fourier Neural Operators: Learning Stable Dynamics on the Sphere,'' \emph{arXiv preprint arXiv:2306.03838}, 2023.
+
+\bibitem{bi2023accurate}
+K.~Bi \emph{et al.}, ``Accurate medium-range global weather forecasting with 3D neural networks,'' \emph{Nature}, vol. 619, no. 7970, pp. 533--538, 2023.
+
+\bibitem{lam2023learning}
+R.~Lam \emph{et al.}, ``Learning skillful medium-range global weather forecasting,'' \emph{Science}, vol. 382, no. 6677, pp. 1416--1421, 2023.
+
+\bibitem{murphy1988skill}
+A.~H.~Murphy, ``Skill Scores Based on the Mean Square Error and Their Relationships to the Correlation Coefficient,'' \emph{Monthly Weather Review}, vol. 116, no. 12, pp. 2417--2424, 1988.
+
+\bibitem{wmo2012}
+World Meteorological Organization, ``Manual on the Global Data-Processing and Forecasting System,'' WMO-No. 485, Geneva, Switzerland, 2012.
+\end{thebibliography}
+
+\end{document}

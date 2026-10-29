@@ -68,6 +68,23 @@ def weighted_rmse(
     return float(np.sqrt(np.nanmean(sq_err)))
 
 
+def weighted_mae(
+    forecast: np.ndarray,
+    truth: np.ndarray,
+    lats: Optional[np.ndarray] = None,
+) -> float:
+    """Compute latitude-weighted Mean Absolute Error."""
+    abs_err = np.abs(forecast - truth)
+    if lats is not None:
+        w = compute_latitude_weights(lats)
+        if abs_err.ndim >= 2:
+            while w.ndim < abs_err.ndim:
+                w = w[:, None] if w.ndim == 1 else w[..., None]
+        weighted_abs_err = abs_err * w
+        return float(np.nanmean(weighted_abs_err))
+    return float(np.nanmean(abs_err))
+
+
 def mean_bias(forecast: np.ndarray, truth: np.ndarray) -> float:
     """Compute unweighted or area-averaged mean bias error."""
     return float(np.nanmean(forecast - truth))
@@ -151,6 +168,7 @@ def compute_all_metrics(
     """Calculate comprehensive suite of meteorological verification metrics."""
     rmse_fc = weighted_rmse(forecast, truth, lats=lats)
     rmse_pers = weighted_rmse(persistence, truth, lats=lats)
+    mae = weighted_mae(forecast, truth, lats=lats)
     mbe = mean_bias(forecast, truth)
     # When evaluated against persistence, this is the Tendency Anomaly Correlation (TAC)
     tac = tendency_anomaly_correlation(forecast, truth, persistence=persistence, lats=lats)
@@ -164,6 +182,7 @@ def compute_all_metrics(
     return {
         "rmse_weighted": round(rmse_fc, 4),
         "rmse_persistence": round(rmse_pers, 4),
+        "mae_weighted": round(mae, 4),
         "skill_score_vs_persistence": round(skill_score, 4),
         "mean_bias": round(mbe, 4),
         "acc": round(tac, 4),  # Maintained for backwards-compatibility

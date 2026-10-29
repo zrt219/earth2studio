@@ -305,10 +305,10 @@ def write_scientific_report(summary: Dict[str, Any]) -> None:
         "",
         "## 5. Artifact Provenance & Audit Trail",
         "",
-        f"- **Full Metric Dataset:** [`outputs/scientific_study/study_metrics.json`](file:///{str(STUDY_OUTPUT_DIR / 'study_metrics.json').replace('\\\\', '/')})",
-        f"- **Growth Curves:** [`outputs/scientific_study/figures/error_growth_curve.png`](file:///{str(summary['figures'][0]).replace('\\\\', '/')})",
-        f"- **Italy Tracking Plot:** [`outputs/scientific_study/figures/italy_extreme_tracking.png`](file:///{str(summary['figures'][1]).replace('\\\\', '/')})",
-        f"- **Japan Tracking Plot:** [`outputs/scientific_study/figures/japan_extreme_tracking.png`](file:///{str(summary['figures'][2]).replace('\\\\', '/')})",
+        f"- **Full Metric Dataset:** [`outputs/scientific_study/study_metrics.json`](file:///{Path(STUDY_OUTPUT_DIR / 'study_metrics.json').as_posix()})",
+        f"- **Growth Curves:** [`outputs/scientific_study/figures/error_growth_curve.png`](file:///{Path(summary['figures'][0]).as_posix()})",
+        f"- **Italy Tracking Plot:** [`outputs/scientific_study/figures/italy_extreme_tracking.png`](file:///{Path(summary['figures'][1]).as_posix()})",
+        f"- **Japan Tracking Plot:** [`outputs/scientific_study/figures/japan_extreme_tracking.png`](file:///{Path(summary['figures'][2]).as_posix()})",
         "",
         "<!-- STUDY_COMPLETE -->"
     ])
