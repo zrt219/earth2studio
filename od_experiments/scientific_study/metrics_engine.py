@@ -80,12 +80,20 @@ def anomaly_correlation_coefficient(
     lats: Optional[np.ndarray] = None,
 ) -> float:
     """Compute Anomaly Correlation Coefficient (ACC).
-    
+
     ACC = <(f - c) * (t - c)> / sqrt(<(f - c)^2> * <(t - c)^2>)
-    If climatology is not provided, spatial mean of truth is used as reference.
+
+    Important Qualification:
+    In operational NWP (ECMWF, WMO, NOAA), ACC is strictly defined against a multi-decadal
+    climatological reference field c = \\bar{C}(day_of_year, hour), typically derived from
+    30 years of reanalysis (e.g., ERA5 1979-2018). ECMWF's widely cited 0.60 threshold denotes
+    the boundary where synoptic weather patterns retain useful predictive value beyond climatology.
+
+    When climatology is not provided, spatial mean of truth is used as reference.
     Note: If c is persistence (T0), this measures the Tendency Anomaly Correlation (TAC),
-    which is the correlation of the 24-hour forecast change with the observed 24-hour change,
-    distinct from multi-decadal climatological ACC.
+    which is the correlation of the forecast change (f - T0) with the observed change (t - T0).
+    The operational 0.60 threshold cannot be automatically transferred to TAC without qualification,
+    as tendency departures have fundamentally different variance spectra and persistence baselines.
     """
     if climatology is None:
         c = np.nanmean(truth)
@@ -116,9 +124,15 @@ def tendency_anomaly_correlation(
     lats: Optional[np.ndarray] = None,
 ) -> float:
     """Compute Tendency Anomaly Correlation (TAC) relative to initial persistence state T0.
-    
+
     TAC = <(f - T0) * (truth - T0)> / sqrt(<(f - T0)^2> * <(truth - T0)^2>)
+
     Quantifies correlation between predicted atmospheric tendency and observed tendency.
+    Unlike climatological ACC (which references multi-decadal monthly/daily climatology),
+    TAC isolates short-term dynamic tendencies. While high TAC values (> 0.90) indicate
+    accurate phase tracking of 24h tendency vectors, the operational 0.60 threshold
+    defined by ECMWF/WMO for ACC does not directly apply as a validated synoptic cutoff
+    for TAC without dedicated empirical calibration.
     """
     return anomaly_correlation_coefficient(
         forecast=forecast,

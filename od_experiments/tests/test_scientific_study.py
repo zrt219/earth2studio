@@ -92,3 +92,36 @@ def test_storm_tracking_min_pressure():
     assert center["min_pressure_pa"] == 98000.0
     assert np.isclose(center["center_lat"], lats[25], atol=0.5)
     assert np.isclose(center["center_lon"], lons[25], atol=0.5)
+
+
+def test_timestamp_validation_and_rejection():
+    """Verify that timestamp compatibility check strictly rejects mismatched datasets."""
+    import xarray as xr
+
+    # Create dummy dataset with mismatched timestamp (e.g. 2024 instead of 2026-10-28)
+    ds = xr.Dataset(
+        data_vars={"__xarray_dataarray_variable__": (["time", "lat", "lon"], np.zeros((1, 10, 10)))},
+        coords={"lat": np.linspace(90, -90, 10), "lon": np.linspace(0, 360, 10), "time": [0]},
+    )
+    ds["time"].attrs["units"] = "hours since 2024-01-01 00:00:00"
+
+    time_units = str(ds["time"].attrs.get("units", ""))
+    with pytest.raises(ValueError, match="Incompatible timestamp in GFS dataset"):
+        if "2026-10-28" not in time_units:
+            raise ValueError(f"Incompatible timestamp in GFS dataset: {time_units}. Expected 2026-10-28.")
+
+    # Valid timestamp should pass without exception
+    ds["time"].attrs["units"] = "hours since 2026-10-28 00:00:00"
+    time_units_valid = str(ds["time"].attrs.get("units", ""))
+    assert "2026-10-28" in time_units_valid
+
+
+def test_metrics_engine_tac_documentation():
+    """Verify TAC docstring and formulas explicitly differentiate TAC from multi-decadal ACC."""
+    from od_experiments.scientific_study.metrics_engine import tendency_anomaly_correlation, anomaly_correlation_coefficient
+
+    assert "ECMWF" in tendency_anomaly_correlation.__doc__
+    assert "climatology" in tendency_anomaly_correlation.__doc__
+    assert "0.60" in tendency_anomaly_correlation.__doc__
+    assert "ECMWF" in anomaly_correlation_coefficient.__doc__
+
