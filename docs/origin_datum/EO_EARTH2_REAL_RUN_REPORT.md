@@ -3,11 +3,11 @@
 
 - **Report Identifier:** `EO-EARTH2-REAL-RUN-001`
 - **Project:** OD-EARTH2-001 / EO-OBSCURA
-- **Date:** 2026-10-29T11:24:26.995965+00:00
+- **Date:** 2026-10-30T03:34:25.281959+00:00
 - **Author:** Zhane Daye
 - **Affiliation:** Origin Datum — Independent Research Initiative
 - **Target Repository:** NVIDIA Earth2Studio fork (`feat/od-earth2-001`)
-- **Active Git Commit:** `74aa6d10670ab7079ef7eb7f5bc61114db55bbe3`
+- **Active Git Commit:** `f16d7d0be0c229a4c2b3bea6840bf8e281b2e040`
 
 ---
 
@@ -58,7 +58,7 @@ All artifacts were serialized and cryptographically hashed before verification:
 - **Platform:** `CPU (Host System: AMD GPU / No CUDA Driver)`
 - **Python Version:** `3.10.11`
 - **PyTorch Version:** `2.14.1+cpu`
-- **Active Git Commit SHA:** `74aa6d10670ab7079ef7eb7f5bc61114db55bbe3`
+- **Active Git Commit SHA:** `f16d7d0be0c229a4c2b3bea6840bf8e281b2e040`
 
 ---
 
