@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Origin Datum EO-OBSCURA: 3D Earth Atmosphere Viewer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #020208;
+      color: #f0f4f8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+    .hud-panel {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      z-index: 10;
+      background: rgba(12, 16, 28, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 18px 24px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+      max-width: 380px;
+    }
+    h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #38bdf8;
+      margin-bottom: 4px;
+    }
+    .subhead {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-bottom: 14px;
+      line-height: 1.35;
+    }
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    button {
+      background: rgba(30, 41, 59, 0.85);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    button:hover {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      transform: translateY(-1px);
+    }
+    .active-btn {
+      background: #0284c7 !important;
+      border-color: #38bdf8 !important;
+      color: #ffffff !important;
+    }
+    .control-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    .legend-box {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.74rem;
+      color: #cbd5e1;
+    }
+    .legend-gradient {
+      width: 100%;
+      height: 10px;
+      border-radius: 4px;
+      margin: 6px 0;
+    }
+    .legend-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.68rem;
+      color: #94a3b8;
+    }
+    .hud-footer {
+      position: absolute;
+      bottom: 20px;
+      right: 24px;
+      z-index: 10;
+      background: rgba(12, 16, 28, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.72rem;
+      color: #64748b;
+      backdrop-filter: blur(8px);
+    }
+    .hud-footer a { color: #38bdf8; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <div class="hud-panel">
+    <h1>EO-OBSCURA 3D Earth</h1>
+    <div class="subhead">Operational NOAA GFS Atmospheric Surface State (Global 0.25° Mesh)</div>
+
+    <div class="control-label">Atmospheric Data Layer</div>
+    <div class="btn-group">
+      <button id="layer-t2m" class="active-btn">Surface Temp (T2m)</button>
+      <button id="layer-tend">24h Tendency (ΔT)</button>
+    </div>
+
+    <div class="control-label">Synoptic Regions</div>
+    <div class="btn-group">
+      <button id="fly-global">🌍 Global</button>
+      <button id="fly-italy">🇮🇹 Italy (Med.)</button>
+      <button id="fly-japan">🇯🇵 Japan (Pac.)</button>
+    </div>
+
+    <div class="control-label">Controls</div>
+    <div class="btn-group">
+      <button id="toggle-spin">⏸ Pause Rotation</button>
+      <button id="toggle-relief">⛰ Topo Relief</button>
+    </div>
+
+    <div class="legend-box">
+      <div id="legend-title">Surface Temperature (°C)</div>
+      <div id="legend-bar" class="legend-gradient" style="background: linear-gradient(to right, #30123b, #4686fb, #1ae4b6, #a2fc3c, #fbb41a, #e4460a, #7a0403);"></div>
+      <div class="legend-labels">
+        <span id="legend-min">-45°C</span>
+        <span>0°C</span>
+        <span id="legend-max">+38°C</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hud-footer">
+    Origin Datum Research Collaboration | <a href="https://origindatum.space/" target="_blank">origindatum.space</a>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
