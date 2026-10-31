@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Origin Datum EO-OBSCURA: 3D Earth Atmosphere Digital Twin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #020208;
+      color: #f0f4f8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+    }
+
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    /* Glassmorphism primitives */
+    .glass-card {
+      background: rgba(13, 19, 33, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Main HUD Panel */
+    .hud-panel {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+      padding: 18px 22px;
+      max-width: 410px;
+      width: calc(100vw - 40px);
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+
+    .hud-panel::-webkit-scrollbar {
+      width: 4px;
+    }
+    .hud-panel::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+    }
+
+    .project-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-live {
+      font-size: 0.62rem;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      letter-spacing: 0.06em;
+    }
+
+    .subhead {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .control-label {
+      font-size: 0.70rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin-top: 12px;
+      margin-bottom: 6px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    button {
+      background: rgba(30, 41, 59, 0.85);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 6px 11px;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    button:hover:not(:disabled) {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.35 !important;
+    }
+
+    .active-btn {
+      background: #0284c7 !important;
+      border-color: #38bdf8 !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 14px rgba(2, 132, 199, 0.55);
+    }
+
+    /* Top/Bottom Timeline Navigation Bar */
+    .timeline-bar {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: min(92vw, 680px);
+    }
+
+    .timeline-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #38bdf8;
+      white-space: nowrap;
+    }
+
+    .timeline-tabs {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .timeline-tabs button {
+      flex: 1;
+      justify-content: center;
+      font-size: 0.72rem;
+      padding: 6px 8px;
+    }
+
+    .active-tab {
+      background: #0284c7 !important;
+      border-color: #38bdf8 !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+    }
+
+    .timeline-slider-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 130px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #38bdf8;
+      cursor: pointer;
+      box-shadow: 0 0 8px #38bdf8;
+    }
+
+    /* Dynamic Legend Box */
+    .legend-box {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.73rem;
+      color: #cbd5e1;
+    }
+
+    .legend-gradient {
+      width: 100%;
+      height: 9px;
+      border-radius: 4px;
+      margin: 6px 0;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .legend-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.67rem;
+      color: #94a3b8;
+    }
+
+    /* Comparison Modal Container */
+    #comparison-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(2, 6, 23, 0.78);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-content {
+      max-width: 980px;
+      width: 100%;
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 24px 28px;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 12px;
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .close-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.05rem;
+    }
+    .close-btn:hover {
+      background: #ef4444;
+      color: #ffffff;
+      border-color: #ef4444;
+    }
+
+    /* Screen-Space Pinned POI Popup Card */
+    #poi-popup-card {
+      position: absolute;
+      z-index: 50;
+      display: none;
+      padding: 14px 18px;
+      max-width: 320px;
+      pointer-events: auto;
+    }
+
+    .popup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 6px;
+    }
+
+    #popup-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Footer Attribution */
+    .hud-footer {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      z-index: 10;
+      padding: 8px 14px;
+      font-size: 0.72rem;
+      color: #64748b;
+    }
+    .hud-footer a { color: #38bdf8; text-decoration: none; }
+    .hud-footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <!-- Three.js Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Glassmorphic HUD Panel -->
+  <div class="hud-panel glass-card">
+    <div class="project-header">
+      <h1>EO-OBSCURA 3D Twin</h1>
+      <span class="badge-live">OD-EARTH2-001</span>
+    </div>
+    <div class="subhead">Operational NOAA GFS Atmospheric Surface State & 7 Advanced Capability Pillars</div>
+
+    <!-- Atmospheric Data Layer -->
+    <div class="control-label">Atmospheric Data Layer</div>
+    <div class="btn-group">
+      <button id="layer-t2m" class="active-btn">Surface Temp (T2m)</button>
+      <button id="layer-tend">24h Tendency (ΔT)</button>
+    </div>
+
+    <!-- 3D Advanced Capability Pillars Toggles -->
+    <div class="control-label">3D Advanced Pillars (V3)</div>
+    <div class="btn-group">
+      <button id="layer-cyclone" class="active-btn">🌀 Cyclone Trajectory</button>
+      <button id="layer-da" class="active-btn">📍 DA Stations</button>
+      <button id="layer-mesoscale" class="active-btn">🏔 Mesoscale Inset</button>
+      <button id="layer-spread">🔮 Ensemble Spread</button>
+    </div>
+
+    <!-- Spread Opacity Slider Control -->
+    <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 0.70rem; color: #94a3b8;">
+      <span>Spread Layer Opacity:</span>
+      <input type="range" id="spread-opacity-slider" min="0.0" max="1.0" step="0.05" value="0.65" style="width: 160px;" />
+    </div>
+
+    <!-- Synoptic Regions & Camera Navigation -->
+    <div class="control-label">Synoptic Regions</div>
+    <div class="btn-group">
+      <button id="fly-global">🌍 Global</button>
+      <button id="fly-italy">🇮🇹 Italy (Med.)</button>
+      <button id="fly-japan">🇯🇵 Japan (Pac.)</button>
+    </div>
+
+    <!-- Scene Controls & Comparison Trigger -->
+    <div class="control-label">Scene & Study Controls</div>
+    <div class="btn-group">
+      <button id="toggle-spin">⏸ Pause Rotation</button>
+      <button id="toggle-relief" class="active-btn">⛰ Topo Relief</button>
+      <button id="open-comparison" style="background:#0284c7; border-color:#38bdf8; color:#fff;">📊 Compare Versions</button>
+    </div>
+
+    <!-- Dynamic Colormap Legend -->
+    <div class="legend-box">
+      <div id="legend-title">Ensemble Spread & DA Increments (K)</div>
+      <div id="legend-bar" class="legend-gradient" style="background: linear-gradient(to right, #0d0887, #6a00a8, #b12a90, #e16462, #fca636, #f0f921);"></div>
+      <div class="legend-labels">
+        <span id="legend-min">0.0 K</span>
+        <span>Mid</span>
+        <span id="legend-max">1.5 K</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Segmented Timeline Navigation Bar -->
+  <div class="timeline-bar glass-card">
+    <div class="timeline-title">Study Trajectory:</div>
+    <div class="timeline-tabs">
+      <button id="tab-v1">V1: Synthetic Audit</button>
+      <button id="tab-v2">V2: Real Decoupled</button>
+      <button id="tab-v3" class="active-tab">V3: 7 Pillars</button>
+    </div>
+    <div class="timeline-slider-wrapper">
+      <input type="range" id="timeline-slider" min="0" max="2" step="1" value="2" />
+    </div>
+  </div>
+
+  <!-- Screen-Space Pinned POI Popup Card -->
+  <div id="poi-popup-card" class="glass-card hidden">
+    <div class="popup-header">
+      <div id="popup-title">POI Details</div>
+      <button id="popup-close" class="close-btn" style="width: 20px; height: 20px; font-size: 0.8rem;">×</button>
+    </div>
+    <div id="popup-body">
+      <!-- Injected dynamically by uiController.showPopup() -->
+    </div>
+  </div>
+  <!-- Backward-compatibility container alias for #poi-popup -->
+  <div id="poi-popup" class="hidden"></div>
+
+  <!-- 3-Column Version Comparison Modal -->
+  <div id="comparison-modal" class="hidden">
+    <div class="modal-content glass-card">
+      <div class="modal-header">
+        <div class="modal-title">OD-EARTH2-001 Study Version Comparison Matrix</div>
+        <button id="modal-close" class="close-btn">×</button>
+      </div>
+      <div id="comparison-grid">
+        <!-- Rendered dynamically by uiController.openComparisonModal() -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Attribution -->
+  <div class="hud-footer glass-card">
+    Origin Datum Research Collaboration | <a href="https://origindatum.space/" target="_blank">origindatum.space</a>
+  </div>
+
+  <!-- Main ES Module Entry Point -->
+  <script type="module" src="/main.js"></script>
+</body>
+</html>

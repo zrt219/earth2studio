@@ -1,0 +1,6 @@
+{
+  "name": "viewer-app-e2e-tests",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Opaque-box E2E test suite for OD-EARTH2-001 3D WebGL Digital Twin"
+}
