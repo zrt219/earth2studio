@@ -689,28 +689,38 @@ class TestEdgeCasesAndBoundaries:
         adv_path = Path("od_experiments/run_all_advanced_capabilities.py")
         assert adv_path.exists()
         adv_source = adv_path.read_text(encoding="utf-8")
+        assert "Copyright (c) 2026 Zhane Daye, Origin Datum" in adv_source
         adv_tree = ast.parse(adv_source)
 
         target_vars = {"p_init", "fcn_pred", "sfno_pred", "graphcast_pred"}
-        found_assignments: set[str] = set()
+        found_assignments: dict[str, int] = {}
+        v_truth_line: int | None = None
         for node in ast.walk(adv_tree):
             if isinstance(node, ast.Assign):
                 for target in node.targets:
-                    if isinstance(target, ast.Name) and target.id in target_vars:
-                        found_assignments.add(target.id)
-                        rhs_names = {
-                            n.id
-                            for n in ast.walk(node.value)
-                            if isinstance(n, ast.Name)
-                        }
-                        assert "v_truth" not in rhs_names, (
-                            f"Target leakage detected in {adv_path}: '{target.id}' references 'v_truth'"
-                        )
-        assert found_assignments == target_vars
+                    if isinstance(target, ast.Name):
+                        if target.id == "v_truth":
+                            v_truth_line = node.lineno
+                        elif target.id in target_vars:
+                            found_assignments[target.id] = node.lineno
+                            rhs_names = {
+                                n.id
+                                for n in ast.walk(node.value)
+                                if isinstance(n, ast.Name)
+                            }
+                            assert "v_truth" not in rhs_names, (
+                                f"Target leakage detected in {adv_path}: '{target.id}' references 'v_truth'"
+                            )
+        assert set(found_assignments.keys()) == target_vars
+        assert v_truth_line is not None
+        # p_init must be generated FIRST before candidate forecasts and v_truth
+        for cand_var in ("fcn_pred", "sfno_pred", "graphcast_pred"):
+            assert found_assignments["p_init"] < found_assignments[cand_var]
 
         real_exp_path = Path("od_experiments/earth2_001/execute_real_experiment.py")
         assert real_exp_path.exists()
         real_exp_source = real_exp_path.read_text(encoding="utf-8")
+        assert "detect_residual_leakage_anomaly" in real_exp_source
         for forbidden_literal in (
             "0.3120",
             "0.312",
@@ -724,3 +734,20 @@ class TestEdgeCasesAndBoundaries:
             assert forbidden_literal not in real_exp_source, (
                 f"Hardcoded float literal {forbidden_literal} found in {real_exp_path}"
             )
+
+        manifest_data = json.loads(
+            DEFAULT_VERIFIED_MANIFEST_PATH.read_text(encoding="utf-8")
+        )
+        metrics = manifest_data["computed_authentic_metrics"]
+        assert metrics["crps_ensemble_k"] is None
+        assert metrics["ssr_ensemble"] is None
+        assert metrics["edi_extreme_wind_20ms"] is None
+        assert metrics["sedi_extreme_wind_20ms"] is None
+        assert isinstance(metrics["edi_extreme_t2m_95p"], float)
+        assert isinstance(metrics["sedi_extreme_t2m_95p"], float)
+        assert (
+            manifest_data["zero_leakage_audit"]["residual_leakage_audit"][
+                "target_leakage_detected"
+            ]
+            is False
+        )

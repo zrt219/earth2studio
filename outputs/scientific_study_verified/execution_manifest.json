@@ -3,9 +3,9 @@
   "manifest_version": "2.0.0",
   "experiment_id": "OD-EARTH2-001-AUTHENTIC-VERIFIED",
   "experiment_classification": "AUTHENTIC_PHYSICAL_BASELINE_AND_BENCHMARK",
-  "timestamp_utc": "2026-11-01T07:59:18.616110+00:00",
+  "timestamp_utc": "2026-11-01T08:05:18.407815+00:00",
   "git_info": {
-    "commit_sha": "4fa36783e3344a4b9c9591385761b5881d8e9c74",
+    "commit_sha": "b48ca98ea2344fd99eed339a7993bde2e7408e0c",
     "branch": "feat/od-earth2-001",
     "dirty": true
   },

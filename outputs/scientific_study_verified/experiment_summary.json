@@ -1,6 +1,6 @@
 {
   "experiment_id": "OD-EARTH2-001-REAL-01",
-  "timestamp_utc": "2026-11-01T07:59:22.277398+00:00",
+  "timestamp_utc": "2026-11-01T08:05:22.346233+00:00",
   "env_probe": {
     "cuda_available": false,
     "device": "CPU (Host System: AMD GPU / No CUDA Driver)",
@@ -32,9 +32,9 @@
     "SFNO": "NOT VERIFIED (HARDWARE_BLOCKER: AMD GPU / NO CUDA / MISSING CHECKPOINT)"
   },
   "timings_seconds": {
-    "forecast_execution": 0.0105,
-    "manifest_freeze": 0.1636,
-    "verification": 0.1673
+    "forecast_execution": 0.0205,
+    "manifest_freeze": 0.1695,
+    "verification": 0.1636
   },
   "metrics": {
     "status": "VERIFIED_GENUINE",
@@ -61,8 +61,8 @@
     "$schema": "https://origindatum.space/schemas/weather-run-manifest-v2.json",
     "manifest_version": "2.0.0",
     "experiment_classification": "BASELINE_PERSISTENCE",
-    "timestamp_utc": "2026-11-01T07:59:22.108859+00:00",
-    "git_commit": "4fa36783e3344a4b9c9591385761b5881d8e9c74",
+    "timestamp_utc": "2026-11-01T08:05:22.180184+00:00",
+    "git_commit": "b48ca98ea2344fd99eed339a7993bde2e7408e0c",
     "init_time": "2026-10-28T00:00:00+00:00",
     "valid_time": "2026-10-29T00:00:00+00:00",
     "lead_time_hours": 24,
