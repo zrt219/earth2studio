@@ -504,6 +504,10 @@ exclude = []
 
 # ==== Ruff configuration ====
 [tool.ruff]
+# Exclude the examples and experimental folders
+exclude = [".claude"]
+
+[tool.ruff.lint]
 # Enable flake8/pycodestyle (`E`), Pyflakes (`F`), flake8-bandit (`S`),
 # isort (`I`), and performance 'PERF' rules.
 select = ["E", "F", "S", "I", "PERF"]
@@ -513,10 +517,7 @@ fixable = ["I"]
 # and `S311` (random number generators)
 ignore = ["E501", "S311"]
 
-# Exclude the examples and experimental folders
-exclude = [".claude"]
-
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 # Ignore `F401` (import violations) in all `__init__.py` files, and in `docs/*.py`.
 "__init__.py" = ["F401"]
 "docs/*.py" = ["F401", "S603"]
@@ -524,9 +525,12 @@ exclude = [".claude"]
 "recipes/**/*_notebook.py" = ["E402"]
 # Ignore `S101` (assertions) in all `test` files.
 "test/*.py" = ["S101"]
+"test/**/*.py" = ["S101"]
 "skills/**/*.py" = ["F401", "E731", "I001", "S101"]
 "serve/server/test/*.py" = ["S101"]
 "recipes/**/test/*.py" = ["S101"]
+"od_experiments/tests/*" = ["S101", "D"]
+"od_experiments/tests/**/*.py" = ["S101", "D"]
 
 # ==== Pytest configuration ====
 [tool.pytest.ini_options]

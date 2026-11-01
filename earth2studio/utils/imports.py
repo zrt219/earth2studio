@@ -16,7 +16,10 @@
 import inspect
 import re
 import sys
-import tomllib
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 from collections.abc import Callable
 from functools import lru_cache, wraps
 from importlib.metadata import PackageNotFoundError, requires, version

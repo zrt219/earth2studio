@@ -1,0 +1,44 @@
+---
+globs: **/*.py, **/*.tex, **/*.md, **/*.json
+description: Earth2Studio scientific integrity, metrics terminology, and experimental validation standards
+---
+
+# Scientific Integrity & Empirical Rigor Standards
+
+This rule establishes strict engineering and scientific protocols to prevent data fabrication, misleading proxy definitions, coordinate inversion errors, and ungrounded claims across experiments, publications, and codebase metrics.
+
+## 1. Zero Tolerance for Synthetic or Fabricated Error Fields
+
+- **Never inject synthetic or pseudo-random noise** (e.g. `np.random.normal`, Gaussian spatial noise) to simulate atmospheric forecast differences, forecast errors, or model predictions.
+- All difference fields ($\Delta T = T_{\text{analysis}} - T_{\text{reference}}$) and evaluation figures **MUST** be derived from authentic operational numerical data (e.g., NOAA GFS, ECMWF IFS, ERA5) or genuine model inference outputs.
+- Never invent regional physical explanations (such as "orographic gravity wave drag" or "blocking high variance over the Andes/Tibet") for artifacts produced by synthetic noise or artificial disturbances.
+
+## 2. Accurate Metric Terminology: ACC vs. TAC
+
+- **Climatological Anomaly Correlation Coefficient (ACC)**:
+  Requires subtracting a long-term, multi-decadal reference climate state (e.g., 30-year ERA5 climatology $\bar{C}(d, h)$):
+  $$\text{ACC} = \frac{\sum (f - c)'(a - c)'}{\sqrt{\sum ((f - c)')^2 \sum ((a - c)')^2}}$$
+- **Tendency Anomaly Correlation (TAC)**:
+  Measures the correlation of atmospheric change / departures relative to the forecast initialization state ($t=0$ reference / persistence):
+  $$\text{TAC} = \frac{\sum (f - a_0)'(a - a_0)'}{\sqrt{\sum ((f - a_0)')^2 \sum ((a - a_0)')^2}}$$
+- **Rule**: If a multi-decadal climatology is not used, the metric **MUST** be explicitly documented and reported as Tendency Anomaly Correlation (`tac`), not climatological `acc`. If backward compatibility requires returning an `"acc"` key, the documentation and docstrings must clarify that it represents initialization-referenced tendency anomaly correlation.
+
+## 3. Honest Proxy and Baseline Representation
+
+- When using an empirical neural benchmark proxy calibrated to neural baseline error distributions rather than direct ONNX/PyTorch model weights:
+  - **Explicitly disclose** in docstrings, manuscripts, and reports that the benchmark is an empirical proxy calibrated to the target model's error characteristics.
+  - Never present proxy benchmark outputs as direct weight-inferred predictions without qualifying the implementation.
+
+## 4. Geographic Grid & Coordinate Orientation Checks
+
+- When plotting geospatial grids with `matplotlib.pyplot.imshow`:
+  - Verify latitude ordering: atmospheric data (e.g., GFS, ERA5) often stores latitudes descending from $+90^\circ$ (North) to $-90^\circ$ (South).
+  - Explicitly set `origin="upper"` when latitude arrays run from North to South, or reverse/sort the latitude axis if using `origin="lower"`.
+  - Ensure `extent=[lon_min, lon_max, lat_min, lat_max]` correctly matches the array index mapping to prevent inverted, upside-down, or mirrored maps.
+- For contouring (`contour`, `contourf`), ensure latitude and longitude 1D coordinate vectors are strictly monotonically increasing. If latitudes are descending, slice with `lats[::-1]` and invert the corresponding array axis `data[::-1, :]`.
+
+## 5. End-to-End Metric Synchronization
+
+- Scientific manuscripts (`.tex`), reports (`.md`), and summary manifests (`.json`) **MUST** match exactly:
+  - Metric values (RMSE, spread, Skill Score, TAC/ACC) in paper tables and abstracts must be dynamically derived or verified against `study_metrics.json`.
+  - Regional extreme values (e.g., minimum MSLP, maximum wind speed) cited in case studies must match the exact grid minima/maxima from the verified dataset.

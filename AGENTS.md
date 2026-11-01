@@ -97,6 +97,7 @@ relevant rule file(s) before writing or reviewing code:
 | `e2s-011-examples.mdc` | Writing gallery examples |
 | `e2s-012-time-tolerance.mdc` | Time tolerance patterns |
 | `e2s-013-assimilation-models.mdc` | Implementing data assimilation models |
+| `e2s-014-scientific-integrity.mdc` | Scientific integrity, TAC vs ACC, empirical rigor |
 
 ## Resources
 
