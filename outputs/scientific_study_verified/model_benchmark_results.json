@@ -1,0 +1,542 @@
+{
+  "benchmark_suite": "EARTH2STUDIO MULTI-MODEL PROGNOSTIC BENCHMARK SUITE",
+  "verification_status": "SUCCESS",
+  "timestamp_utc": "2026-11-01T07:17:08.455297+00:00",
+  "mock_mode": true,
+  "steps": 4,
+  "models_evaluated": [
+    "graphcast",
+    "sfno",
+    "pangu",
+    "climax",
+    "persistence"
+  ],
+  "models": {
+    "graphcast": {
+      "display_name": "GraphCast (GNN)",
+      "rmse_t2m": 1.2467,
+      "mae_t2m": 1.0767,
+      "bias_t2m": -0.0059,
+      "tac_t2m": 0.9937,
+      "skill_vs_persistence_pct": 66.29
+    },
+    "sfno": {
+      "display_name": "FourCastNet v2 (SFNO)",
+      "rmse_t2m": 1.3652,
+      "mae_t2m": 1.1834,
+      "bias_t2m": -0.0062,
+      "tac_t2m": 0.9937,
+      "skill_vs_persistence_pct": 63.09
+    },
+    "pangu": {
+      "display_name": "Pangu-Weather",
+      "rmse_t2m": 1.2939,
+      "mae_t2m": 1.1193,
+      "bias_t2m": -0.006,
+      "tac_t2m": 0.9937,
+      "skill_vs_persistence_pct": 65.02
+    },
+    "climax": {
+      "display_name": "ClimaX (ViT)",
+      "rmse_t2m": 1.4817,
+      "mae_t2m": 1.2882,
+      "bias_t2m": -0.0065,
+      "tac_t2m": 0.9937,
+      "skill_vs_persistence_pct": 59.94
+    },
+    "persistence": {
+      "display_name": "Persistence Baseline",
+      "rmse_t2m": 3.6986,
+      "mae_t2m": 3.2601,
+      "bias_t2m": -0.0119,
+      "tac_t2m": 0.0,
+      "skill_vs_persistence_pct": 0.0
+    }
+  },
+  "profiles": {
+    "graphcast": {
+      "display_name": "GraphCast (GNN)",
+      "param_count_m": 36.7,
+      "latency_ms_cpu": 3.4,
+      "memory_mb": 128.45,
+      "empirical_proxy": true
+    },
+    "sfno": {
+      "display_name": "FourCastNet v2 (SFNO)",
+      "param_count_m": 73.0,
+      "latency_ms_cpu": 0.96,
+      "memory_mb": 255.5,
+      "empirical_proxy": true
+    },
+    "pangu": {
+      "display_name": "Pangu-Weather",
+      "param_count_m": 64.0,
+      "latency_ms_cpu": 0.94,
+      "memory_mb": 224.0,
+      "empirical_proxy": true
+    },
+    "climax": {
+      "display_name": "ClimaX (ViT)",
+      "param_count_m": 107.0,
+      "latency_ms_cpu": 1.37,
+      "memory_mb": 374.5,
+      "empirical_proxy": true
+    },
+    "persistence": {
+      "display_name": "Persistence Baseline",
+      "param_count_m": 0.0,
+      "latency_ms_cpu": 0.36,
+      "memory_mb": 16.0,
+      "empirical_proxy": false
+    }
+  },
+  "lead_time_error_growth": [
+    {
+      "step": 1,
+      "lead_hours": 6,
+      "models": {
+        "graphcast": {
+          "rmse_t2m": 1.2453,
+          "mae_t2m": 1.0764,
+          "bias_t2m": -0.0011,
+          "tac_t2m": 0.9941,
+          "variables": {
+            "t2m": {
+              "rmse": 1.2453,
+              "mae": 1.0764
+            },
+            "u10m": {
+              "rmse": 0.8143
+            },
+            "msl": {
+              "rmse": 80.1581
+            }
+          }
+        },
+        "sfno": {
+          "rmse_t2m": 1.3642,
+          "mae_t2m": 1.1836,
+          "bias_t2m": -0.0012,
+          "tac_t2m": 0.9941,
+          "variables": {
+            "t2m": {
+              "rmse": 1.3642,
+              "mae": 1.1836
+            },
+            "u10m": {
+              "rmse": 0.8143
+            },
+            "msl": {
+              "rmse": 80.1581
+            }
+          }
+        },
+        "pangu": {
+          "rmse_t2m": 1.2927,
+          "mae_t2m": 1.1192,
+          "bias_t2m": -0.0011,
+          "tac_t2m": 0.9941,
+          "variables": {
+            "t2m": {
+              "rmse": 1.2927,
+              "mae": 1.1192
+            },
+            "u10m": {
+              "rmse": 0.8143
+            },
+            "msl": {
+              "rmse": 80.1581
+            }
+          }
+        },
+        "climax": {
+          "rmse_t2m": 1.4811,
+          "mae_t2m": 1.2887,
+          "bias_t2m": -0.0013,
+          "tac_t2m": 0.9941,
+          "variables": {
+            "t2m": {
+              "rmse": 1.4811,
+              "mae": 1.2887
+            },
+            "u10m": {
+              "rmse": 0.8143
+            },
+            "msl": {
+              "rmse": 80.1581
+            }
+          }
+        },
+        "persistence": {
+          "rmse_t2m": 3.6997,
+          "mae_t2m": 3.2621,
+          "bias_t2m": -0.0034,
+          "tac_t2m": 0.0,
+          "variables": {
+            "t2m": {
+              "rmse": 3.6997,
+              "mae": 3.2621
+            },
+            "u10m": {
+              "rmse": 0.7983
+            },
+            "msl": {
+              "rmse": 79.7882
+            }
+          }
+        }
+      }
+    },
+    {
+      "step": 2,
+      "lead_hours": 12,
+      "models": {
+        "graphcast": {
+          "rmse_t2m": 1.2415,
+          "mae_t2m": 1.0715,
+          "bias_t2m": 0.0002,
+          "tac_t2m": 0.994,
+          "variables": {
+            "t2m": {
+              "rmse": 1.2415,
+              "mae": 1.0715
+            },
+            "u10m": {
+              "rmse": 0.857
+            },
+            "msl": {
+              "rmse": 81.2542
+            }
+          }
+        },
+        "sfno": {
+          "rmse_t2m": 1.3603,
+          "mae_t2m": 1.1783,
+          "bias_t2m": 0.0,
+          "tac_t2m": 0.994,
+          "variables": {
+            "t2m": {
+              "rmse": 1.3603,
+              "mae": 1.1783
+            },
+            "u10m": {
+              "rmse": 0.857
+            },
+            "msl": {
+              "rmse": 81.2542
+            }
+          }
+        },
+        "pangu": {
+          "rmse_t2m": 1.2889,
+          "mae_t2m": 1.1141,
+          "bias_t2m": 0.0001,
+          "tac_t2m": 0.994,
+          "variables": {
+            "t2m": {
+              "rmse": 1.2889,
+              "mae": 1.1141
+            },
+            "u10m": {
+              "rmse": 0.857
+            },
+            "msl": {
+              "rmse": 81.2542
+            }
+          }
+        },
+        "climax": {
+          "rmse_t2m": 1.477,
+          "mae_t2m": 1.2832,
+          "bias_t2m": -0.0002,
+          "tac_t2m": 0.994,
+          "variables": {
+            "t2m": {
+              "rmse": 1.477,
+              "mae": 1.2832
+            },
+            "u10m": {
+              "rmse": 0.857
+            },
+            "msl": {
+              "rmse": 81.2542
+            }
+          }
+        },
+        "persistence": {
+          "rmse_t2m": 3.6948,
+          "mae_t2m": 3.2559,
+          "bias_t2m": -0.0034,
+          "tac_t2m": 0.0,
+          "variables": {
+            "t2m": {
+              "rmse": 3.6948,
+              "mae": 3.2559
+            },
+            "u10m": {
+              "rmse": 0.7933
+            },
+            "msl": {
+              "rmse": 79.6397
+            }
+          }
+        }
+      }
+    },
+    {
+      "step": 3,
+      "lead_hours": 18,
+      "models": {
+        "graphcast": {
+          "rmse_t2m": 1.2441,
+          "mae_t2m": 1.0733,
+          "bias_t2m": -0.0067,
+          "tac_t2m": 0.9939,
+          "variables": {
+            "t2m": {
+              "rmse": 1.2441,
+              "mae": 1.0733
+            },
+            "u10m": {
+              "rmse": 0.9352
+            },
+            "msl": {
+              "rmse": 83.5108
+            }
+          }
+        },
+        "sfno": {
+          "rmse_t2m": 1.3628,
+          "mae_t2m": 1.1802,
+          "bias_t2m": -0.0069,
+          "tac_t2m": 0.9939,
+          "variables": {
+            "t2m": {
+              "rmse": 1.3628,
+              "mae": 1.1802
+            },
+            "u10m": {
+              "rmse": 0.9352
+            },
+            "msl": {
+              "rmse": 83.5108
+            }
+          }
+        },
+        "pangu": {
+          "rmse_t2m": 1.2914,
+          "mae_t2m": 1.1159,
+          "bias_t2m": -0.0068,
+          "tac_t2m": 0.9939,
+          "variables": {
+            "t2m": {
+              "rmse": 1.2914,
+              "mae": 1.1159
+            },
+            "u10m": {
+              "rmse": 0.9352
+            },
+            "msl": {
+              "rmse": 83.5108
+            }
+          }
+        },
+        "climax": {
+          "rmse_t2m": 1.4795,
+          "mae_t2m": 1.2852,
+          "bias_t2m": -0.0072,
+          "tac_t2m": 0.9939,
+          "variables": {
+            "t2m": {
+              "rmse": 1.4795,
+              "mae": 1.2852
+            },
+            "u10m": {
+              "rmse": 0.9352
+            },
+            "msl": {
+              "rmse": 83.5108
+            }
+          }
+        },
+        "persistence": {
+          "rmse_t2m": 3.6972,
+          "mae_t2m": 3.2582,
+          "bias_t2m": -0.0115,
+          "tac_t2m": 0.0,
+          "variables": {
+            "t2m": {
+              "rmse": 3.6972,
+              "mae": 3.2582
+            },
+            "u10m": {
+              "rmse": 0.7952
+            },
+            "msl": {
+              "rmse": 79.8043
+            }
+          }
+        }
+      }
+    },
+    {
+      "step": 4,
+      "lead_hours": 24,
+      "models": {
+        "graphcast": {
+          "rmse_t2m": 1.2467,
+          "mae_t2m": 1.0767,
+          "bias_t2m": -0.0059,
+          "tac_t2m": 0.9937,
+          "variables": {
+            "t2m": {
+              "rmse": 1.2467,
+              "mae": 1.0767
+            },
+            "u10m": {
+              "rmse": 1.0381
+            },
+            "msl": {
+              "rmse": 86.1334
+            }
+          }
+        },
+        "sfno": {
+          "rmse_t2m": 1.3652,
+          "mae_t2m": 1.1834,
+          "bias_t2m": -0.0062,
+          "tac_t2m": 0.9937,
+          "variables": {
+            "t2m": {
+              "rmse": 1.3652,
+              "mae": 1.1834
+            },
+            "u10m": {
+              "rmse": 1.0381
+            },
+            "msl": {
+              "rmse": 86.1334
+            }
+          }
+        },
+        "pangu": {
+          "rmse_t2m": 1.2939,
+          "mae_t2m": 1.1193,
+          "bias_t2m": -0.006,
+          "tac_t2m": 0.9937,
+          "variables": {
+            "t2m": {
+              "rmse": 1.2939,
+              "mae": 1.1193
+            },
+            "u10m": {
+              "rmse": 1.0381
+            },
+            "msl": {
+              "rmse": 86.1334
+            }
+          }
+        },
+        "climax": {
+          "rmse_t2m": 1.4817,
+          "mae_t2m": 1.2882,
+          "bias_t2m": -0.0065,
+          "tac_t2m": 0.9937,
+          "variables": {
+            "t2m": {
+              "rmse": 1.4817,
+              "mae": 1.2882
+            },
+            "u10m": {
+              "rmse": 1.0381
+            },
+            "msl": {
+              "rmse": 86.1334
+            }
+          }
+        },
+        "persistence": {
+          "rmse_t2m": 3.6986,
+          "mae_t2m": 3.2601,
+          "bias_t2m": -0.0119,
+          "tac_t2m": 0.0,
+          "variables": {
+            "t2m": {
+              "rmse": 3.6986,
+              "mae": 3.2601
+            },
+            "u10m": {
+              "rmse": 0.7992
+            },
+            "msl": {
+              "rmse": 79.8462
+            }
+          }
+        }
+      }
+    }
+  ],
+  "deterministic_summary_24h": {
+    "graphcast": {
+      "rmse_t2m": 1.2467,
+      "mae_t2m": 1.0767,
+      "bias_t2m": -0.0059,
+      "tac_t2m": 0.9937,
+      "skill_vs_persistence_pct": 66.29
+    },
+    "sfno": {
+      "rmse_t2m": 1.3652,
+      "mae_t2m": 1.1834,
+      "bias_t2m": -0.0062,
+      "tac_t2m": 0.9937,
+      "skill_vs_persistence_pct": 63.09
+    },
+    "pangu": {
+      "rmse_t2m": 1.2939,
+      "mae_t2m": 1.1193,
+      "bias_t2m": -0.006,
+      "tac_t2m": 0.9937,
+      "skill_vs_persistence_pct": 65.02
+    },
+    "climax": {
+      "rmse_t2m": 1.4817,
+      "mae_t2m": 1.2882,
+      "bias_t2m": -0.0065,
+      "tac_t2m": 0.9937,
+      "skill_vs_persistence_pct": 59.94
+    },
+    "persistence": {
+      "rmse_t2m": 3.6986,
+      "mae_t2m": 3.2601,
+      "bias_t2m": -0.0119,
+      "tac_t2m": 0.0,
+      "skill_vs_persistence_pct": 0.0
+    }
+  },
+  "ensemble_verification": {
+    "members_count": 5,
+    "members": [
+      "graphcast",
+      "sfno",
+      "pangu",
+      "climax",
+      "persistence"
+    ],
+    "finite_size_factor": 1.0954451150103321,
+    "summary_24h": {
+      "crps": 0.4148,
+      "crps_fair": 0.2794,
+      "ssr": 2.4586,
+      "ssr_raw": 2.2444,
+      "edi_wind_20ms": 0.9261,
+      "sedi_wind_20ms": 0.9428,
+      "sedi_mslp_980hpa": 1.0
+    }
+  },
+  "tac_qualification": {
+    "qualified_per_e2s_014": true,
+    "reference_baseline": "initialization_state_t0",
+    "statement": "TAC measures 24h dynamic tendency correlation and is strictly separated from WMO climatological ACC."
+  },
+  "sha256_integrity_seal": "41933dbfccae262a677cf2e60b494b0e13bf58fb85a72d3c53a5b428002f0ccf"
+}

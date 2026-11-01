@@ -89,7 +89,11 @@ cache/
 .cache/
 
 # Examples
-outputs/
+outputs/*
+!outputs/scientific_study_verified/
+outputs/scientific_study_verified/*
+!outputs/scientific_study_verified/*.json
+!outputs/scientific_study_verified/*.sha256
 multirun/
 !examples/.env
 cufile.log
