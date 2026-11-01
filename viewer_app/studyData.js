@@ -277,7 +277,7 @@ const RAW_STUDY_VERSIONS = {
     badgeClass: "badge-verified",
     summary:
       "Strict 3-Stage Decoupled Pipeline (Stage A Forecast -> Stage B Freeze -> Stage C Verify) executed on operational NOAA GFS 0.25° analysis. Zero future access, cryptographic SHA-256 sealing, strict TAC vs ACC separation.",
-    runManifestSha256: "b96996093f15e7b94943ef93a3f3406d1a3fe33e0254d7885aec2977b391803e",
+    runManifestSha256: "6b2d8b0e0dc7d060ba19a13a7ce1a6c447e0d68a40dc54bc6a98c8193c8327ca",
     validationSha256: "8a1eb1e4425f571861401a48d1d62939474e6ea1f5ab341532dee862ccfd6c65",
     forecastTensorSha256: "aebf0e84f8c1bc210fc051b44b4a9fca15d39cd76fad323f6fe8c5de6307a7f9",
     initialConditionSha256: "aebf0e84f8c1bc210fc051b44b4a9fca15d39cd76fad323f6fe8c5de6307a7f9",
@@ -382,7 +382,7 @@ const RAW_STUDY_VERSIONS = {
     badgeClass: "badge-certified",
     summary:
       "Full deployment of NVIDIA Earth-2 Advanced Capability Suite across 7 foundational pillars: Massive Ensembles, Cyclone Tracking, Multi-Source Ingestion, Prognostic Comparison, Mesoscale Downscaling, Data Assimilation, and 3D Spherical Digital Twin.",
-    advancedManifestSha256: "4b2b14407e20357c971d5e2c34587d96d369add9d69abca6750f438d91237e18",
+    advancedManifestSha256: "61a196c16786a8f5e988a6a2e9ab26a4453583d6bf89f5ca10e9da0de990c626",
     pillarsSummary: [
       { id: 1, name: "Massive Probabilistic Ensembles", metric: "N=25, mean spread 0.4273 K, max spread 1.182 K" },
       { id: 2, name: "Operational Cyclone Tracking", metric: "WPAC Typhoon (964.5 hPa min, 105 kt wind, 5 waypoints)" },
@@ -1131,8 +1131,8 @@ export const COMPARISON_MATRIX = deepFreeze([
     category: "Provenance",
     dimension: "Cryptographic Manifest",
     v1: "SHA-256: 40e50f339462... (Preserved historical)",
-    v2: "SHA-256: b96996093f15... (Schema 2.0.0 Run Manifest sealed)",
-    v3: "SHA-256: 4b2b14407e20... (Advanced Capabilities Manifest)",
+    v2: "SHA-256: 6b2d8b0e0dc7... (Schema 2.0.0 Run Manifest sealed)",
+    v3: "SHA-256: 61a196c16786... (Advanced Capabilities Manifest)",
     status: "hash"
   },
   {
@@ -1583,14 +1583,14 @@ export function validateStudyData() {
   assert(v2.metrics.tac === 0.0000, "V2 persistence TAC must be exactly 0.0000");
   assert(v2.metrics.acc === null, "V2 climatological ACC must be strictly null per Rule e2s-014");
   assert(Array.isArray(v2.antiLeakageInvariants) && v2.antiLeakageInvariants.length === 6, "V2 must specify 6 anti-leakage invariants (Tests A-F)");
-  assert(v2.runManifestSha256.startsWith("b9699609"), "V2 manifest SHA-256 seal must match b9699609...");
+  assert(v2.runManifestSha256.startsWith("6b2d8b0e"), "V2 manifest SHA-256 seal must match 6b2d8b0e...");
   assert(v2.cycle.platform.includes("AMD"), "V2 must disclose AMD host platform");
   assert(v2.cycle.neuralStatus.includes("HARDWARE BLOCKER"), "V2 must disclose HARDWARE BLOCKER per Rule e2s-014 §3");
 
   // --- V3 Invariants (7 Advanced Capability Pillars) ---
   const v3 = STUDY_VERSIONS.V3;
   assert(Array.isArray(v3.pillarsSummary) && v3.pillarsSummary.length === 7, "V3 must summarize all 7 Advanced Pillars");
-  assert(v3.advancedManifestSha256.startsWith("4b2b1440"), "V3 manifest SHA-256 must match 4b2b1440...");
+  assert(v3.advancedManifestSha256.startsWith("61a196c1"), "V3 manifest SHA-256 must match 61a196c1...");
 
   // Pillar 1: Ensembles
   assert(ENSEMBLE_METADATA.members === 25 && ENSEMBLE_METADATA.crps > 0 && ENSEMBLE_METADATA.ssr > 0, "Pillar 1 ensemble must specify 25 members, positive CRPS, and positive SSR");
