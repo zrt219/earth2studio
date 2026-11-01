@@ -3,9 +3,9 @@
   "manifest_version": "2.0.0",
   "experiment_id": "OD-EARTH2-001-AUTHENTIC-VERIFIED",
   "experiment_classification": "AUTHENTIC_PHYSICAL_BASELINE_AND_BENCHMARK",
-  "timestamp_utc": "2026-11-01T07:03:22.921870+00:00",
+  "timestamp_utc": "2026-11-01T07:59:18.616110+00:00",
   "git_info": {
-    "commit_sha": "47c5e5284f764977fbe19c177f1bdcaec74d1d9b",
+    "commit_sha": "4fa36783e3344a4b9c9591385761b5881d8e9c74",
     "branch": "feat/od-earth2-001",
     "dirty": true
   },
@@ -86,11 +86,13 @@
     "tac": 0.0,
     "acc": null,
     "crps_deterministic_k": 1.0369,
-    "crps_ensemble_k": 0.312,
+    "crps_ensemble_k": null,
     "ssr_deterministic": 0.0,
-    "ssr_ensemble": 0.985,
-    "edi_extreme_wind_20ms": 0.764,
-    "sedi_extreme_wind_20ms": 0.789,
+    "ssr_ensemble": null,
+    "edi_extreme_t2m_95p": 0.8159,
+    "sedi_extreme_t2m_95p": 0.8475,
+    "edi_extreme_wind_20ms": null,
+    "sedi_extreme_wind_20ms": null,
     "spatial_pixels_evaluated": 1038240
   },
   "zero_leakage_audit": {
@@ -98,6 +100,13 @@
     "empirical_alpha_slope": 0.0,
     "correlation_with_future_delta": 0.0,
     "target_leakage_detected": false,
+    "residual_leakage_audit": {
+      "target_leakage_detected": false,
+      "empirical_alpha_slope": 0.0,
+      "residual_persistence_correlation": 1.0,
+      "tendency_correlation": 0.0,
+      "has_verified_checkpoint": false
+    },
     "tests_passed": [
       "TestA_FutureTruthIndependence",
       "TestB_PredictionBeforeVerification",

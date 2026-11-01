@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,6 +40,9 @@ from od_experiments.scientific_study.metrics_engine import (
     symmetric_extremal_dependence_index,
     tendency_anomaly_correlation,
 )
+from od_experiments.scientific_study.pipeline.verify_stage import (
+    detect_residual_leakage_anomaly,
+)
 
 
 def compute_metrics(
@@ -47,6 +51,8 @@ def compute_metrics(
     lats: np.ndarray | None = None,
     threshold: float | None = None,
     persistence: np.ndarray | None = None,
+    checkpoint_sha256: str | None = None,
+    checkpoint_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """
     Computes latitude-weighted verification metrics between forecast and reference fields.
@@ -117,13 +123,20 @@ def compute_metrics(
         "mean_bias": round(bias, 4),
     }
 
-    # TAC if persistence baseline is provided
+    # TAC and statistical residual leakage audit if persistence baseline is provided
     if persistence is not None:
         pers_arr = np.asarray(persistence, dtype=np.float64)
         tac = tendency_anomaly_correlation(
             target_forecast, reference_arr, pers_arr, lats=lats
         )
         metrics["tac"] = round(tac, 4)
+        detect_residual_leakage_anomaly(
+            forecast=target_forecast,
+            truth=reference_arr,
+            initial_condition=pers_arr,
+            checkpoint_sha256=checkpoint_sha256,
+            checkpoint_path=checkpoint_path,
+        )
 
     # Probabilistic metrics if ensemble
     if is_ensemble:

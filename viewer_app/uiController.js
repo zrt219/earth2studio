@@ -84,6 +84,9 @@ let activeLayers3D = null;
 let isSpinningState = true;
 let isReliefActiveState = true;
 let activePopupPOI = null;
+let isPlayingForecast = false;
+let forecastStep = 0;
+let forecastInterval = null;
 
 // =============================================================================
 // 2. DYNAMIC COLORMAP LEGENDS
@@ -169,16 +172,19 @@ export function showPopup(poiData, screenPos) {
 
   const isStation = Boolean(poiData.increment !== undefined || poiData.wmoId || poiData.type?.includes('Sounding'));
 
+  const latVal = typeof poiData.lat === 'number' ? poiData.lat.toFixed(2) : (Number(poiData.lat) ? Number(poiData.lat).toFixed(2) : '0.00');
+  const lonVal = typeof poiData.lon === 'number' ? poiData.lon.toFixed(2) : (Number(poiData.lon) ? Number(poiData.lon).toFixed(2) : '0.00');
+
   if (isStation) {
     if (titleEl) {
-      titleEl.innerText = `${poiData.name || 'Station'} (${poiData.id || poiData.wmoId})`;
+      titleEl.innerText = `${poiData.name || 'Station'} (${poiData.id || poiData.wmoId || 'N/A'})`;
     }
     if (bodyEl) {
       const inc = poiData.increment !== undefined ? poiData.increment : (poiData.obsVal - poiData.bgVal).toFixed(1);
       const elev = poiData.elevM !== undefined ? `${poiData.elevM}m` : (poiData.elevFt ? `${poiData.elevFt}ft` : 'N/A');
       bodyEl.innerHTML = `
         <div style="font-size:0.75rem; line-height:1.45; color:#cbd5e1;">
-          <div style="margin-bottom:4px;"><strong>Location:</strong> ${poiData.lat.toFixed(2)}°N, ${poiData.lon.toFixed(2)}°E (${elev})</div>
+          <div style="margin-bottom:4px;"><strong>Location:</strong> ${latVal}°N, ${lonVal}°E (${elev})</div>
           <div style="margin-bottom:4px;"><strong>Background (T2m):</strong> ${poiData.bgVal !== undefined ? poiData.bgVal + ' °C' : 'N/A'}</div>
           <div style="margin-bottom:4px;"><strong>Observation:</strong> ${poiData.obsVal !== undefined ? poiData.obsVal + ' °C' : 'N/A'}</div>
           <div style="margin-bottom:4px;"><strong>Innovation:</strong> ${poiData.innovation !== undefined ? poiData.innovation + ' K' : ((poiData.obsVal - poiData.bgVal).toFixed(1) + ' K')}</div>
@@ -199,7 +205,7 @@ export function showPopup(poiData, screenPos) {
       bodyEl.innerHTML = `
         <div style="font-size:0.75rem; line-height:1.45; color:#cbd5e1;">
           <div style="margin-bottom:4px;"><strong>Valid Time:</strong> ${sanitizeHTML(timeStr)}</div>
-          <div style="margin-bottom:4px;"><strong>Coordinates:</strong> ${poiData.lat.toFixed(2)}°N, ${poiData.lon.toFixed(2)}°E</div>
+          <div style="margin-bottom:4px;"><strong>Coordinates:</strong> ${latVal}°N, ${lonVal}°E</div>
           <div style="margin-bottom:4px;"><strong>Central MSLP:</strong> <span style="color:#38bdf8; font-weight:700;">${mslp} hPa</span></div>
           <div style="margin-bottom:4px;"><strong>Max Wind:</strong> <span style="color:#fbbf24; font-weight:700;">${wind} kt</span> (${(wind * 1.852).toFixed(0)} km/h)</div>
           <div><strong>Intensity:</strong> <span style="background:rgba(56,189,248,0.2); color:#38bdf8; padding:2px 6px; border-radius:4px; font-weight:700; font-size:0.7rem;">${sanitizeHTML(poiData.status || 'Active')}</span></div>
@@ -360,6 +366,9 @@ export function setStudyVersion(versionId) {
   const norm = String(versionId).toUpperCase();
   if (norm !== 'V1' && norm !== 'V2' && norm !== 'V3') return;
 
+  // Ensure forecast animation is paused and reset when switching study version per Item 2
+  stopForecastAnimation(true);
+
   if (studyData.setActiveVersion) {
     studyData.setActiveVersion(norm);
   }
@@ -399,6 +408,7 @@ function syncLayerButtonsForVersion(versionId) {
   const btnDA = document.getElementById('layer-da');
   const btnSpread = document.getElementById('layer-spread');
   const btnMeso = document.getElementById('layer-mesoscale');
+  const btnPlayForecast = document.getElementById('btn-play-forecast');
 
   if (btnCyclone) {
     btnCyclone.classList.toggle('active-btn', isV3);
@@ -420,6 +430,10 @@ function syncLayerButtonsForVersion(versionId) {
     btnMeso.disabled = !isV3;
     btnMeso.style.opacity = isV3 ? '1.0' : '0.4';
   }
+  if (btnPlayForecast) {
+    btnPlayForecast.disabled = !isV3;
+    btnPlayForecast.style.opacity = isV3 ? '1.0' : '0.4';
+  }
 }
 
 /**
@@ -430,6 +444,114 @@ export function setSpinState(isSpinning) {
   const btnSpin = document.getElementById('toggle-spin');
   if (btnSpin) {
     btnSpin.innerText = isSpinningState ? '⏸ Pause Rotation' : '▶ Resume Rotation';
+  }
+  if (studyData?.setLayerVisibility) {
+    studyData.setLayerVisibility('rotation', isSpinningState);
+  }
+}
+
+export function getSpinState() {
+  return isSpinningState;
+}
+
+/**
+ * Coordinated handler for Topographic Relief state
+ * Preserves bumpScale across texture swaps and synchronizes UI & 3D Globe
+ * Conforms to Item 1 & T3.5
+ */
+export function setReliefState(active) {
+  isReliefActiveState = Boolean(active);
+  const btnRelief = document.getElementById('toggle-relief');
+  if (btnRelief) {
+    btnRelief.classList.toggle('active-btn', isReliefActiveState);
+  }
+  if (activeGlobe && activeGlobe.material) {
+    activeGlobe.material.bumpScale = isReliefActiveState ? 0.18 : 0.0;
+    activeGlobe.material.needsUpdate = true;
+  }
+  if (studyData?.setLayerVisibility) {
+    studyData.setLayerVisibility('relief', isReliefActiveState);
+  }
+}
+
+export function getReliefState() {
+  return isReliefActiveState;
+}
+
+export function toggleReliefState() {
+  setReliefState(!isReliefActiveState);
+  return isReliefActiveState;
+}
+
+/**
+ * Forecast Animation State Lifecycle Controller
+ * Pauses and resets forecast loop cleanly
+ * Conforms to Item 2
+ *
+ * @param {boolean} resetStep - Whether to reset time step to 0 (+0h)
+ */
+export function stopForecastAnimation(resetStep = true) {
+  if (forecastInterval) {
+    clearInterval(forecastInterval);
+    forecastInterval = null;
+  }
+  isPlayingForecast = false;
+  const btnPlayForecast = document.getElementById('btn-play-forecast');
+  if (btnPlayForecast) {
+    btnPlayForecast.innerText = '▶ Play 24h';
+    btnPlayForecast.style.background = '#0284c7';
+  }
+  if (resetStep) {
+    forecastStep = 0;
+    const forecastLabel = document.getElementById('forecast-time-label');
+    if (forecastLabel) {
+      forecastLabel.innerText = 'Valid: +0h (T0)';
+    }
+    if (studyData?.setActiveTimeStep) {
+      studyData.setActiveTimeStep(0);
+    }
+  }
+}
+
+/**
+ * Dynamically updates screen position of active POI popup on window resize
+ * Conforms to T3.7
+ *
+ * @param {THREE.Camera} camera
+ * @param {number} vpW
+ * @param {number} vpH
+ */
+export function updatePopupPosition(camera = activeCamera, vpW = null, vpH = null) {
+  if (typeof document === 'undefined') return;
+  if (!activePopupPOI) return;
+
+  const popup = document.getElementById('poi-popup-card') || document.getElementById('poi-popup');
+  if (!popup || popup.style.display === 'none' || popup.classList.contains('hidden')) return;
+
+  const targetCamera = camera || activeCamera;
+  if (!targetCamera) return;
+
+  const width = (vpW && vpW > 0) ? vpW : (typeof window !== 'undefined' ? window.innerWidth : 1920);
+  const height = (vpH && vpH > 0) ? vpH : (typeof window !== 'undefined' ? window.innerHeight : 1080);
+
+  if (typeof activePopupPOI.lat === 'number' && typeof activePopupPOI.lon === 'number' && activeLayers3D?.latLonToVector3) {
+    const isStation = Boolean(activePopupPOI.increment !== undefined || activePopupPOI.wmoId);
+    const radius = isStation
+      ? (activeLayers3D.RADIAL_SHELLS?.DA_STATION_CAP || 5.350)
+      : (activeLayers3D.RADIAL_SHELLS?.CYCLONE_TUBE || 5.050);
+    const worldPos = activeLayers3D.latLonToVector3(activePopupPOI.lat, activePopupPOI.lon, radius);
+    if (activeGlobe) {
+      worldPos.applyEuler(activeGlobe.rotation);
+    }
+    const screenPos = activeLayers3D.projectToScreen(worldPos, targetCamera, width, height);
+    if (screenPos && screenPos.visible) {
+      const clampedX = Math.max(16, Math.min(width - 320, screenPos.x + 16));
+      const clampedY = Math.max(16, Math.min(height - 240, screenPos.y - 40));
+      popup.style.left = `${clampedX}px`;
+      popup.style.top = `${clampedY}px`;
+    } else {
+      hidePopup();
+    }
   }
 }
 
@@ -584,9 +706,6 @@ export function initUI(globe, camera, renderer, layers3D) {
   // 5c. Forecast Lead-Time Animation Scrubber
   const btnPlayForecast = document.getElementById('btn-play-forecast');
   const forecastLabel = document.getElementById('forecast-time-label');
-  let isPlayingForecast = false;
-  let forecastStep = 0;
-  let forecastInterval = null;
 
   if (btnPlayForecast) {
     btnPlayForecast.addEventListener('click', () => {
@@ -595,20 +714,23 @@ export function initUI(globe, camera, renderer, layers3D) {
       btnPlayForecast.style.background = isPlayingForecast ? '#e11d48' : '#0284c7';
 
       if (isPlayingForecast) {
+        if (forecastInterval) clearInterval(forecastInterval);
         forecastInterval = setInterval(() => {
           forecastStep = (forecastStep + 1) % 5;
           const leadHours = forecastStep * 6;
           if (forecastLabel) {
             forecastLabel.innerText = `Valid: +${leadHours}h (Step ${forecastStep})`;
           }
+          if (studyData?.setActiveTimeStep) {
+            studyData.setActiveTimeStep(forecastStep);
+          }
           // Slight rotational nudge to simulate dynamic atmospheric wave translation
-          if (globe) {
-            globe.rotation.y += 0.04;
+          if (activeGlobe) {
+            activeGlobe.rotation.y += 0.04;
           }
         }, 1200);
       } else {
-        if (forecastInterval) clearInterval(forecastInterval);
-        forecastInterval = null;
+        stopForecastAnimation(false);
       }
     });
   }
@@ -641,16 +763,45 @@ export function initUI(globe, camera, renderer, layers3D) {
     });
   }
 
-  // 8. Topographic Relief Toggle
+  // 8. Topographic Relief Toggle (Single coordinated handler)
   const btnRelief = document.getElementById('toggle-relief');
   if (btnRelief) {
     btnRelief.addEventListener('click', () => {
-      isReliefActiveState = !isReliefActiveState;
-      if (globe && globe.material) {
-        globe.material.bumpScale = isReliefActiveState ? 0.18 : 0.0;
-        globe.material.needsUpdate = true;
+      toggleReliefState();
+    });
+  }
+
+  // 9. Resize Listener for Dynamic POI Popup Positioning (T3.7)
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', () => {
+      updatePopupPosition(activeCamera, window.innerWidth, window.innerHeight);
+    });
+  }
+
+  // 10. Listen for external version change to reset forecast animation
+  if (studyData?.on) {
+    studyData.on('study-version-changed', () => {
+      stopForecastAnimation(true);
+    });
+
+    studyData.on('layer-toggled', ({ layerId, visible }) => {
+      if (layerId === 'relief') {
+        isReliefActiveState = Boolean(visible);
+        const btnRelief = document.getElementById('toggle-relief');
+        if (btnRelief) {
+          btnRelief.classList.toggle('active-btn', isReliefActiveState);
+        }
+        if (activeGlobe && activeGlobe.material) {
+          activeGlobe.material.bumpScale = isReliefActiveState ? 0.18 : 0.0;
+          activeGlobe.material.needsUpdate = true;
+        }
+      } else if (layerId === 'rotation') {
+        isSpinningState = Boolean(visible);
+        const btnSpin = document.getElementById('toggle-spin');
+        if (btnSpin) {
+          btnSpin.innerText = isSpinningState ? '⏸ Pause Rotation' : '▶ Resume Rotation';
+        }
       }
-      btnRelief.classList.toggle('active-btn', isReliefActiveState);
     });
   }
 
@@ -672,5 +823,11 @@ export default {
   closeComparisonModal,
   setStudyVersion,
   setSpinState,
+  getSpinState,
+  setReliefState,
+  getReliefState,
+  toggleReliefState,
+  stopForecastAnimation,
+  updatePopupPosition,
   initUI
 };

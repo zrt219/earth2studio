@@ -1,0 +1,43 @@
+{
+  "$schema": "https://origindatum.space/schemas/weather-run-manifest-v2.json",
+  "manifest_version": "2.0.0",
+  "experiment_classification": "BASELINE_PERSISTENCE",
+  "timestamp_utc": "2026-11-01T07:59:22.108859+00:00",
+  "git_commit": "4fa36783e3344a4b9c9591385761b5881d8e9c74",
+  "init_time": "2026-10-28T00:00:00+00:00",
+  "valid_time": "2026-10-29T00:00:00+00:00",
+  "lead_time_hours": 24,
+  "model": {
+    "family": "Persistence",
+    "checkpoint": "identity",
+    "checkpoint_sha256": null
+  },
+  "environment": {
+    "python_version": "3.10.11",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "processor": "AMD64 Family 23 Model 113 Stepping 0, AuthenticAMD"
+  },
+  "input_artifacts": [
+    {
+      "name": "initial_condition.npy",
+      "sha256": "aebf0e84f8c1bc210fc051b44b4a9fca15d39cd76fad323f6fe8c5de6307a7f9",
+      "shape": [
+        721,
+        1440
+      ],
+      "dtype": "float32"
+    }
+  ],
+  "forecast_artifacts": [
+    {
+      "name": "forecast_t2m.npy",
+      "sha256": "aebf0e84f8c1bc210fc051b44b4a9fca15d39cd76fad323f6fe8c5de6307a7f9",
+      "shape": [
+        721,
+        1440
+      ],
+      "dtype": "float32",
+      "units": "Kelvin"
+    }
+  ]
+}

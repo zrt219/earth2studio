@@ -1,0 +1,14 @@
+{
+  "status": "VERIFIED_GENUINE",
+  "init_time": "2026-10-28T00:00:00+00:00",
+  "valid_time": "2026-10-29T00:00:00+00:00",
+  "model_family": "Persistence",
+  "classification": "BASELINE_PERSISTENCE",
+  "rmse_weighted": 2.129,
+  "rmse_persistence": 2.129,
+  "mae_weighted": 1.0369,
+  "skill_score_vs_persistence": 0.0,
+  "mean_bias": -0.0,
+  "acc": null,
+  "tac": 0.0
+}

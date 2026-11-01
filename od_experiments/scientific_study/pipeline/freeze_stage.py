@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
 # SPDX-License-Identifier: Apache-2.0
 
 """Stage B: Genuine Freeze Stage (Cryptographic Hashing & Provenance Sealing).
@@ -7,6 +8,8 @@
 Computes SHA-256 digests for all serialized prediction tensors and initial fields,
 validates model identity invariants, captures execution environment metadata,
 and seals run_manifest.json before verification retrieval.
+
+Attribution: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
 """
 
 from __future__ import annotations
@@ -15,6 +18,7 @@ import datetime
 import hashlib
 import json
 import platform
+import shutil
 from pathlib import Path
 from typing import Any, Optional
 
@@ -80,8 +84,11 @@ def freeze_forecast(
             try:
                 import subprocess
 
-                git_commit = subprocess.check_output(
-                    ["git", "rev-parse", "HEAD"], text=True, stderr=subprocess.DEVNULL
+                git_bin = shutil.which("git") or "git"
+                git_commit = subprocess.check_output(  # noqa: S603
+                    [git_bin, "rev-parse", "HEAD"],
+                    text=True,
+                    stderr=subprocess.DEVNULL,
                 ).strip()
             except Exception:
                 git_commit = "unknown"

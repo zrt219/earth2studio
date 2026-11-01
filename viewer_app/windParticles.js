@@ -119,6 +119,7 @@ function sphericalToCartesian(latDeg, lonDeg, radius) {
  * @param {number} count - Total particle count (default 3500)
  */
 export function initWindParticles(globeMesh, count = 3500) {
+  disposeWindParticles();
   activeGlobe = globeMesh;
   particleCount = count;
 
@@ -172,7 +173,9 @@ export function initWindParticles(globeMesh, count = 3500) {
   particlePoints.name = 'atmospheric_wind_particles';
   particlePoints.visible = isVisible;
 
-  activeGlobe.add(particlePoints);
+  if (activeGlobe && typeof activeGlobe.add === 'function') {
+    activeGlobe.add(particlePoints);
+  }
   return particlePoints;
 }
 
@@ -211,12 +214,14 @@ export function updateWindParticles(deltaSeconds = 0.016) {
 
   const posAttr = particleGeometry.getAttribute('position');
   const colAttr = particleGeometry.getAttribute('color');
+  if (!posAttr || !colAttr || !posAttr.array || !colAttr.array) return;
   const posArray = posAttr.array;
   const colArray = colAttr.array;
-  const lats = particleGeometry.userData.lats;
-  const lons = particleGeometry.userData.lons;
+  const lats = particleGeometry.userData?.lats;
+  const lons = particleGeometry.userData?.lons;
+  if (!lats || !lons || !particleLifetimes || !particleSpeeds) return;
 
-  const dt = deltaSeconds * speedMultiplier;
+  const dt = (Number.isFinite(deltaSeconds) ? deltaSeconds : 0.016) * speedMultiplier;
 
   for (let i = 0; i < particleCount; i++) {
     particleLifetimes[i] += dt * 30.0;
@@ -286,14 +291,23 @@ export function setWindSpeedScale(multiplier) {
  * Dispose and release memory on component teardown.
  */
 export function disposeWindParticles() {
-  if (particlePoints && activeGlobe) {
+  if (particlePoints && activeGlobe && typeof activeGlobe.remove === 'function') {
     activeGlobe.remove(particlePoints);
   }
-  if (particleGeometry) particleGeometry.dispose();
-  if (particleMaterial) particleMaterial.dispose();
+  if (particleGeometry && typeof particleGeometry.dispose === 'function') {
+    particleGeometry.dispose();
+  }
+  if (particleMaterial && typeof particleMaterial.dispose === 'function') {
+    particleMaterial.dispose();
+  }
   particlePoints = null;
   particleGeometry = null;
   particleMaterial = null;
+  positions = null;
+  colors = null;
+  particleLifetimes = null;
+  particleSpeeds = null;
+  activeGlobe = null;
 }
 
 export default {

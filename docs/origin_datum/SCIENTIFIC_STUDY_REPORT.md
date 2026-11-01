@@ -1,8 +1,12 @@
-# Scientific Report: 7-Day Continuous Lead-Time Benchmark & Dual Regional Extreme Event Tracking
+# [QUARANTINED_DEFECTIVE_SYNTHETIC] Scientific Report: 7-Day Continuous Lead-Time Benchmark & Dual Regional Extreme Event Tracking
+
+> **QUARANTINE NOTICE (`QUARANTINED_DEFECTIVE_SYNTHETIC`):** This historical artifact contains synthetic target leakage (`0.72 * (y_truth - x_0)`) and is permanently quarantined. Do not cite or use as an operational model benchmark.
 
 **Organization:** ORIGIN DATUM  
 **Research Program:** EO-OBSCURA  
-**Model Architecture:** Spherical Fourier Neural Operator (FourCastNet / SFNO)  
+**Quarantine Status:** `QUARANTINED_DEFECTIVE_SYNTHETIC`  
+**Experiment Classification:** `QUARANTINED_DEFECTIVE_SYNTHETIC (TRUTH_CONDITIONED_SYNTHETIC_DIAGNOSTIC)`  
+**Model Architecture:** Spherical Fourier Neural Operator (FourCastNet / SFNO) [SYNTHETIC PROTOTYPE - QUARANTINED]  
 **Ground Truth Reference:** NOAA GFS Operational Analysis ($0.25^\circ \times 0.25^\circ$)  
 **Evaluation Period:** 2026-10-20 to 2026-10-26 (7 Consecutive Daily Cycles)  
 **Publication Date:** 2026-10-28  

@@ -96,6 +96,7 @@ function latLonToVector3(latDeg, lonDeg, radius = 5.055) {
  * Initialize 3D Hazard Warning Rings & Cones on the Globe.
  */
 export function initHazardAlerts(globeMesh) {
+  disposeHazardAlerts();
   activeGlobe = globeMesh;
   alertGroup = new THREE.Group();
   alertGroup.name = 'extreme_weather_hazard_group';
@@ -144,7 +145,9 @@ export function initHazardAlerts(globeMesh) {
   });
 
   alertGroup.visible = isVisible;
-  activeGlobe.add(alertGroup);
+  if (activeGlobe && typeof activeGlobe.add === 'function') {
+    activeGlobe.add(alertGroup);
+  }
   return alertGroup;
 }
 
@@ -153,14 +156,16 @@ export function initHazardAlerts(globeMesh) {
  */
 export function updateHazardAlerts(elapsedTime) {
   if (!alertGroup || !isVisible) return;
+  const t = typeof elapsedTime === 'number' ? elapsedTime : (Date.now() * 0.001);
 
   pulsingMeshes.forEach((mesh, idx) => {
+    if (!mesh || !mesh.material || !mesh.userData) return;
     if (mesh.userData.isRing) {
-      const pulse = 1.0 + 0.18 * Math.sin(elapsedTime * 3.5 + idx);
+      const pulse = 1.0 + 0.18 * Math.sin(t * 3.5 + idx);
       mesh.scale.set(pulse, pulse, 1.0);
-      mesh.material.opacity = 0.5 + 0.35 * Math.cos(elapsedTime * 3.5 + idx);
+      mesh.material.opacity = 0.5 + 0.35 * Math.cos(t * 3.5 + idx);
     } else if (mesh.userData.isBeacon) {
-      mesh.material.opacity = 0.7 + 0.3 * Math.sin(elapsedTime * 5.0 + idx);
+      mesh.material.opacity = 0.7 + 0.3 * Math.sin(t * 5.0 + idx);
     }
   });
 }
@@ -183,14 +188,29 @@ export function getActiveHazards() {
 }
 
 /**
- * Dispose hazard alert meshes.
+ * Dispose hazard alert meshes, geometries and materials.
  */
 export function disposeHazardAlerts() {
-  if (alertGroup && activeGlobe) {
+  if (alertGroup && activeGlobe && typeof activeGlobe.remove === 'function') {
     activeGlobe.remove(alertGroup);
+  }
+  if (alertGroup && typeof alertGroup.traverse === 'function') {
+    alertGroup.traverse(child => {
+      if (child.geometry && typeof child.geometry.dispose === 'function') {
+        child.geometry.dispose();
+      }
+      if (child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach(m => m && typeof m.dispose === 'function' && m.dispose());
+        } else if (typeof child.material.dispose === 'function') {
+          child.material.dispose();
+        }
+      }
+    });
   }
   pulsingMeshes = [];
   alertGroup = null;
+  activeGlobe = null;
 }
 
 export default {

@@ -25,18 +25,11 @@ Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
 from __future__ import annotations
 
 import datetime
-import hashlib
 import json
 import logging
 import platform
-import shutil
-import sys
 from pathlib import Path
 from typing import Any
-
-repo_root = Path(__file__).resolve().parents[2]
-if str(repo_root) not in sys.path:
-    sys.path.insert(0, str(repo_root))
 
 import numpy as np
 import torch
@@ -44,7 +37,9 @@ import torch
 from od_experiments.earth2_001.provenance import compute_sha256, get_git_info
 from od_experiments.scientific_study.metrics_engine import (
     compute_latitude_weights,
+    extreme_dependency_index,
     mean_bias,
+    symmetric_extremal_dependence_index,
     tendency_anomaly_correlation,
     weighted_mae,
     weighted_rmse,
@@ -52,11 +47,15 @@ from od_experiments.scientific_study.metrics_engine import (
 from od_experiments.scientific_study.pipeline import (
     freeze_forecast,
     run_forecast,
-    verify_forecast,
+)
+from od_experiments.scientific_study.pipeline.verify_stage import (
+    detect_residual_leakage_anomaly,
 )
 
 logger = logging.getLogger("EXECUTE_REAL_EXPERIMENT")
-logging.basicConfig(level=logging.INFO, format="[%(asctime)s UTC] [%(levelname)s] %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="[%(asctime)s UTC] [%(levelname)s] %(message)s"
+)
 
 OUTPUT_DIR = Path("outputs/scientific_study_verified")
 FORECAST_DIR = OUTPUT_DIR / "forecast"
@@ -67,7 +66,11 @@ MANIFEST_FILE = OUTPUT_DIR / "execution_manifest.json"
 def probe_hardware_environment() -> dict[str, Any]:
     """Inspect and report host computational hardware environment."""
     cuda_available = torch.cuda.is_available()
-    device = torch.cuda.get_device_name(0) if cuda_available else "CPU (Host System: AMD GPU / No CUDA Driver)"
+    device = (
+        torch.cuda.get_device_name(0)
+        if cuda_available
+        else "CPU (Host System: AMD GPU / No CUDA Driver)"
+    )
     hardware_blocker = not cuda_available
     blocker_reason = (
         "Host environment lacks NVIDIA CUDA GPU acceleration (running on CPU/AMD GPU). "
@@ -99,32 +102,25 @@ def verify_zero_target_leakage(
 
     Historical leakage formula manufactured illusory skill via:
         y_hat = x0 + alpha * (Y_truth - x0) + eps (with alpha = 0.72)
-    This test verifies that the forecast tendency (y_hat - x0) has zero linear leakage
-    from delta_truth = Y_truth - x0.
+    Delegates to `detect_residual_leakage_anomaly` from `verify_stage` to enforce the
+    real statistical residual & correlation anomaly guardrail.
     """
-    delta_truth = verifying_truth - init_state
-    forecast_tendency = forecast - init_state
-
-    # 1. Variance of persistence forecast tendency is 0
-    tendency_std = float(np.std(forecast_tendency))
-    if tendency_std < 1e-8:
-        # Zero tendency variance -> zero slope/leakage
-        empirical_alpha = 0.0
-        r_leakage = 0.0
-    else:
-        var_truth = float(np.var(delta_truth))
-        cov = float(np.cov(forecast_tendency.ravel(), delta_truth.ravel())[0, 1])
-        empirical_alpha = cov / var_truth if var_truth > 0 else 0.0
-        r_leakage = cov / (tendency_std * np.sqrt(var_truth)) if var_truth > 0 else 0.0
-
-    # 2. Check that alpha is not the historical defective 0.72 target leakage
-    is_leakage_free = abs(empirical_alpha - 0.72) > 0.5 and abs(empirical_alpha) < 0.1
+    residual_audit = detect_residual_leakage_anomaly(
+        forecast=forecast,
+        truth=verifying_truth,
+        initial_condition=init_state,
+        checkpoint_sha256=None,
+    )
+    empirical_alpha = float(residual_audit["empirical_alpha_slope"])
+    r_leakage = float(residual_audit["tendency_correlation"])
+    is_leakage_free = not bool(residual_audit["target_leakage_detected"])
 
     return {
         "status": "VERIFIED_ZERO_LEAKAGE" if is_leakage_free else "LEAKAGE_DETECTED",
-        "empirical_alpha_slope": round(float(empirical_alpha), 6),
-        "correlation_with_future_delta": round(float(r_leakage), 6),
+        "empirical_alpha_slope": round(empirical_alpha, 6),
+        "correlation_with_future_delta": round(r_leakage, 6),
         "target_leakage_detected": not is_leakage_free,
+        "residual_leakage_audit": residual_audit,
         "tests_passed": [
             "TestA_FutureTruthIndependence",
             "TestB_PredictionBeforeVerification",
@@ -186,7 +182,7 @@ def execute_authentic_experiment(output_dir: Path | str = OUTPUT_DIR) -> dict[st
     np.save(verif_path, verifying_truth)
 
     # Freeze Stage B
-    manifest_b = freeze_forecast(
+    freeze_forecast(
         forecast_dir=f_dir,
         output_dir=out_dir,
         classification="BASELINE_PERSISTENCE",
@@ -211,18 +207,26 @@ def execute_authentic_experiment(output_dir: Path | str = OUTPUT_DIR) -> dict[st
     unweighted_bias = float(mean_bias(forecast, verifying_truth))
     w_2d = weights[:, None]
     weighted_b = float(np.mean((forecast - verifying_truth) * w_2d))
-    tac = float(tendency_anomaly_correlation(forecast, verifying_truth, init_state, lats=lats))
+    tac = float(
+        tendency_anomaly_correlation(forecast, verifying_truth, init_state, lats=lats)
+    )
 
     # Single-member deterministic CRPS equals MAE (proved analytically)
     crps_det = mae_w
-    # Calibrated ensemble CRPS from 25-member Mediterranean run
-    crps_ensemble = 0.3120
-    # Spread-Skill Ratio: 0.0 for deterministic, 0.9850 for calibrated ensemble
+    # Single-member deterministic Persistence run (checkpoint="identity"): no ensemble members
+    crps_ensemble = None
     ssr_deterministic = 0.0000
-    ssr_ensemble = 0.9850
-    # EDI & SEDI: 0.0 for deterministic persistence; 0.7640 & 0.7890 for extreme wind/cyclone
-    edi_wind = 0.7640
-    sedi_wind = 0.7890
+    ssr_ensemble = None
+    # Compute deterministic 95th-percentile T2m EDI & SEDI directly from forecast and verifying_truth
+    t2m_p95_threshold = float(np.percentile(verifying_truth, 95))
+    edi_t2m_res = extreme_dependency_index(
+        forecast, verifying_truth, threshold=t2m_p95_threshold, lats=lats
+    )
+    sedi_t2m_res = symmetric_extremal_dependence_index(
+        forecast, verifying_truth, threshold=t2m_p95_threshold, lats=lats
+    )
+    edi_extreme_t2m_95p = float(edi_t2m_res["edi"])
+    sedi_extreme_t2m_95p = float(sedi_t2m_res["sedi"])
 
     # Compute SHA-256 digests
     init_path = f_dir / "initial_condition.npy"
@@ -295,11 +299,13 @@ def execute_authentic_experiment(output_dir: Path | str = OUTPUT_DIR) -> dict[st
             "tac": round(tac, 4),
             "acc": None,  # Strictly null per e2s-014 (no 30-year climatology reference)
             "crps_deterministic_k": round(crps_det, 4),
-            "crps_ensemble_k": round(crps_ensemble, 4),
+            "crps_ensemble_k": crps_ensemble,
             "ssr_deterministic": round(ssr_deterministic, 4),
-            "ssr_ensemble": round(ssr_ensemble, 4),
-            "edi_extreme_wind_20ms": round(edi_wind, 4),
-            "sedi_extreme_wind_20ms": round(sedi_wind, 4),
+            "ssr_ensemble": ssr_ensemble,
+            "edi_extreme_t2m_95p": round(edi_extreme_t2m_95p, 4),
+            "sedi_extreme_t2m_95p": round(sedi_extreme_t2m_95p, 4),
+            "edi_extreme_wind_20ms": None,
+            "sedi_extreme_wind_20ms": None,
             "spatial_pixels_evaluated": n_lat * n_lon,
         },
         "zero_leakage_audit": leakage_audit,

@@ -1,9 +1,30 @@
-import os
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 NVIDIA CORPORATION & AFFILIATES.
+# SPDX-FileCopyrightText: All rights reserved.
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Author: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
+
+from __future__ import annotations
+
 import shutil
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 import torch
@@ -14,12 +35,17 @@ from earth2studio.io import ZarrBackend
 from earth2studio.models.px import Persistence
 from earth2studio.run import deterministic
 from od_experiments.earth2_001.config import load_config
+from od_experiments.earth2_001.forecast_stage import (
+    FORBIDDEN_TARGET_PARAMS,
+    enforce_call_stack_isolation,
+)
 from od_experiments.earth2_001.provenance import (
     compute_sha256,
     create_provenance_manifest,
 )
 from od_experiments.earth2_001.validate import evaluate_forecast
 from od_experiments.earth2_001.visualize import plot_field
+from od_experiments.scientific_study.exceptions import TargetLeakageError
 
 
 def run_forecast(
@@ -27,12 +53,27 @@ def run_forecast(
     output_dir: str | Path | None = None,
     device: str = "cpu",
     override_source: str | None = None,  # "gfs" or "random"
+    **kwargs: Any,
 ) -> dict[str, Any]:
     """
     Executes a genuine weather forecast workflow, reading output arrays directly
     from Earth2Studio's Zarr store, saving verified tensors and plots, and
     distinguishing between SYNTHETIC_SMOKE_TEST and GENUINE_ATMOSPHERIC_EXPERIMENT.
     """
+    if kwargs:
+        leaked = set(kwargs.keys()).intersection(
+            FORBIDDEN_TARGET_PARAMS | {"verification_truth"}
+        )
+        if leaked:
+            raise TargetLeakageError(
+                f"Signature isolation violation: run_forecast rejected forbidden ground-truth "
+                f"parameter(s): {sorted(leaked)}"
+            )
+        raise TypeError(
+            f"run_forecast() got unexpected keyword argument(s): {sorted(kwargs.keys())}"
+        )
+
+    enforce_call_stack_isolation(check_caller_locals=False, max_depth=2)
     start_time = time.time()
     config = load_config(config_path)
 
@@ -90,7 +131,7 @@ def run_forecast(
 
     # Execute deterministic inference with Zarr backend
     io_backend = ZarrBackend(str(zarr_path))
-    io_result = deterministic(
+    _ = deterministic(
         time=[init_time],
         nsteps=n_steps,
         prognostic=model,
@@ -133,7 +174,7 @@ def run_forecast(
 
             # Generate scientific visualization plot
             plot_file = out_dir / f"forecast_{var}.png"
-            title = f"{var.upper()} Forecast (+{lead_time_hours*n_steps}h from {init_time_str} UTC)"
+            title = f"{var.upper()} Forecast (+{lead_time_hours * n_steps}h from {init_time_str} UTC)"
             plot_field(
                 final_step,
                 title,

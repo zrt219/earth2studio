@@ -23,6 +23,7 @@
       top: 0;
       left: 0;
       z-index: 1;
+      touch-action: none;
     }
 
     /* Glassmorphism primitives */
@@ -338,6 +339,208 @@
     }
     .hud-footer a { color: #38bdf8; text-decoration: none; }
     .hud-footer a:hover { text-decoration: underline; }
+
+    /* Floating Camera Controls Widget */
+    .camera-widget {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 15;
+      padding: 14px 16px;
+      width: 210px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .camera-widget-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 6px;
+    }
+
+    .camera-widget-title {
+      font-size: 0.80rem;
+      font-weight: 700;
+      color: #38bdf8;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .cam-icon-btn {
+      padding: 2px 7px;
+      font-size: 0.68rem;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .cam-icon-btn:hover {
+      background: #0284c7;
+      color: #ffffff;
+    }
+
+    .camera-control-sublabel {
+      font-size: 0.64rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .dpad-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .dpad-row {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .dpad-btn {
+      width: 32px;
+      height: 28px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      background: rgba(30, 41, 59, 0.85);
+      color: #94a3b8;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .dpad-btn:hover {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+    }
+
+    .dpad-btn.center {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+
+    .cam-btn-row {
+      display: flex;
+      gap: 5px;
+    }
+
+    .cam-btn {
+      flex: 1;
+      padding: 4px 5px;
+      font-size: 0.70rem;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .camera-hint-text {
+      font-size: 0.62rem;
+      color: #64748b;
+      line-height: 1.35;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .camera-hint-text b {
+      color: #94a3b8;
+    }
+
+    /* Responsive Mobile & Narrow Viewport Layout (< 768px) */
+    @media (max-width: 768px) {
+      .hud-panel {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        width: auto;
+        max-width: calc(100vw - 20px);
+        max-height: 44vh;
+        padding: 12px 14px;
+      }
+
+      /* Dock camera widget cleanly to bottom-right, avoiding collision with HUD panel */
+      .camera-widget {
+        top: auto;
+        bottom: 86px;
+        right: 10px;
+        left: auto;
+        width: 175px;
+        padding: 8px 10px;
+        gap: 4px;
+        max-height: 38vh;
+        overflow-y: auto;
+      }
+
+      .camera-widget .camera-hint-text {
+        display: none;
+      }
+
+      .timeline-bar {
+        bottom: 12px;
+        width: calc(100vw - 20px);
+        padding: 8px 12px;
+        gap: 8px;
+      }
+
+      .hud-footer {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hud-panel {
+        max-height: 40vh;
+        padding: 10px 12px;
+      }
+
+      .camera-widget {
+        bottom: 120px;
+        width: 155px;
+        padding: 6px 8px;
+        max-height: 35vh;
+      }
+
+      .cam-btn-row {
+        gap: 3px;
+      }
+
+      .cam-btn {
+        padding: 3px 2px;
+        font-size: 0.65rem;
+        white-space: nowrap;
+      }
+
+      #poi-popup-card {
+        max-width: calc(100vw - 32px);
+      }
+
+      .timeline-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+      }
+
+      .timeline-slider-wrapper {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -387,6 +590,9 @@
       <button id="fly-global">🌍 Global</button>
       <button id="fly-italy">🇮🇹 Italy (Med.)</button>
       <button id="fly-japan">🇯🇵 Japan (Pac.)</button>
+      <button id="fly-americas">🌎 Americas</button>
+      <button id="fly-arctic">❄️ Arctic</button>
+      <button id="fly-antarctic">🇦🇶 Antarctic</button>
     </div>
 
     <!-- Scene Controls & Comparison Trigger -->
@@ -394,6 +600,7 @@
     <div class="btn-group">
       <button id="toggle-spin">⏸ Pause Rotation</button>
       <button id="toggle-relief" class="active-btn">⛰ Topo Relief</button>
+      <button id="btn-camera-reset-hud">🎯 Recenter View</button>
       <button id="open-comparison" style="background:#0284c7; border-color:#38bdf8; color:#fff;">📊 Compare Versions</button>
     </div>
 
@@ -406,6 +613,51 @@
         <span>Mid</span>
         <span id="legend-max">1.5 K</span>
       </div>
+    </div>
+  </div>
+
+  <!-- Floating Glassmorphic Camera Controls Widget -->
+  <div id="camera-controls-widget" class="glass-card camera-widget">
+    <div class="camera-widget-header">
+      <span class="camera-widget-title">🎥 Camera Controls</span>
+      <button id="btn-camera-reset" class="cam-icon-btn" title="Reset View (R / Space)">⟲ Reset</button>
+    </div>
+
+    <!-- Directional Pan Cross -->
+    <div class="camera-control-sublabel">Pan / Move</div>
+    <div class="dpad-container">
+      <button id="cam-pan-up" class="dpad-btn" title="Pan Up (Shift+W / Shift+↑)">▲</button>
+      <div class="dpad-row">
+        <button id="cam-pan-left" class="dpad-btn" title="Pan Left (Shift+A / Shift+←)">◀</button>
+        <button id="cam-recenter" class="dpad-btn center" title="Recenter View (🎯)">🎯</button>
+        <button id="cam-pan-right" class="dpad-btn" title="Pan Right (Shift+D / Shift+→)">▶</button>
+      </div>
+      <button id="cam-pan-down" class="dpad-btn" title="Pan Down (Shift+S / Shift+↓)">▼</button>
+    </div>
+
+    <!-- Zoom & Rotation -->
+    <div class="camera-control-sublabel">Zoom & Rotate</div>
+    <div class="cam-btn-row">
+      <button id="cam-zoom-in" class="cam-btn" title="Zoom In (+ / E)">🔍 +</button>
+      <button id="cam-zoom-out" class="cam-btn" title="Zoom Out (- / Q)">🔍 −</button>
+      <button id="cam-rot-left" class="cam-btn" title="Rotate Left (A / ←)">↺</button>
+      <button id="cam-rot-right" class="cam-btn" title="Rotate Right (D / →)">↻</button>
+    </div>
+
+    <!-- Polar Perspectives -->
+    <div class="camera-control-sublabel">Quick Polar Angles</div>
+    <div class="cam-btn-row">
+      <button id="cam-view-arctic" class="cam-btn" title="Arctic / North Pole">❄️ Arctic</button>
+      <button id="cam-view-antarctic" class="cam-btn" title="Antarctic / South Pole">🇦🇶 Antarctic</button>
+    </div>
+
+    <!-- Interactive Navigation Cheat-Sheet -->
+    <div class="camera-hint-text">
+      <div>🖱️ <b>Left-drag:</b> Orbit globe</div>
+      <div>🖐️ <b>Right/Shift-drag:</b> Pan view</div>
+      <div>⚙️ <b>Wheel:</b> Smooth zoom</div>
+      <div>⌨️ <b>WASD / Arrows:</b> Move</div>
+      <div>⌨️ <b>R / Space:</b> Reset View</div>
     </div>
   </div>
 

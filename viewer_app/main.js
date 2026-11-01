@@ -56,10 +56,14 @@ let currentTextureName = 'earth_t2m.jpg';
 
 // Pointer interaction tracking
 let isDragging = false;
+let dragMode = 'rotate'; // 'rotate' | 'pan'
+let pointerButton = 0;
 let pointerDownPos = { x: 0, y: 0 };
 let previousPointerPos = { x: 0, y: 0 };
 
-// Smooth Camera Navigation targets
+// Camera target & Smooth Navigation targets
+let cameraTarget = new THREE.Vector3(0, 0, 0);
+let targetCameraTarget = null;
 let isFlying = false;
 let targetCameraPos = null;
 let targetGlobeRot = null;
@@ -98,7 +102,9 @@ export function init() {
   const width = window.innerWidth || 1920;
   const height = window.innerHeight || 1080;
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-  camera.position.set(0, 5, 14);
+  camera.position.set(0, 0, 14);
+  cameraTarget = new THREE.Vector3(0, 0, 0);
+  camera.lookAt(cameraTarget);
 
   // 3. WebGL Renderer
   renderer = new THREE.WebGLRenderer({
@@ -160,7 +166,9 @@ export function init() {
   // 10. Wire DOM Event Listeners
   window.addEventListener('resize', onWindowResize);
   setupPointerEvents(renderer.domElement);
+  setupKeyboardControls();
   setupNavigationButtons();
+  setupCameraControlButtons();
   setupAtmosphereLayerButtons();
 
   // 11. Connect studyData events
@@ -170,7 +178,22 @@ export function init() {
     }
   });
 
+  studyData.on('layer-toggled', ({ layerId, visible }) => {
+    if (layerId === 'relief') {
+      isReliefActive = Boolean(visible);
+      if (globe && globe.material) {
+        globe.material.bumpScale = isReliefActive ? bumpScaleValue : 0.0;
+        globe.material.needsUpdate = true;
+      }
+    } else if (layerId === 'rotation') {
+      isSpinning = Boolean(visible);
+    }
+  });
+
   studyData.on('study-version-changed', ({ versionId }) => {
+    if (uiController?.stopForecastAnimation) {
+      uiController.stopForecastAnimation(true);
+    }
     if (versionId === 'V1') {
       // V1 defaults to global synoptic perspective
       flyTo(0, 0, 14);
@@ -207,79 +230,307 @@ function createStarfield() {
 }
 
 // =============================================================================
-// 3. POINTER EVENTS & INTERACTIVE RAYCASTING
+// 3. POINTER EVENTS & INTERACTIVE CAMERA CONTROLS
 // =============================================================================
 
+export function panCamera(deltaX, deltaY) {
+  if (!camera || !cameraTarget) return;
+  const right = new THREE.Vector3();
+  const up = new THREE.Vector3();
+  camera.matrixWorld.extractBasis(right, up, new THREE.Vector3());
+
+  const dist = camera.position.distanceTo(cameraTarget);
+  const factor = Math.max(0.002, dist * 0.0012);
+
+  const moveX = right.multiplyScalar(-deltaX * factor);
+  const moveY = up.multiplyScalar(deltaY * factor);
+
+  camera.position.add(moveX).add(moveY);
+  cameraTarget.add(moveX).add(moveY);
+}
+
+export function zoomCamera(delta) {
+  if (!camera || !cameraTarget) return;
+  const offset = new THREE.Vector3().subVectors(camera.position, cameraTarget);
+  const currentDist = offset.length();
+  const newDist = Math.max(5.8, Math.min(26.0, currentDist + delta));
+  offset.normalize().multiplyScalar(newDist);
+  camera.position.copy(cameraTarget).add(offset);
+}
+
+export function rotateGlobe(deltaX, deltaY) {
+  if (!globe) return;
+  globe.rotation.y += deltaX * 0.005;
+  globe.rotation.x += deltaY * 0.005;
+  const maxTilt = Math.PI * 0.48;
+  globe.rotation.x = Math.max(-maxTilt, Math.min(maxTilt, globe.rotation.x));
+}
+
+export function resetCameraView() {
+  if (uiController?.stopForecastAnimation) {
+    uiController.stopForecastAnimation(true);
+  }
+  targetCameraPos = { x: 0, y: 0, z: 14 };
+  targetCameraTarget = new THREE.Vector3(0, 0, 0);
+  targetGlobeRot = { x: 0, y: globe ? globe.rotation.y : 0 };
+  isFlying = true;
+}
+
+export function recenterCameraTarget() {
+  if (!camera) return;
+  const currentDist = camera.position.distanceTo(cameraTarget) || 14;
+  targetCameraTarget = new THREE.Vector3(0, 0, 0);
+  targetCameraPos = { x: 0, y: 0, z: currentDist };
+  targetGlobeRot = { x: globe ? globe.rotation.x : 0, y: globe ? globe.rotation.y : 0 };
+  isFlying = true;
+}
+
 function setupPointerEvents(canvas) {
+  canvas.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+  });
+
+  const activePointers = new Map();
+  let pinchStartDist = 0;
+  let pinchStartCenter = { x: 0, y: 0 };
+
   canvas.addEventListener('pointerdown', (e) => {
+    const ptrId = typeof e.pointerId !== 'undefined' ? e.pointerId : 0;
+    activePointers.set(ptrId, { x: e.clientX, y: e.clientY });
+
     isDragging = true;
+    pointerButton = typeof e.button === 'number' ? e.button : 0;
     pointerDownPos = { x: e.clientX, y: e.clientY };
     previousPointerPos = { x: e.clientX, y: e.clientY };
+
+    if (activePointers.size >= 2) {
+      dragMode = 'pinch';
+      const pts = Array.from(activePointers.values());
+      pinchStartDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      pinchStartCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+    } else if (e.button === 2 || e.button === 1 || e.shiftKey) {
+      dragMode = 'pan';
+    } else {
+      dragMode = 'rotate';
+    }
+
+    isFlying = false;
   });
 
   window.addEventListener('pointermove', (e) => {
-    if (!isDragging || !globe) return;
+    if (!isDragging || !globe || !camera) return;
+
+    const ptrId = typeof e.pointerId !== 'undefined' ? e.pointerId : 0;
+    if (activePointers.has(ptrId)) {
+      activePointers.set(ptrId, { x: e.clientX, y: e.clientY });
+    }
+
+    if (activePointers.size >= 2) {
+      const pts = Array.from(activePointers.values());
+      const curDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      const curCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+
+      if (pinchStartDist > 0) {
+        const pinchDelta = (pinchStartDist - curDist) * 0.02;
+        zoomCamera(pinchDelta);
+        pinchStartDist = curDist;
+      }
+
+      const panDeltaX = curCenter.x - pinchStartCenter.x;
+      const panDeltaY = curCenter.y - pinchStartCenter.y;
+      panCamera(panDeltaX, panDeltaY);
+      pinchStartCenter = curCenter;
+      isFlying = false;
+      return;
+    }
 
     const deltaX = e.clientX - previousPointerPos.x;
     const deltaY = e.clientY - previousPointerPos.y;
 
-    globe.rotation.y += deltaX * 0.005;
-    globe.rotation.x += deltaY * 0.005;
+    if (dragMode === 'pan') {
+      panCamera(deltaX, deltaY);
+    } else {
+      rotateGlobe(deltaX, deltaY);
+    }
 
-    // Interrupt active fly-to if user manually drags
     isFlying = false;
-
     previousPointerPos = { x: e.clientX, y: e.clientY };
   });
 
-  window.addEventListener('pointerup', (e) => {
+  const handlePointerEnd = (e) => {
     if (!isDragging) return;
-    isDragging = false;
+    const ptrId = typeof e.pointerId !== 'undefined' ? e.pointerId : 0;
+    activePointers.delete(ptrId);
 
-    const deltaDist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+    if (activePointers.size === 0) {
+      isDragging = false;
+      const deltaDist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
 
-    // Click threshold (<=5px): execute raycast POI selection
-    if (deltaDist <= 5) {
-      const hit = layers3D.handleRaycast(e, camera, window.innerWidth, window.innerHeight);
-      if (hit && hit.data) {
-        uiController.showPopup(hit.data, hit.screenPos);
-        isSpinning = false;
-        uiController.setSpinState(false);
+      // Click threshold (<=5px) on left click or touch tap without shift: execute raycast POI selection
+      const isLeftOrTouch = pointerButton === 0 || e.pointerType === 'touch' || e.pointerType === 'pen';
+      if (deltaDist <= 5 && isLeftOrTouch && !e.shiftKey) {
+        const hit = layers3D.handleRaycast(e, camera, window.innerWidth, window.innerHeight);
+        if (hit && hit.data) {
+          uiController.showPopup(hit.data, hit.screenPos);
+          isSpinning = false;
+          uiController.setSpinState(false);
+        } else {
+          uiController.hidePopup();
+        }
       } else {
-        // Clicked empty space or base globe: dismiss active popup
         uiController.hidePopup();
       }
-    } else {
-      // Drag action completed: dismiss popup
-      uiController.hidePopup();
+    } else if (activePointers.size === 1) {
+      // Transition from 2 fingers back to 1 finger smoothly without jumping
+      const [remaining] = Array.from(activePointers.values());
+      previousPointerPos = { x: remaining.x, y: remaining.y };
+      dragMode = 'rotate';
     }
-  });
+  };
 
-  // Zoom clamp [7.0, 22.0]
+  window.addEventListener('pointerup', handlePointerEnd);
+  window.addEventListener('pointercancel', handlePointerEnd);
+
+  // Smooth mouse wheel zoom
   window.addEventListener('wheel', (e) => {
     if (!camera) return;
-    const nextZ = camera.position.z + e.deltaY * 0.01;
-    camera.position.z = Math.max(7.0, Math.min(22.0, nextZ));
+    const delta = e.deltaY * 0.008;
+    zoomCamera(delta);
   }, { passive: true });
+}
+
+function setupKeyboardControls() {
+  window.addEventListener('keydown', (e) => {
+    if (['INPUT', 'TEXTAREA'].includes(e.target?.tagName)) return;
+
+    const panAmount = 35;
+    const rotAmount = 0.08;
+
+    if (e.key === 'r' || e.key === 'R' || e.code === 'Space') {
+      resetCameraView();
+      return;
+    }
+
+    if (e.shiftKey) {
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+          panCamera(0, panAmount);
+          break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          panCamera(0, -panAmount);
+          break;
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          panCamera(panAmount, 0);
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          panCamera(-panAmount, 0);
+          break;
+      }
+    } else {
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+          if (globe) {
+            rotateGlobe(0, panAmount * 0.2);
+            isFlying = false;
+          }
+          break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          if (globe) {
+            rotateGlobe(0, -panAmount * 0.2);
+            isFlying = false;
+          }
+          break;
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          if (globe) {
+            rotateGlobe(-panAmount * 0.2, 0);
+            isFlying = false;
+          }
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          if (globe) {
+            rotateGlobe(panAmount * 0.2, 0);
+            isFlying = false;
+          }
+          break;
+        case 'e':
+        case 'E':
+        case '+':
+        case '=':
+          zoomCamera(-0.8);
+          break;
+        case 'q':
+        case 'Q':
+        case '-':
+        case '_':
+          zoomCamera(0.8);
+          break;
+      }
+    }
+  });
 }
 
 // =============================================================================
 // 4. ATMOSPHERIC TEXTURE & TOPOGRAPHIC RELIEF CONTROLS
 // =============================================================================
 
+export function setReliefState(active) {
+  isReliefActive = Boolean(active);
+  if (globe && globe.material) {
+    globe.material.bumpScale = isReliefActive ? bumpScaleValue : 0.0;
+    globe.material.needsUpdate = true;
+  }
+  if (uiController?.setReliefState && uiController.getReliefState() !== isReliefActive) {
+    uiController.setReliefState(isReliefActive);
+  }
+}
+
+export function getReliefState() {
+  return (typeof uiController?.getReliefState === 'function')
+    ? uiController.getReliefState()
+    : isReliefActive;
+}
+
+export function setSpinState(spinning) {
+  isSpinning = Boolean(spinning);
+  if (uiController?.setSpinState && uiController.getSpinState() !== isSpinning) {
+    uiController.setSpinState(isSpinning);
+  }
+}
+
+export function getSpinState() {
+  return (typeof uiController?.getSpinState === 'function')
+    ? uiController.getSpinState()
+    : isSpinning;
+}
+
 function setupAtmosphereLayerButtons() {
   const btnT2m = document.getElementById('layer-t2m');
   const btnTend = document.getElementById('layer-tend');
-  const btnRelief = document.getElementById('toggle-relief');
-  const btnSpin = document.getElementById('toggle-spin');
 
   if (btnT2m) {
     btnT2m.addEventListener('click', () => {
       currentTextureName = 'earth_t2m.jpg';
       if (globe && globe.material) {
         globe.material.map = t2mTex;
-        // Preserve bumpScale across texture swaps per T3.5
-        globe.material.bumpScale = isReliefActive ? bumpScaleValue : 0.0;
+        // Preserve bumpScale across texture swaps per Item 1 & T3.5
+        const reliefActive = getReliefState();
+        globe.material.bumpScale = reliefActive ? bumpScaleValue : 0.0;
         globe.material.needsUpdate = true;
       }
     });
@@ -290,27 +541,11 @@ function setupAtmosphereLayerButtons() {
       currentTextureName = 'earth_tendency.jpg';
       if (globe && globe.material) {
         globe.material.map = tendTex;
-        // Preserve bumpScale across texture swaps per T3.5
-        globe.material.bumpScale = isReliefActive ? bumpScaleValue : 0.0;
+        // Preserve bumpScale across texture swaps per Item 1 & T3.5
+        const reliefActive = getReliefState();
+        globe.material.bumpScale = reliefActive ? bumpScaleValue : 0.0;
         globe.material.needsUpdate = true;
       }
-    });
-  }
-
-  if (btnRelief) {
-    btnRelief.addEventListener('click', () => {
-      isReliefActive = !isReliefActive;
-      if (globe && globe.material) {
-        globe.material.bumpScale = isReliefActive ? bumpScaleValue : 0.0;
-        globe.material.needsUpdate = true;
-      }
-    });
-  }
-
-  if (btnSpin) {
-    btnSpin.addEventListener('click', () => {
-      isSpinning = !isSpinning;
-      uiController.setSpinState(isSpinning);
     });
   }
 }
@@ -322,12 +557,14 @@ function setupAtmosphereLayerButtons() {
 export function flyToLatLon(lat, lon, distance = 8.5) {
   const { rotX, rotY } = layers3D.boresightRotation(lat, lon);
   targetGlobeRot = { x: rotX, y: rotY };
-  targetCameraPos = { x: 0, y: 1.5, z: distance };
+  targetCameraPos = { x: 0, y: 0, z: distance };
+  targetCameraTarget = new THREE.Vector3(0, 0, 0);
   isFlying = true;
 }
 
 export function flyTo(x, y, z) {
   targetCameraPos = { x, y, z };
+  targetCameraTarget = new THREE.Vector3(0, 0, 0);
   targetGlobeRot = { x: 0, y: targetGlobeRot ? targetGlobeRot.y : (globe ? globe.rotation.y : 0) };
   isFlying = true;
 }
@@ -336,6 +573,10 @@ function setupNavigationButtons() {
   const btnGlobal = document.getElementById('fly-global');
   const btnItaly = document.getElementById('fly-italy');
   const btnJapan = document.getElementById('fly-japan');
+  const btnAmericas = document.getElementById('fly-americas');
+  const btnArctic = document.getElementById('fly-arctic');
+  const btnAntarctic = document.getElementById('fly-antarctic');
+  const btnResetHud = document.getElementById('btn-camera-reset-hud');
 
   if (btnGlobal) {
     btnGlobal.addEventListener('click', () => {
@@ -360,19 +601,99 @@ function setupNavigationButtons() {
       flyToLatLon(36.0, 138.0, 8.5);
     });
   }
+
+  if (btnAmericas) {
+    btnAmericas.addEventListener('click', () => {
+      isSpinning = false;
+      uiController.setSpinState(false);
+      flyToLatLon(38.0, -97.0, 8.5);
+    });
+  }
+
+  if (btnArctic) {
+    btnArctic.addEventListener('click', () => {
+      isSpinning = false;
+      uiController.setSpinState(false);
+      flyToLatLon(88.0, 0.0, 10.0);
+    });
+  }
+
+  if (btnAntarctic) {
+    btnAntarctic.addEventListener('click', () => {
+      isSpinning = false;
+      uiController.setSpinState(false);
+      flyToLatLon(-88.0, 0.0, 10.0);
+    });
+  }
+
+  if (btnResetHud) {
+    btnResetHud.addEventListener('click', resetCameraView);
+  }
+}
+
+function setupCameraControlButtons() {
+  const btnReset = document.getElementById('btn-camera-reset');
+  const btnRecenter = document.getElementById('cam-recenter');
+  const btnPanUp = document.getElementById('cam-pan-up');
+  const btnPanDown = document.getElementById('cam-pan-down');
+  const btnPanLeft = document.getElementById('cam-pan-left');
+  const btnPanRight = document.getElementById('cam-pan-right');
+
+  const btnZoomIn = document.getElementById('cam-zoom-in');
+  const btnZoomOut = document.getElementById('cam-zoom-out');
+  const btnRotLeft = document.getElementById('cam-rot-left');
+  const btnRotRight = document.getElementById('cam-rot-right');
+
+  const btnViewArctic = document.getElementById('cam-view-arctic');
+  const btnViewAntarctic = document.getElementById('cam-view-antarctic');
+
+  if (btnReset) btnReset.addEventListener('click', resetCameraView);
+  if (btnRecenter) btnRecenter.addEventListener('click', recenterCameraTarget);
+
+  if (btnPanUp) btnPanUp.addEventListener('click', () => panCamera(0, 35));
+  if (btnPanDown) btnPanDown.addEventListener('click', () => panCamera(0, -35));
+  if (btnPanLeft) btnPanLeft.addEventListener('click', () => panCamera(35, 0));
+  if (btnPanRight) btnPanRight.addEventListener('click', () => panCamera(-35, 0));
+
+  if (btnZoomIn) btnZoomIn.addEventListener('click', () => zoomCamera(-1.2));
+  if (btnZoomOut) btnZoomOut.addEventListener('click', () => zoomCamera(1.2));
+
+  if (btnRotLeft) btnRotLeft.addEventListener('click', () => {
+    if (globe) globe.rotation.y -= 0.15;
+    isFlying = false;
+  });
+  if (btnRotRight) btnRotRight.addEventListener('click', () => {
+    if (globe) globe.rotation.y += 0.15;
+    isFlying = false;
+  });
+
+  if (btnViewArctic) btnViewArctic.addEventListener('click', () => {
+    isSpinning = false;
+    uiController.setSpinState(false);
+    flyToLatLon(88.0, 0.0, 10.0);
+  });
+
+  if (btnViewAntarctic) btnViewAntarctic.addEventListener('click', () => {
+    isSpinning = false;
+    uiController.setSpinState(false);
+    flyToLatLon(-88.0, 0.0, 10.0);
+  });
 }
 
 // =============================================================================
 // 6. ANIMATION & RENDER LOOP
 // =============================================================================
 
-function onWindowResize() {
+export function onWindowResize() {
   if (!camera || !renderer) return;
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  camera.aspect = w / h;
+  const w = (typeof window !== 'undefined' ? window.innerWidth : 1920) || 1;
+  const h = (typeof window !== 'undefined' ? window.innerHeight : 1080) || 1;
+  camera.aspect = (w > 0 && h > 0) ? (w / h) : 1.0;
   camera.updateProjectionMatrix();
-  renderer.setSize(w, h);
+  renderer.setSize(Math.max(1, w), Math.max(1, h));
+  if (uiController?.updatePopupPosition) {
+    uiController.updatePopupPosition(camera, w, h);
+  }
 }
 
 function animate() {
@@ -387,6 +708,13 @@ function animate() {
     camera.position.x += (targetCameraPos.x - camera.position.x) * 0.08;
     camera.position.y += (targetCameraPos.y - camera.position.y) * 0.08;
     camera.position.z += (targetCameraPos.z - camera.position.z) * 0.08;
+
+    // Lerp camera target if defined
+    if (targetCameraTarget && cameraTarget) {
+      cameraTarget.x += (targetCameraTarget.x - cameraTarget.x) * 0.08;
+      cameraTarget.y += (targetCameraTarget.y - cameraTarget.y) * 0.08;
+      cameraTarget.z += (targetCameraTarget.z - cameraTarget.z) * 0.08;
+    }
 
     // Lerp globe rotation
     globe.rotation.x += (targetGlobeRot.x - globe.rotation.x) * 0.08;
@@ -404,9 +732,18 @@ function animate() {
 
     if (distCam < 0.02 && distRot < 0.01) {
       camera.position.set(targetCameraPos.x, targetCameraPos.y, targetCameraPos.z);
+      if (targetCameraTarget && cameraTarget) {
+        cameraTarget.copy(targetCameraTarget);
+        targetCameraTarget = null;
+      }
       globe.rotation.set(targetGlobeRot.x, targetGlobeRot.y, 0);
       isFlying = false;
     }
+  }
+
+  // Camera orientation always tracks focus target
+  if (camera && cameraTarget) {
+    camera.lookAt(cameraTarget.x, cameraTarget.y, cameraTarget.z);
   }
 
   // 2. Earth Constant Auto-Rotation (F13.3)
@@ -442,5 +779,15 @@ if (typeof window !== 'undefined') {
 export default {
   init,
   flyToLatLon,
-  flyTo
+  flyTo,
+  panCamera,
+  zoomCamera,
+  rotateGlobe,
+  resetCameraView,
+  recenterCameraTarget,
+  setReliefState,
+  getReliefState,
+  setSpinState,
+  getSpinState,
+  onWindowResize
 };

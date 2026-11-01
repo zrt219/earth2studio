@@ -71,12 +71,16 @@ export const RADIAL_SHELLS = Object.freeze({
  * @returns {THREE.Vector3}
  */
 export function latLonToVector3(lat, lon, radius = RADIAL_SHELLS.BASE_GLOBE) {
-  const phi = (lat * Math.PI) / 180.0;
-  const lambda = ((((lon % 360) + 360) % 360) * Math.PI) / 180.0;
+  const numLat = Number.isFinite(Number(lat)) ? Number(lat) : 0.0;
+  const clampedLat = Math.max(-90.0, Math.min(90.0, numLat));
+  const numLon = Number.isFinite(Number(lon)) ? Number(lon) : 0.0;
+  const phi = (clampedLat * Math.PI) / 180.0;
+  const lambda = ((((numLon % 360) + 360) % 360) * Math.PI) / 180.0;
+  const r = (Number.isFinite(Number(radius)) && Number(radius) > 0) ? Number(radius) : RADIAL_SHELLS.BASE_GLOBE;
   return new THREE.Vector3(
-    radius * Math.cos(phi) * Math.cos(lambda),
-    radius * Math.sin(phi),
-    -radius * Math.cos(phi) * Math.sin(lambda)
+    r * Math.cos(phi) * Math.cos(lambda),
+    r * Math.sin(phi),
+    -r * Math.cos(phi) * Math.sin(lambda)
   );
 }
 
@@ -851,7 +855,9 @@ export function initLayers(globe, camera, renderer) {
   if (renderer && renderer.domElement && typeof renderer.domElement.addEventListener === 'function') {
     pointerDownTarget = renderer.domElement;
     pointerDownHandler = (e) => {
-      pointerDownPos = { x: e.clientX, y: e.clientY };
+      const cx = typeof e.clientX === 'number' ? e.clientX : (e.x || 0);
+      const cy = typeof e.clientY === 'number' ? e.clientY : (e.y || 0);
+      pointerDownPos = { x: cx, y: cy };
     };
     pointerDownTarget.addEventListener('pointerdown', pointerDownHandler);
   }
@@ -959,11 +965,18 @@ export function handleRaycast(event, camera = activeCamera, width = null, height
   if (!event || !camera) return null;
   const targetCamera = camera;
 
-  const w = width || (activeRenderer?.domElement?.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 1920));
-  const h = height || (activeRenderer?.domElement?.clientHeight || (typeof window !== 'undefined' ? window.innerHeight : 1080));
+  if (width !== null && (typeof width !== 'number' || width <= 0 || !Number.isFinite(width))) return null;
+  if (height !== null && (typeof height !== 'number' || height <= 0 || !Number.isFinite(height))) return null;
 
-  const clientX = typeof event.clientX === 'number' ? event.clientX : (event.x || 0);
-  const clientY = typeof event.clientY === 'number' ? event.clientY : (event.y || 0);
+  const rawW = width || (activeRenderer?.domElement?.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 1920));
+  const rawH = height || (activeRenderer?.domElement?.clientHeight || (typeof window !== 'undefined' ? window.innerHeight : 1080));
+  const w = (rawW && rawW > 0) ? rawW : 1920;
+  const h = (rawH && rawH > 0) ? rawH : 1080;
+
+  const clientX = typeof event.clientX === 'number' ? event.clientX : (typeof event.x === 'number' ? event.x : NaN);
+  const clientY = typeof event.clientY === 'number' ? event.clientY : (typeof event.y === 'number' ? event.y : NaN);
+  if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) return null;
+  if (Math.abs(clientX) > 1e6 || Math.abs(clientY) > 1e6) return null;
 
   // Drag-vs-click suppression: reject clicks with movement > 5px
   if (pointerDownPos) {
@@ -1050,6 +1063,7 @@ export function updateLayers(time, camera = activeCamera) {
   // 1. Pulsing waypoint beacon nodes
   if (cycloneBeaconMeshes && cycloneBeaconMeshes.length > 0) {
     cycloneBeaconMeshes.forEach((mesh, idx) => {
+      if (!mesh || !mesh.scale) return;
       const s = 1.0 + 0.25 * Math.sin(t * 4.0 + idx * 0.8);
       mesh.scale.set(s, s, s);
     });
@@ -1058,6 +1072,7 @@ export function updateLayers(time, camera = activeCamera) {
   // 2. Pulsing DA station beacon caps
   if (daCapMeshes && daCapMeshes.length > 0) {
     daCapMeshes.forEach((mesh, idx) => {
+      if (!mesh || !mesh.scale) return;
       const s = 1.0 + 0.18 * Math.sin(t * 3.5 + idx * 1.2);
       mesh.scale.set(s, s, s);
       if (mesh.material && typeof mesh.material.emissiveIntensity === 'number') {

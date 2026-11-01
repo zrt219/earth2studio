@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +19,11 @@
 
 All visualizations are produced strictly from authentic NOAA GFS operational analysis
 and verified model simulation outputs without synthetic noise arrays or unverified figures.
+Historical study_metrics.json artifacts are strictly stamped with QUARANTINED_DEFECTIVE_SYNTHETIC.
 """
 
 from __future__ import annotations
 
-import datetime
 import json
 import shutil
 from pathlib import Path
@@ -31,6 +32,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 from loguru import logger
+
+from od_experiments.scientific_study.historical.study_runner_historical import (
+    QUARANTINE_STAMP,
+    assert_quarantine_stamped,
+    stamp_quarantined_dict,
+)
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 PAPER_FIGS = ROOT_DIR / "docs" / "origin_datum" / "paper" / "figures"
@@ -47,14 +54,16 @@ def generate_visual_suite() -> None:
     # Load authentic October 2026 NOAA GFS operational analysis
     nc_path = REALTIME_OUT / "live_gfs_20261028_0000.nc"
     if not nc_path.exists():
-        raise FileNotFoundError(f"Required operational GFS dataset not found: {nc_path}")
+        raise FileNotFoundError(
+            f"Required operational GFS dataset not found: {nc_path}"
+        )
 
     logger.info(f"Loading authentic NOAA GFS operational analysis from {nc_path}...")
     ds_gfs = xr.open_dataset(str(nc_path), decode_times=False)
     data_gfs = ds_gfs["__xarray_dataarray_variable__"]
 
     t2m_gfs = np.squeeze(data_gfs.sel(variable="t2m").values[0]) - 273.15  # Celsius
-    msl_gfs = np.squeeze(data_gfs.sel(variable="msl").values[0]) / 100.0   # hPa
+    msl_gfs = np.squeeze(data_gfs.sel(variable="msl").values[0]) / 100.0  # hPa
     lats = ds_gfs["lat"].values
     lons = ds_gfs["lon"].values
 
@@ -64,7 +73,9 @@ def generate_visual_suite() -> None:
     # Verify that dataset contains valid October 2026 analysis
     time_units = str(ds_gfs["time"].attrs.get("units", ""))
     if "2026-10-28" not in time_units:
-        raise ValueError(f"Incompatible timestamp in GFS dataset: {time_units}. Expected 2026-10-28.")
+        raise ValueError(
+            f"Incompatible timestamp in GFS dataset: {time_units}. Expected 2026-10-28."
+        )
 
     logger.info("Synchronizing visual evaluation timeline on October 2026...")
 
@@ -73,7 +84,9 @@ def generate_visual_suite() -> None:
     f_u10m = np.load(EARTH2_OUT / "forecast_u10m.npy")
     f_v10m = np.load(EARTH2_OUT / "forecast_v10m.npy")
     if f_u10m.shape != t2m_gfs.shape or f_v10m.shape != t2m_gfs.shape:
-        raise ValueError(f"Grid shape mismatch: wind fields {f_u10m.shape} vs GFS analysis {t2m_gfs.shape}")
+        raise ValueError(
+            f"Grid shape mismatch: wind fields {f_u10m.shape} vs GFS analysis {t2m_gfs.shape}"
+        )
 
     # Standardize baseline reference state to match the 24-hour evaluation timeline:
     # In operational 24-hour verification, the baseline persistence reference corresponds
@@ -95,28 +108,65 @@ def generate_visual_suite() -> None:
     # ---------------------------------------------------------
     # 1. Global Verification Triplet (Authentic Analysis vs Baseline Reference vs Observed Difference)
     # ---------------------------------------------------------
-    logger.info("Generating Global Verification Triplet from October 2026 operational timeline...")
+    logger.info(
+        "Generating Global Verification Triplet from October 2026 operational timeline..."
+    )
     diff_t2m = t2m_gfs - ref_t2m
 
     fig, axes = plt.subplots(3, 1, figsize=(11, 13))
 
-    im0 = axes[0].imshow(t2m_gfs, extent=[0, 360, -90, 90], cmap="turbo", vmin=-40, vmax=40, origin="upper")
-    axes[0].set_title("(a) NOAA GFS Operational Analysis ($T_{2m}$ Valid: 2026-10-28 00:00 UTC)", fontsize=11, fontweight="bold")
+    im0 = axes[0].imshow(
+        t2m_gfs,
+        extent=[0, 360, -90, 90],
+        cmap="turbo",
+        vmin=-40,
+        vmax=40,
+        origin="upper",
+    )
+    axes[0].set_title(
+        "(a) NOAA GFS Operational Analysis ($T_{2m}$ Valid: 2026-10-28 00:00 UTC)",
+        fontsize=11,
+        fontweight="bold",
+    )
     axes[0].set_ylabel("Latitude (°)")
     fig.colorbar(im0, ax=axes[0], orientation="vertical", shrink=0.8, label="°C")
     axes[0].grid(True, linestyle=":", alpha=0.4)
 
-    im1 = axes[1].imshow(ref_t2m, extent=[0, 360, -90, 90], cmap="turbo", vmin=-40, vmax=40, origin="upper")
-    axes[1].set_title("(b) Operational Baseline Persistence State ($T_{2m}$ Reference Valid: 2026-10-27 00:00 UTC)", fontsize=11, fontweight="bold")
+    im1 = axes[1].imshow(
+        ref_t2m,
+        extent=[0, 360, -90, 90],
+        cmap="turbo",
+        vmin=-40,
+        vmax=40,
+        origin="upper",
+    )
+    axes[1].set_title(
+        "(b) Operational Baseline Persistence State ($T_{2m}$ Reference Valid: 2026-10-27 00:00 UTC)",
+        fontsize=11,
+        fontweight="bold",
+    )
     axes[1].set_ylabel("Latitude (°)")
     fig.colorbar(im1, ax=axes[1], orientation="vertical", shrink=0.8, label="°C")
     axes[1].grid(True, linestyle=":", alpha=0.4)
 
-    im2 = axes[2].imshow(diff_t2m, extent=[0, 360, -90, 90], cmap="bwr", vmin=-15, vmax=15, origin="upper")
-    axes[2].set_title(r"(c) Observed 24-Hour Synoptic Tendency ($\Delta T = T_{\mathrm{analysis}} - T_{\mathrm{persistence}}$)", fontsize=11, fontweight="bold")
+    im2 = axes[2].imshow(
+        diff_t2m,
+        extent=[0, 360, -90, 90],
+        cmap="bwr",
+        vmin=-15,
+        vmax=15,
+        origin="upper",
+    )
+    axes[2].set_title(
+        r"(c) Observed 24-Hour Synoptic Tendency ($\Delta T = T_{\mathrm{analysis}} - T_{\mathrm{persistence}}$)",
+        fontsize=11,
+        fontweight="bold",
+    )
     axes[2].set_xlabel("Longitude (°)")
     axes[2].set_ylabel("Latitude (°)")
-    fig.colorbar(im2, ax=axes[2], orientation="vertical", shrink=0.8, label="Difference (°C)")
+    fig.colorbar(
+        im2, ax=axes[2], orientation="vertical", shrink=0.8, label="Difference (°C)"
+    )
     axes[2].grid(True, linestyle=":", alpha=0.4)
 
     plt.tight_layout()
@@ -126,24 +176,43 @@ def generate_visual_suite() -> None:
     logger.success(f"Generated {triplet_path.name}")
 
     # ---------------------------------------------------------
-    # 2. Multi-Cycle Skill Score Distribution Chart
+    # 2. Multi-Cycle Skill Score Distribution Chart (Strictly Quarantined)
     # ---------------------------------------------------------
     logger.info("Generating Daily Skill Score Progression Chart...")
     metrics_file = STUDY_OUT / "study_metrics.json"
     if metrics_file.exists():
-        data = json.loads(metrics_file.read_text(encoding="utf-8"))
-        cycles = [f"Cycle {i+1}\n({c['cycle'][-5:]})" for i, c in enumerate(data.get("cycles", []))]
-        skill_scores = [c["metrics_t2m"]["skill_score_vs_persistence"] * 100 for c in data.get("cycles", [])]
+        data = stamp_quarantined_dict(
+            json.loads(metrics_file.read_text(encoding="utf-8"))
+        )
+        assert_quarantine_stamped(data)
+        cycles = [
+            f"Cycle {i + 1}\n({c['cycle'][-5:]})"
+            for i, c in enumerate(data.get("cycles", []))
+        ]
+        skill_scores = [
+            c["metrics_t2m"]["skill_score_vs_persistence"] * 100
+            for c in data.get("cycles", [])
+        ]
         acc_scores = [c["metrics_t2m"]["acc"] for c in data.get("cycles", [])]
 
         fig, (ax_bar, ax_line) = plt.subplots(1, 2, figsize=(12, 5))
 
         # Bar chart of Skill Scores
-        bars = ax_bar.bar(cycles, skill_scores, color="royalblue", edgecolor="navy", width=0.55)
+        bars = ax_bar.bar(
+            cycles, skill_scores, color="royalblue", edgecolor="navy", width=0.55
+        )
         ax_bar.axhline(0, color="black", linewidth=0.8)
-        ax_bar.axhline(50, color="orange", linestyle="--", label="High Skill Threshold (+50%)")
-        ax_bar.set_ylabel("Forecast Skill Score over Persistence (%)", fontsize=10, fontweight="bold")
-        ax_bar.set_title("Operational Skill Score ($SS$) by Forecast Cycle", fontsize=11, fontweight="bold")
+        ax_bar.axhline(
+            50, color="orange", linestyle="--", label="High Skill Threshold (+50%)"
+        )
+        ax_bar.set_ylabel(
+            "Forecast Skill Score over Persistence (%)", fontsize=10, fontweight="bold"
+        )
+        ax_bar.set_title(
+            f"[{QUARANTINE_STAMP}] Synthetic Diagnostic Skill ($SS$)",
+            fontsize=11,
+            fontweight="bold",
+        )
         ax_bar.set_ylim([0, 100])
         ax_bar.grid(True, linestyle=":", alpha=0.6)
         ax_bar.legend(loc="upper right")
@@ -162,13 +231,34 @@ def generate_visual_suite() -> None:
             )
 
         # Line chart of TAC / ACC
-        ax_line.plot(cycles, acc_scores, "g-^", linewidth=2, markersize=7, label="Tendency Anomaly Correlation (TAC)")
-        ax_line.axhline(0.60, color="red", linestyle=":", label="ECMWF Climatol. ACC Limit (0.60 ref)")
-        ax_line.set_ylabel("Correlation (Dimensionless)", color="darkgreen", fontsize=10, fontweight="bold")
+        ax_line.plot(
+            cycles,
+            acc_scores,
+            "g-^",
+            linewidth=2,
+            markersize=7,
+            label="Tendency Anomaly Correlation (TAC)",
+        )
+        ax_line.axhline(
+            0.60,
+            color="red",
+            linestyle=":",
+            label="ECMWF Climatol. ACC Limit (0.60 ref)",
+        )
+        ax_line.set_ylabel(
+            "Correlation (Dimensionless)",
+            color="darkgreen",
+            fontsize=10,
+            fontweight="bold",
+        )
         ax_line.set_ylim([0.5, 1.0])
         ax_line.tick_params(axis="y", labelcolor="darkgreen")
         ax_line.grid(True, linestyle=":", alpha=0.6)
-        ax_line.set_title("Anomaly Correlation vs. Operational Reference Limit", fontsize=11, fontweight="bold")
+        ax_line.set_title(
+            f"[{QUARANTINE_STAMP}] Diagnostic Correlation",
+            fontsize=11,
+            fontweight="bold",
+        )
         ax_line.legend(loc="lower right")
 
         plt.tight_layout()
@@ -206,7 +296,11 @@ def generate_visual_suite() -> None:
         aspect="auto",
     )
     plt.colorbar(im, ax=ax, label="2-Meter Temperature (°C)")
-    ax.set_title("European Mesoscale Inset: NOAA GFS Operational Analysis ($T_{2m}$)\n(Valid: 2026-10-28 00:00 UTC)", fontsize=11, fontweight="bold")
+    ax.set_title(
+        "European Mesoscale Inset: NOAA GFS Operational Analysis ($T_{2m}$)\n(Valid: 2026-10-28 00:00 UTC)",
+        fontsize=11,
+        fontweight="bold",
+    )
     ax.set_xlabel("Longitude (°E)")
     ax.set_ylabel("Latitude (°N)")
     ax.grid(True, linestyle=":", alpha=0.5)
@@ -219,7 +313,9 @@ def generate_visual_suite() -> None:
     # ---------------------------------------------------------
     # 4. Regional Wind & Pressure Dynamics Maps for Italy & Japan
     # ---------------------------------------------------------
-    logger.info("Generating Regional Wind & Pressure Dynamics Maps with authentic isobaric analysis...")
+    logger.info(
+        "Generating Regional Wind & Pressure Dynamics Maps with authentic isobaric analysis..."
+    )
     speed = np.sqrt(f_u10m**2 + f_v10m**2)
 
     # A. Italy Regional Domain (lat 35-48°N, lon 6-19°E)
@@ -241,13 +337,35 @@ def generate_visual_suite() -> None:
     it_v_asc = it_v[it_lat_sort, :]
 
     fig, ax = plt.subplots(figsize=(8, 6.5))
-    cs = ax.contour(it_lons, it_lats_asc, it_msl_asc, levels=12, colors="black", linewidths=1.0)
+    cs = ax.contour(
+        it_lons, it_lats_asc, it_msl_asc, levels=12, colors="black", linewidths=1.0
+    )
     ax.clabel(cs, inline=True, fontsize=8, fmt="%1.0f")
-    im = ax.pcolormesh(it_lons, it_lats_asc, it_speed_asc, cmap="YlOrRd", shading="auto", alpha=0.75, vmin=0, vmax=20)
+    im = ax.pcolormesh(
+        it_lons,
+        it_lats_asc,
+        it_speed_asc,
+        cmap="YlOrRd",
+        shading="auto",
+        alpha=0.75,
+        vmin=0,
+        vmax=20,
+    )
     plt.colorbar(im, ax=ax, label="Surface Wind Speed (m/s)")
     step = 2
-    ax.quiver(it_lons[::step], it_lats_asc[::step], it_u_asc[::step, ::step], it_v_asc[::step, ::step], color="navy", scale=300)
-    ax.set_title(f"Central Mediterranean (Italy): MSLP Isobars & 10m Wind Vectors\n(NOAA GFS Analysis Valid 2026-10-28 | Min MSLP: {it_msl.min():.1f} hPa, Max Wind: {it_speed.max():.1f} m/s)", fontsize=10, fontweight="bold")
+    ax.quiver(
+        it_lons[::step],
+        it_lats_asc[::step],
+        it_u_asc[::step, ::step],
+        it_v_asc[::step, ::step],
+        color="navy",
+        scale=300,
+    )
+    ax.set_title(
+        f"Central Mediterranean (Italy): MSLP Isobars & 10m Wind Vectors\n(NOAA GFS Analysis Valid 2026-10-28 | Min MSLP: {it_msl.min():.1f} hPa, Max Wind: {it_speed.max():.1f} m/s)",
+        fontsize=10,
+        fontweight="bold",
+    )
     ax.set_xlabel("Longitude (°E)")
     ax.set_ylabel("Latitude (°N)")
     ax.set_xlim(6.0, 19.0)
@@ -277,13 +395,35 @@ def generate_visual_suite() -> None:
     jp_v_asc = jp_v[jp_lat_sort, :]
 
     fig, ax = plt.subplots(figsize=(8, 6.5))
-    cs = ax.contour(jp_lons, jp_lats_asc, jp_msl_asc, levels=14, colors="black", linewidths=1.0)
+    cs = ax.contour(
+        jp_lons, jp_lats_asc, jp_msl_asc, levels=14, colors="black", linewidths=1.0
+    )
     ax.clabel(cs, inline=True, fontsize=8, fmt="%1.0f")
-    im = ax.pcolormesh(jp_lons, jp_lats_asc, jp_speed_asc, cmap="YlOrRd", shading="auto", alpha=0.75, vmin=0, vmax=25)
+    im = ax.pcolormesh(
+        jp_lons,
+        jp_lats_asc,
+        jp_speed_asc,
+        cmap="YlOrRd",
+        shading="auto",
+        alpha=0.75,
+        vmin=0,
+        vmax=25,
+    )
     plt.colorbar(im, ax=ax, label="Surface Wind Speed (m/s)")
     step = 2
-    ax.quiver(jp_lons[::step], jp_lats_asc[::step], jp_u_asc[::step, ::step], jp_v_asc[::step, ::step], color="navy", scale=300)
-    ax.set_title(f"Western Pacific (Japan): MSLP Isobars & 10m Wind Vectors\n(NOAA GFS Analysis Valid 2026-10-28 | Min MSLP: {jp_msl.min():.1f} hPa, Max Wind: {jp_speed.max():.1f} m/s)", fontsize=10, fontweight="bold")
+    ax.quiver(
+        jp_lons[::step],
+        jp_lats_asc[::step],
+        jp_u_asc[::step, ::step],
+        jp_v_asc[::step, ::step],
+        color="navy",
+        scale=300,
+    )
+    ax.set_title(
+        f"Western Pacific (Japan): MSLP Isobars & 10m Wind Vectors\n(NOAA GFS Analysis Valid 2026-10-28 | Min MSLP: {jp_msl.min():.1f} hPa, Max Wind: {jp_speed.max():.1f} m/s)",
+        fontsize=10,
+        fontweight="bold",
+    )
     ax.set_xlabel("Longitude (°E)")
     ax.set_ylabel("Latitude (°N)")
     ax.set_xlim(128.0, 146.0)
@@ -299,9 +439,20 @@ def generate_visual_suite() -> None:
     # 5. Global Wind Velocity Component Figures
     # ---------------------------------------------------------
     fig_u, ax_u = plt.subplots(figsize=(10, 5))
-    im_u = ax_u.imshow(f_u10m, extent=[0, 360, -90, 90], cmap="RdBu_r", vmin=-25, vmax=25, origin="upper")
+    im_u = ax_u.imshow(
+        f_u10m,
+        extent=[0, 360, -90, 90],
+        cmap="RdBu_r",
+        vmin=-25,
+        vmax=25,
+        origin="upper",
+    )
     plt.colorbar(im_u, ax=ax_u, label="Zonal Velocity U10m (m/s)")
-    ax_u.set_title("Global Zonal Wind Component ($U_{10m}$) at 10m Elevation", fontsize=11, fontweight="bold")
+    ax_u.set_title(
+        "Global Zonal Wind Component ($U_{10m}$) at 10m Elevation",
+        fontsize=11,
+        fontweight="bold",
+    )
     ax_u.set_xlabel("Longitude (°E)")
     ax_u.set_ylabel("Latitude (°N)")
     ax_u.grid(True, linestyle=":", alpha=0.4)
@@ -311,9 +462,20 @@ def generate_visual_suite() -> None:
     logger.success(f"Generated {u_path.name}")
 
     fig_v, ax_v = plt.subplots(figsize=(10, 5))
-    im_v = ax_v.imshow(f_v10m, extent=[0, 360, -90, 90], cmap="RdBu_r", vmin=-20, vmax=20, origin="upper")
+    im_v = ax_v.imshow(
+        f_v10m,
+        extent=[0, 360, -90, 90],
+        cmap="RdBu_r",
+        vmin=-20,
+        vmax=20,
+        origin="upper",
+    )
     plt.colorbar(im_v, ax=ax_v, label="Meridional Velocity V10m (m/s)")
-    ax_v.set_title("Global Meridional Wind Component ($V_{10m}$) at 10m Elevation", fontsize=11, fontweight="bold")
+    ax_v.set_title(
+        "Global Meridional Wind Component ($V_{10m}$) at 10m Elevation",
+        fontsize=11,
+        fontweight="bold",
+    )
     ax_v.set_xlabel("Longitude (°E)")
     ax_v.set_ylabel("Latitude (°N)")
     ax_v.grid(True, linestyle=":", alpha=0.4)
@@ -327,7 +489,10 @@ def generate_visual_suite() -> None:
     # ---------------------------------------------------------
     for src, dst_name in [
         (STUDY_OUT / "figures" / "error_growth_curve.png", "error_growth_curve.png"),
-        (STUDY_OUT / "figures" / "italy_extreme_tracking.png", "italy_cyclogenesis_msl.png"),
+        (
+            STUDY_OUT / "figures" / "italy_extreme_tracking.png",
+            "italy_cyclogenesis_msl.png",
+        ),
         (STUDY_OUT / "figures" / "japan_extreme_tracking.png", "japan_trough_msl.png"),
         (REALTIME_OUT / "live_gfs_t2m.png", "realtime_gfs_analysis.png"),
         (EARTH2_OUT / "forecast_t2m.png", "global_t2m_baseline.png"),
@@ -336,9 +501,10 @@ def generate_visual_suite() -> None:
             shutil.copy(src, PAPER_FIGS / dst_name)
             logger.info(f"Synchronized {src.name} -> {dst_name}")
 
-    logger.success("All visual assets successfully generated in docs/origin_datum/paper/figures/!")
+    logger.success(
+        "All visual assets successfully generated in docs/origin_datum/paper/figures/!"
+    )
 
 
 if __name__ == "__main__":
     generate_visual_suite()
-

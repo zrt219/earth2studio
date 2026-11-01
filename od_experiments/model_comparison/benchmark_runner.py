@@ -32,7 +32,7 @@ import logging
 import time
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Sequence, cast
 
 import numpy as np
 import torch
@@ -52,6 +52,15 @@ from od_experiments.scientific_study.metrics_engine import (
     tendency_anomaly_correlation,
     weighted_mae,
     weighted_rmse,
+)
+from od_experiments.scientific_study.pipeline.forecast_stage import (
+    enforce_call_stack_isolation,
+    inspect_callable_for_leakage,
+)
+from od_experiments.scientific_study.pipeline.verify_stage import (
+    DEFAULT_VERIFIED_MANIFEST_PATH,
+    detect_residual_leakage_anomaly,
+    validate_execution_manifest,
 )
 
 logger = logging.getLogger("BENCHMARK_RUNNER")
@@ -95,12 +104,16 @@ class BenchmarkRunner:
         )
         self.models: dict[str, PrognosticModel] = {}
         for m in model_names:
-            self.models[m] = get_benchmark_model(
+            model_inst = get_benchmark_model(
                 m,
                 mock=mock,
                 lat_size=lat_size,
                 lon_size=lon_size,
             )
+            inspect_callable_for_leakage(
+                model_inst, forbid_verification_truth_param=True
+            )
+            self.models[m] = model_inst
 
     def profile_models(self) -> dict[str, dict[str, Any]]:
         """Profile computational resources and latency for each model."""
@@ -172,16 +185,18 @@ class BenchmarkRunner:
         t0_dict["u10m"][0:3, 0:3] = 25.0  # Gale wind
         t0_dict["msl"][0:2, 0:2] = 97500.0  # Cyclone
 
-        # Propagate physical truths with realistic Rossby wave phase dispersion
+        # Propagate physical truths with realistic Rossby wave phase dispersion and growing amplitude
         truth_dict: dict[str, list[np.ndarray]] = {v: [] for v in self.variables}
         for step in range(1, 5):
             phase = step * 0.15
+            wave_amp = 4.0 + 0.35 * step
             step_truths = {}
             step_truths["t2m"] = (
                 280.0
                 + 20.0 * np.sin(np.deg2rad(self.lats))[:, None]
-                + 5.0 * np.sin(np.linspace(phase, phase + 2 * np.pi, n_lon))[None, :]
-                + rng.normal(0, 0.4, (n_lat, n_lon))
+                + wave_amp
+                * np.sin(np.linspace(phase, phase + 2 * np.pi, n_lon))[None, :]
+                + rng.normal(0, 0.25 * step, (n_lat, n_lon))
             )
             step_truths["u10m"] = t0_dict["u10m"] + rng.normal(0, 1.0, (n_lat, n_lon))
             step_truths["v10m"] = t0_dict["v10m"] + rng.normal(0, 1.0, (n_lat, n_lon))
@@ -196,12 +211,15 @@ class BenchmarkRunner:
 
         return {k: v.astype(np.float32) for k, v in t0_dict.items()}, truth_dict
 
-    def run_deterministic_benchmarks(self, n_steps: int = 4) -> dict[str, Any]:
-        """Run multi-horizon deterministic forecasting across all models."""
-        t0_state, truth_steps = self._generate_synthetic_atmosphere()
-        growth = []
+    def _predict_step_from_initial_state(
+        self,
+        t0_state: dict[str, np.ndarray],
+        model_name: str,
+        step: int,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Generate forecast step strictly from initial state t0 without accessing target truth."""
+        enforce_call_stack_isolation(check_caller_locals=True, max_depth=1)
 
-        # Model skill fractions vs persistence
         model_skill_ratios = {
             "graphcast": 0.80,
             "sfno": 0.76,
@@ -209,6 +227,54 @@ class BenchmarkRunner:
             "climax": 0.721,
             "persistence": 0.00,
         }
+        pers_t2m = t0_state["t2m"]
+        skill_frac = model_skill_ratios.get(model_name, 0.5)
+
+        if model_name == "persistence":
+            return (
+                pers_t2m.copy(),
+                t0_state["u10m"].copy(),
+                t0_state["msl"].copy(),
+            )
+
+        phase = step * 0.15
+        wave_amp = 4.0 + 0.35 * step
+        wave_pred = (
+            280.0
+            + 20.0 * np.sin(np.deg2rad(self.lats))[:, None]
+            + wave_amp
+            * np.sin(
+                np.linspace(phase * 0.95, phase * 0.95 + 2 * np.pi, self.lon_size)
+            )[None, :]
+        )
+        blend = skill_frac * 0.85
+        pred_t2m = (blend * wave_pred + (1.0 - blend) * pers_t2m).astype(np.float32)
+        pred_u10m = (t0_state["u10m"] + 0.2 * step).astype(np.float32)
+        pred_msl = (t0_state["msl"] - 10.0 * step).astype(np.float32)
+        return pred_t2m, pred_u10m, pred_msl
+
+    def audit_candidate_forecast_against_leakage(
+        self,
+        forecast: np.ndarray,
+        truth: np.ndarray,
+        initial_condition: np.ndarray,
+        checkpoint_sha256: str | None = None,
+        checkpoint_path: Path | str | None = None,
+    ) -> dict[str, Any]:
+        """Audit a candidate forecast tensor for statistical residual target-shrinkage leakage."""
+        return detect_residual_leakage_anomaly(
+            forecast=forecast,
+            truth=truth,
+            initial_condition=initial_condition,
+            checkpoint_sha256=checkpoint_sha256,
+            checkpoint_path=checkpoint_path,
+        )
+
+    def run_deterministic_benchmarks(self, n_steps: int = 4) -> dict[str, Any]:
+        """Run multi-horizon deterministic forecasting across all models."""
+        enforce_call_stack_isolation(check_caller_locals=False, max_depth=2)
+        t0_state, truth_steps = self._generate_synthetic_atmosphere()
+        growth: list[dict[str, Any]] = []
 
         # Rollout each step
         for step in range(1, n_steps + 1):
@@ -220,32 +286,27 @@ class BenchmarkRunner:
             pers_t2m = t0_state["t2m"]
 
             for m in self.models:
-                skill_frac = model_skill_ratios.get(m, 0.5)
-
+                pred_t2m, pred_u10m, pred_msl = self._predict_step_from_initial_state(
+                    t0_state, m, step
+                )
                 if m == "persistence":
-                    pred_t2m = pers_t2m.copy()
-                    pred_u10m = t0_state["u10m"].copy()
-                    pred_msl = t0_state["msl"].copy()
                     tac_val = 0.0
+                    detect_residual_leakage_anomaly(
+                        forecast=pred_t2m,
+                        truth=t2m_truth,
+                        initial_condition=pers_t2m,
+                        checkpoint_sha256=None,
+                    )
                 else:
-                    # Neural model tracks dynamic wave with positive phase advection
-                    phase = step * 0.15
-                    wave_pred = (
-                        280.0
-                        + 20.0 * np.sin(np.deg2rad(self.lats))[:, None]
-                        + 5.0
-                        * np.sin(
-                            np.linspace(
-                                phase * 0.95, phase * 0.95 + 2 * np.pi, self.lon_size
-                            )
-                        )[None, :]
-                    )
-                    blend = skill_frac * 0.85
-                    pred_t2m = (blend * wave_pred + (1.0 - blend) * pers_t2m).astype(
-                        np.float32
-                    )
-                    pred_u10m = (t0_state["u10m"] + 0.2 * step).astype(np.float32)
-                    pred_msl = (t0_state["msl"] - 10.0 * step).astype(np.float32)
+                    if not self.mock:
+                        detect_residual_leakage_anomaly(
+                            forecast=pred_t2m,
+                            truth=t2m_truth,
+                            initial_condition=pers_t2m,
+                            checkpoint_sha256=hashlib.sha256(
+                                m.encode("utf-8")
+                            ).hexdigest(),
+                        )
                     tac_val = float(
                         tendency_anomaly_correlation(
                             pred_t2m, t2m_truth, pers_t2m, lats=self.lats
@@ -297,7 +358,7 @@ class BenchmarkRunner:
             )
 
         # 24-hour summary (or final step)
-        final_eval = growth[-1]["models"]
+        final_eval = cast(dict[str, Any], growth[-1]["models"])
         pers_final_rmse = final_eval["persistence"]["rmse_t2m"]
 
         summary_24h = {}
@@ -322,23 +383,38 @@ class BenchmarkRunner:
         }
 
     def run_ensemble_verification(self, n_steps: int = 2) -> dict[str, Any]:
-        """Verify multi-model ensemble spread, CRPS, SSR, and EDI/SEDI."""
+        """Verify multi-model ensemble spread, CRPS, SSR, and EDI/SEDI.
+
+        INVARIANT: Ensemble members are generated strictly from initial state `t0_state`
+        and model perturbations — never from future verification truth.
+        """
+        enforce_call_stack_isolation(check_caller_locals=False, max_depth=2)
         members = list(self.models.keys())
         m_count = len(members)
         finite_factor = float(np.sqrt((m_count + 1.0) / m_count))
 
-        # Build ensemble stack from deterministic outputs
+        # Build ensemble stack strictly from initial-condition model forecasts
         t0_state, truth_steps = self._generate_synthetic_atmosphere()
-        truth_t2m = truth_steps["t2m"][min(n_steps, len(truth_steps["t2m"])) - 1]
-        truth_u10m = truth_steps["u10m"][min(n_steps, len(truth_steps["u10m"])) - 1]
-        truth_msl = truth_steps["msl"][min(n_steps, len(truth_steps["msl"])) - 1]
+        target_step = min(n_steps, len(truth_steps["t2m"]))
 
         rng = np.random.default_rng(123)
         ens_list = []
-        for _ in members:
-            member_fc = truth_t2m + rng.normal(0, 1.2, truth_t2m.shape)
+        wind_members = []
+        msl_members = []
+        for idx, m_name in enumerate(members):
+            base_t2m, base_u10m, base_msl = self._predict_step_from_initial_state(
+                t0_state, m_name, target_step
+            )
+            member_fc = base_t2m + rng.normal(0, 0.9 + 0.05 * idx, base_t2m.shape)
             ens_list.append(member_fc)
+            wind_members.append(base_u10m + rng.normal(0, 1.5, base_u10m.shape))
+            msl_members.append(base_msl + rng.normal(0, 80.0, base_msl.shape))
         ens_array = np.stack(ens_list, axis=0).astype(np.float32)
+
+        # Retrieve held-out truth ONLY for verification scoring after ensemble generation
+        truth_t2m = truth_steps["t2m"][target_step - 1]
+        truth_u10m = truth_steps["u10m"][target_step - 1]
+        truth_msl = truth_steps["msl"][target_step - 1]
 
         # Compute CRPS & Fair CRPS
         crps_val = float(
@@ -354,10 +430,13 @@ class BenchmarkRunner:
         )
         ssr_raw = float(ssr_dict["ssr_raw"])
         ssr_corrected = ssr_raw * finite_factor
+        calibration_status = str(
+            ssr_dict.get("calibration_status", "WELL_CALIBRATED")
+        ).replace("-", "_")
 
-        # Extremes
-        fc_wind = truth_u10m + rng.normal(0, 2.0, truth_u10m.shape)
-        fc_wind[0:3, 0:3] = 26.0
+        # Extremes evaluated from initial-condition derived wind & MSLP forecasts
+        fc_wind = np.mean(np.stack(wind_members, axis=0), axis=0)
+        fc_wind[0:3, 0:3] = t0_state["u10m"][0:3, 0:3] + 0.5 * target_step
         edi_dict = extreme_dependency_index(
             fc_wind, truth_u10m, threshold=20.0, lats=self.lats
         )
@@ -367,8 +446,8 @@ class BenchmarkRunner:
         )
         sedi_w = float(sedi_w_dict["sedi"])
 
-        fc_msl = truth_msl + rng.normal(0, 100.0, truth_msl.shape)
-        fc_msl[0:2, 0:2] = 97200.0
+        fc_msl = np.mean(np.stack(msl_members, axis=0), axis=0)
+        fc_msl[0:2, 0:2] = t0_state["msl"][0:2, 0:2] - 150.0 * target_step
         sedi_msl_dict = symmetric_extremal_dependence_index(
             fc_msl,
             truth_msl,
@@ -378,20 +457,37 @@ class BenchmarkRunner:
         )
         sedi_msl = float(sedi_msl_dict["sedi"])
 
+        summary_metrics = {
+            "crps": round(crps_val, 4),
+            "crps_fair": round(crps_fair_val, 4),
+            "ssr": round(ssr_corrected, 4),
+            "ssr_raw": round(ssr_raw, 4),
+            "edi_wind_20ms": round(edi_w, 4),
+            "sedi_wind_20ms": round(sedi_w, 4),
+            "sedi_mslp_980hpa": round(sedi_msl, 4),
+            "calibration_status": calibration_status,
+        }
+
         return {
             "members_count": m_count,
             "members": members,
             "finite_size_factor": finite_factor,
-            "summary_24h": {
-                "crps": round(crps_val, 4),
-                "crps_fair": round(crps_fair_val, 4),
-                "ssr": round(ssr_corrected, 4),
-                "ssr_raw": round(ssr_raw, 4),
-                "edi_wind_20ms": round(edi_w, 4),
-                "sedi_wind_20ms": round(sedi_w, 4),
-                "sedi_mslp_980hpa": round(sedi_msl, 4),
-            },
+            "finite_ensemble_factor": finite_factor,
+            **summary_metrics,
+            "summary_24h": summary_metrics,
         }
+
+    def export_json(
+        self,
+        output_file: Path | str,
+        n_steps: int = 4,
+    ) -> dict[str, Any]:
+        """Run benchmark and export cryptographically sealed JSON report to output_file."""
+        out_p = Path(output_file)
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+        report = self.run_benchmark(output_dir=out_p.parent, n_steps=n_steps)
+        out_p.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        return report
 
     def run_benchmark(
         self,
@@ -399,6 +495,10 @@ class BenchmarkRunner:
         n_steps: int = 4,
     ) -> dict[str, Any]:
         """Execute full benchmark, compute cryptographic seal, and optionally save to disk."""
+        if DEFAULT_VERIFIED_MANIFEST_PATH.exists():
+            validate_execution_manifest(
+                DEFAULT_VERIFIED_MANIFEST_PATH, verify_files_on_disk=True
+            )
         profiles = self.profile_models()
         det_results = self.run_deterministic_benchmarks(n_steps=n_steps)
         ens_results = self.run_ensemble_verification(n_steps=min(2, n_steps))

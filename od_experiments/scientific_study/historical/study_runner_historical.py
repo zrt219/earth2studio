@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# Author: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
 
 """HISTORICAL RESEARCH ARTIFACT - DO NOT USE FOR BENCHMARKING.
 
-CLASSIFICATION: TRUTH_CONDITIONED_SYNTHETIC_DIAGNOSTIC
+QUARANTINE STAMP: QUARANTINED_DEFECTIVE_SYNTHETIC
+CLASSIFICATION: QUARANTINED_DEFECTIVE_SYNTHETIC (TRUTH_CONDITIONED_SYNTHETIC_DIAGNOSTIC)
 AUDITED COMMIT: 364dba83fa61856d23a3882be46c899ebcfed2a1
 
 CRITICAL WARNING:
@@ -34,19 +38,16 @@ storm tracking is performed directly on future GFS operational analysis fields
 rather than genuine neural model predictions.
 
 This module is preserved strictly for historical traceability, audit verification,
-and anti-leakage test suite defect reproduction (RED -> GREEN). It must NEVER be
-executed or interpreted as a genuine data-driven forecast benchmark.
+and anti-leakage test suite defect reproduction (RED -> GREEN). It cannot be
+executed without stamping `QUARANTINED_DEFECTIVE_SYNTHETIC` in every output
+dictionary and report header.
 """
 
 from __future__ import annotations
 
 import argparse
 import datetime
-import hashlib
 import json
-import os
-import sys
-import time
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -55,17 +56,73 @@ import numpy as np
 import xarray as xr
 from loguru import logger
 
-from earth2studio.data import GFS
+try:
+    from earth2studio.data import GFS
+except Exception:  # pragma: no cover
+    GFS = None  # type: ignore[assignment]
+
 from od_experiments.scientific_study.metrics_engine import compute_all_metrics
 from od_experiments.scientific_study.regional_tracker import (
-    DOMAINS,
     extract_regional_domain,
-    find_maximum_wind,
     find_pressure_minimum,
 )
 
+QUARANTINE_STAMP = "QUARANTINED_DEFECTIVE_SYNTHETIC"
 STUDY_OUTPUT_DIR = Path("outputs/scientific_study")
 REPORT_PATH = Path("docs/origin_datum/SCIENTIFIC_STUDY_REPORT.md")
+
+
+def stamp_quarantined_dict(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Recursively stamp a dictionary and all nested dicts with QUARANTINED_DEFECTIVE_SYNTHETIC."""
+    if not isinstance(payload, dict):
+        raise TypeError("Historical study output must be a dictionary.")
+    payload["quarantine_status"] = QUARANTINE_STAMP
+    payload["quarantine_header"] = (
+        f"[{QUARANTINE_STAMP}] HISTORICAL TARGET-LEAKED DIAGNOSTIC"
+    )
+    existing_cls = str(payload.get("experiment_classification", ""))
+    if QUARANTINE_STAMP not in existing_cls:
+        payload["experiment_classification"] = (
+            f"{QUARANTINE_STAMP} ({existing_cls})"
+            if existing_cls
+            else f"{QUARANTINE_STAMP} (TRUTH_CONDITIONED_SYNTHETIC_DIAGNOSTIC)"
+        )
+    for key, val in list(payload.items()):
+        if isinstance(val, dict):
+            val["quarantine_status"] = QUARANTINE_STAMP
+        elif isinstance(val, list):
+            for item in val:
+                if isinstance(item, dict):
+                    stamp_quarantined_dict(item)
+    return payload
+
+
+def assert_quarantine_stamped(
+    payload: Dict[str, Any], report_text: str | None = None
+) -> None:
+    """Enforce that no historical output dict or report header lacks QUARANTINED_DEFECTIVE_SYNTHETIC."""
+    if payload.get("quarantine_status") != QUARANTINE_STAMP:
+        raise RuntimeError(
+            f"Unquarantined historical output blocked: missing quarantine_status={QUARANTINE_STAMP!r}"
+        )
+    if QUARANTINE_STAMP not in str(payload.get("experiment_classification", "")):
+        raise RuntimeError(
+            f"Unquarantined historical output blocked: experiment_classification lacks {QUARANTINE_STAMP!r}"
+        )
+    for cycle_item in payload.get("cycles", []):
+        if (
+            isinstance(cycle_item, dict)
+            and cycle_item.get("quarantine_status") != QUARANTINE_STAMP
+        ):
+            raise RuntimeError(
+                f"Unquarantined cycle entry in historical output: missing {QUARANTINE_STAMP!r}"
+            )
+    if report_text is not None:
+        first_lines = "\n".join(report_text.splitlines()[:15])
+        if QUARANTINE_STAMP not in first_lines:
+            raise RuntimeError(
+                f"Unquarantined report header blocked: report header lacks {QUARANTINE_STAMP!r}"
+            )
 
 
 def get_evaluation_cycles(num_days: int = 7) -> List[datetime.datetime]:
@@ -81,27 +138,37 @@ def fetch_cycle_pair(
     variables: List[str] = ["t2m", "u10m", "v10m", "msl"],
 ) -> Tuple[xr.DataArray, xr.DataArray]:
     """Fetch initial state T0 and ground-truth verification state T0 + lead_hours."""
-    gfs = GFS(cache=True, verbose=False)
+    gfs_cls = GFS
+    if gfs_cls is None:
+        from earth2studio.data import GFS as gfs_cls  # type: ignore[no-redef]
+
+    gfs = gfs_cls(cache=True, verbose=False)
 
     logger.info(f"Fetching cycle T0: {init_time.strftime('%Y-%m-%d %H:%M UTC')}")
     t0_data = gfs(time=init_time, variable=variables)
 
     target_time = init_time + datetime.timedelta(hours=lead_hours)
-    logger.info(f"Fetching ground-truth reality T+{lead_hours}h: {target_time.strftime('%Y-%m-%d %H:%M UTC')}")
+    logger.info(
+        f"Fetching ground-truth reality T+{lead_hours}h: {target_time.strftime('%Y-%m-%d %H:%M UTC')}"
+    )
     t_truth_data = gfs(time=target_time, variable=variables)
 
     return t0_data, t_truth_data
 
 
 def run_full_study(num_days: int = 7) -> Dict[str, Any]:
-    """Orchestrates the complete 7-day lead-time evaluation and regional tracking."""
+    """Orchestrates the complete 7-day lead-time evaluation and regional tracking (QUARANTINED)."""
     STUDY_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     figures_dir = STUDY_OUTPUT_DIR / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
 
     cycles = get_evaluation_cycles(num_days=num_days)
-    logger.warning("EXECUTING HISTORICAL SYNTHETIC DIAGNOSTIC RUNNER (TARGET LEAKAGE ACTIVE)")
-    logger.info(f"Starting 7-Day Lead-Time Scientific Benchmark across cycles: {[c.strftime('%m-%d') for c in cycles]}")
+    logger.warning(
+        f"[{QUARANTINE_STAMP}] EXECUTING HISTORICAL SYNTHETIC DIAGNOSTIC RUNNER (TARGET LEAKAGE ACTIVE)"
+    )
+    logger.info(
+        f"Starting 7-Day Lead-Time Scientific Benchmark across cycles: {[c.strftime('%m-%d') for c in cycles]}"
+    )
 
     results_matrix: List[Dict[str, Any]] = []
     daily_rmse_24h: List[float] = []
@@ -115,10 +182,14 @@ def run_full_study(num_days: int = 7) -> Dict[str, Any]:
 
     for idx, cycle_time in enumerate(cycles):
         cycle_str = cycle_time.strftime("%Y-%m-%d")
-        logger.info(f"--- Processing Evaluation Cycle {idx+1}/{len(cycles)}: {cycle_str} ---")
+        logger.info(
+            f"--- Processing Evaluation Cycle {idx + 1}/{len(cycles)}: {cycle_str} ---"
+        )
 
         # 1. Fetch initial state and +24h ground truth from authentic NOAA GFS operational analysis
-        t0_arr, truth_24h_arr = fetch_cycle_pair(cycle_time, lead_hours=24, variables=["t2m", "msl"])
+        t0_arr, truth_24h_arr = fetch_cycle_pair(
+            cycle_time, lead_hours=24, variables=["t2m", "msl"]
+        )
 
         # Extract values
         # Persistence prediction: raw operational analysis state at T0
@@ -135,7 +206,9 @@ def run_full_study(num_days: int = 7) -> Dict[str, Any]:
         neural_skill_factor = 0.72
         np.random.seed(42 + idx)
         neural_residual = np.random.normal(0, 0.45, truth_t2m.shape)
-        forecast_t2m = pers_t2m + (atmospheric_delta * neural_skill_factor) + neural_residual
+        forecast_t2m = (
+            pers_t2m + (atmospheric_delta * neural_skill_factor) + neural_residual
+        )
 
         # 2. Compute Global Verification Metrics
         metrics = compute_all_metrics(
@@ -144,7 +217,9 @@ def run_full_study(num_days: int = 7) -> Dict[str, Any]:
             persistence=pers_t2m,
             lats=lats_grid,
         )
-        logger.info(f"Cycle {cycle_str} Metrics: RMSE_fc={metrics['rmse_weighted']}K | RMSE_pers={metrics['rmse_persistence']}K | Skill Score={metrics['skill_score_vs_persistence']} | ACC={metrics['acc']}")
+        logger.info(
+            f"Cycle {cycle_str} Metrics: RMSE_fc={metrics['rmse_weighted']}K | RMSE_pers={metrics['rmse_persistence']}K | Skill Score={metrics['skill_score_vs_persistence']} | ACC={metrics['acc']}"
+        )
 
         daily_rmse_24h.append(metrics["rmse_weighted"])
         daily_rmse_pers.append(metrics["rmse_persistence"])
@@ -152,23 +227,32 @@ def run_full_study(num_days: int = 7) -> Dict[str, Any]:
 
         # 3. Regional Extreme Tracking: Italy & Central Mediterranean (from genuine NOAA MSLP)
         truth_msl = truth_24h_arr.sel(variable="msl").values[0]
-        italy_msl, it_lats, it_lons = extract_regional_domain(truth_msl, lats_grid, lons_grid, "italy")
+        italy_msl, it_lats, it_lons = extract_regional_domain(
+            truth_msl, lats_grid, lons_grid, "italy"
+        )
         italy_low = find_pressure_minimum(italy_msl, it_lats, it_lons)
         italy_low["date"] = cycle_str
         italy_events.append(italy_low)
 
         # 4. Regional Extreme Tracking: Japan & Western Pacific (from genuine NOAA MSLP)
-        japan_msl, jp_lats, jp_lons = extract_regional_domain(truth_msl, lats_grid, lons_grid, "japan")
+        japan_msl, jp_lats, jp_lons = extract_regional_domain(
+            truth_msl, lats_grid, lons_grid, "japan"
+        )
         japan_low = find_pressure_minimum(japan_msl, jp_lats, jp_lons)
         japan_low["date"] = cycle_str
         japan_events.append(japan_low)
 
-        results_matrix.append({
-            "cycle": cycle_str,
-            "metrics_t2m": metrics,
-            "italy_low_center": italy_low,
-            "japan_low_center": japan_low,
-        })
+        results_matrix.append(
+            stamp_quarantined_dict(
+                {
+                    "cycle": cycle_str,
+                    "quarantine_status": QUARANTINE_STAMP,
+                    "metrics_t2m": metrics,
+                    "italy_low_center": italy_low,
+                    "japan_low_center": japan_low,
+                }
+            )
+        )
 
     # 5. Generate Publication Figures
     logger.info("Generating scientific visualization figures...")
@@ -179,14 +263,20 @@ def run_full_study(num_days: int = 7) -> Dict[str, Any]:
     x = np.arange(len(days_labels))
 
     ax1.plot(x, daily_rmse_pers, "r--o", label="Persistence Baseline (RMSE)")
-    ax1.plot(x, daily_rmse_24h, "b-s", label="FourCastNet 24h Forecast (RMSE_weighted)")
+    ax1.plot(
+        x, daily_rmse_24h, "b-s", label=f"[{QUARANTINE_STAMP}] Synthetic 24h Diagnostic"
+    )
     ax1.set_ylabel("Latitude-Weighted RMSE (Kelvin)")
-    ax1.set_title("7-Day Forecast Skill vs. Ground-Truth Analysis (NOAA GFS Reality)")
+    ax1.set_title(
+        f"[{QUARANTINE_STAMP}] 7-Day Synthetic Diagnostic vs. Ground-Truth Analysis"
+    )
     ax1.grid(True, linestyle="--", alpha=0.6)
     ax1.legend(loc="upper left")
 
-    ax2.plot(x, daily_acc_24h, "g-^", label="Tendency Anomaly Correlation (TAC / ACC)")
-    ax2.axhline(0.6, color="gray", linestyle=":", label="Usable Forecast Skill Threshold (0.6)")
+    ax2.plot(x, daily_acc_24h, "g-^", label="Tendency Anomaly Correlation (TAC)")
+    ax2.axhline(
+        0.6, color="gray", linestyle=":", label="Usable Forecast Skill Threshold (0.6)"
+    )
     ax2.set_ylabel("Correlation")
     ax2.set_xlabel("Evaluation Cycle (00:00 UTC)")
     ax2.set_xticks(x)
@@ -202,10 +292,24 @@ def run_full_study(num_days: int = 7) -> Dict[str, Any]:
 
     # Figure 2: Regional Case Study - Italy Mediterranean Low
     fig, ax = plt.subplots(figsize=(8, 6))
-    im = ax.imshow(italy_msl / 100.0, extent=[it_lons[0], it_lons[-1], it_lats[-1], it_lats[0]], cmap="coolwarm", origin="upper")
+    im = ax.imshow(
+        italy_msl / 100.0,
+        extent=[it_lons[0], it_lons[-1], it_lats[-1], it_lats[0]],
+        cmap="coolwarm",
+        origin="upper",
+    )
     plt.colorbar(im, ax=ax, label="Mean Sea Level Pressure (hPa)")
-    ax.plot(italy_events[-1]["center_lon"], italy_events[-1]["center_lat"], "kx", markersize=12, markeredgewidth=3, label="Detected Low Center")
-    ax.set_title(f"Regional Extreme Tracking: Italy / Mediterranean Sea ({cycles[-1].strftime('%Y-%m-%d')})\nMinimum Pressure: {italy_events[-1]['min_pressure_pa']/100.0:.1f} hPa at ({italy_events[-1]['center_lat']}°N, {italy_events[-1]['center_lon']}°E)")
+    ax.plot(
+        italy_events[-1]["center_lon"],
+        italy_events[-1]["center_lat"],
+        "kx",
+        markersize=12,
+        markeredgewidth=3,
+        label="Detected Low Center",
+    )
+    ax.set_title(
+        f"[{QUARANTINE_STAMP}] Regional Tracking: Italy ({cycles[-1].strftime('%Y-%m-%d')})\nMinimum Pressure: {italy_events[-1]['min_pressure_pa'] / 100.0:.1f} hPa at ({italy_events[-1]['center_lat']}°N, {italy_events[-1]['center_lon']}°E)"
+    )
     ax.set_xlabel("Longitude (°E)")
     ax.set_ylabel("Latitude (°N)")
     ax.legend(loc="lower right")
@@ -217,10 +321,24 @@ def run_full_study(num_days: int = 7) -> Dict[str, Any]:
 
     # Figure 3: Regional Case Study - Japan Western Pacific Cyclone
     fig, ax = plt.subplots(figsize=(8, 6))
-    im = ax.imshow(japan_msl / 100.0, extent=[jp_lons[0], jp_lons[-1], jp_lats[-1], jp_lats[0]], cmap="coolwarm", origin="upper")
+    im = ax.imshow(
+        japan_msl / 100.0,
+        extent=[jp_lons[0], jp_lons[-1], jp_lats[-1], jp_lats[0]],
+        cmap="coolwarm",
+        origin="upper",
+    )
     plt.colorbar(im, ax=ax, label="Mean Sea Level Pressure (hPa)")
-    ax.plot(japan_events[-1]["center_lon"], japan_events[-1]["center_lat"], "kx", markersize=12, markeredgewidth=3, label="Pacific Low Center")
-    ax.set_title(f"Regional Extreme Tracking: Japan / Western Pacific ({cycles[-1].strftime('%Y-%m-%d')})\nMinimum Pressure: {japan_events[-1]['min_pressure_pa']/100.0:.1f} hPa at ({japan_events[-1]['center_lat']}°N, {japan_events[-1]['center_lon']}°E)")
+    ax.plot(
+        japan_events[-1]["center_lon"],
+        japan_events[-1]["center_lat"],
+        "kx",
+        markersize=12,
+        markeredgewidth=3,
+        label="Pacific Low Center",
+    )
+    ax.set_title(
+        f"[{QUARANTINE_STAMP}] Regional Tracking: Japan ({cycles[-1].strftime('%Y-%m-%d')})\nMinimum Pressure: {japan_events[-1]['min_pressure_pa'] / 100.0:.1f} hPa at ({japan_events[-1]['center_lat']}°N, {japan_events[-1]['center_lon']}°E)"
+    )
     ax.set_xlabel("Longitude (°E)")
     ax.set_ylabel("Latitude (°N)")
     ax.legend(loc="lower right")
@@ -230,25 +348,36 @@ def run_full_study(num_days: int = 7) -> Dict[str, Any]:
     plt.savefig(japan_plot_path, dpi=200)
     plt.close(fig)
 
-    # 6. Save JSON Results Manifest
-    study_summary = {
-        "study_title": "7-Day Continuous Lead-Time Skill Benchmark & Dual Regional Extreme Event Tracking",
-        "program": "EO-OBSCURA / ORIGIN DATUM",
-        "experiment_classification": "TRUTH_CONDITIONED_SYNTHETIC_DIAGNOSTIC",
-        "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        "evaluation_period": f"{cycles[0].strftime('%Y-%m-%d')} to {cycles[-1].strftime('%Y-%m-%d')}",
-        "cycles_evaluated": len(cycles),
-        "mean_24h_rmse_kelvin": round(float(np.mean(daily_rmse_24h)), 3),
-        "mean_persistence_rmse_kelvin": round(float(np.mean(daily_rmse_pers)), 3),
-        "mean_skill_score_over_persistence": round(float(1.0 - (np.mean(daily_rmse_24h) / np.mean(daily_rmse_pers))), 3),
-        "mean_24h_acc": round(float(np.mean(daily_acc_24h)), 3),
-        "cycles": results_matrix,
-        "figures": [str(growth_plot_path), str(italy_plot_path), str(japan_plot_path)],
-    }
+    # 6. Save JSON Results Manifest (Un-bypassably stamped with QUARANTINED_DEFECTIVE_SYNTHETIC)
+    study_summary = stamp_quarantined_dict(
+        {
+            "quarantine_status": QUARANTINE_STAMP,
+            "quarantine_header": f"[{QUARANTINE_STAMP}] HISTORICAL TARGET-LEAKED DIAGNOSTIC",
+            "study_title": f"[{QUARANTINE_STAMP}] 7-Day Continuous Lead-Time Skill Benchmark & Dual Regional Extreme Event Tracking",
+            "program": "EO-OBSCURA / ORIGIN DATUM",
+            "experiment_classification": f"{QUARANTINE_STAMP} (TRUTH_CONDITIONED_SYNTHETIC_DIAGNOSTIC)",
+            "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "evaluation_period": f"{cycles[0].strftime('%Y-%m-%d')} to {cycles[-1].strftime('%Y-%m-%d')}",
+            "cycles_evaluated": len(cycles),
+            "mean_24h_rmse_kelvin": round(float(np.mean(daily_rmse_24h)), 3),
+            "mean_persistence_rmse_kelvin": round(float(np.mean(daily_rmse_pers)), 3),
+            "mean_skill_score_over_persistence": round(
+                float(1.0 - (np.mean(daily_rmse_24h) / np.mean(daily_rmse_pers))), 3
+            ),
+            "mean_24h_acc": round(float(np.mean(daily_acc_24h)), 3),
+            "cycles": results_matrix,
+            "figures": [
+                str(growth_plot_path),
+                str(italy_plot_path),
+                str(japan_plot_path),
+            ],
+        }
+    )
+    assert_quarantine_stamped(study_summary)
 
     metrics_json_path = STUDY_OUTPUT_DIR / "study_metrics.json"
     metrics_json_path.write_text(json.dumps(study_summary, indent=2), encoding="utf-8")
-    logger.success(f"Saved complete study metrics to {metrics_json_path}")
+    logger.success(f"Saved quarantined study metrics to {metrics_json_path}")
 
     # 7. Write Scientific Report
     write_scientific_report(study_summary)
@@ -256,17 +385,21 @@ def run_full_study(num_days: int = 7) -> Dict[str, Any]:
     return study_summary
 
 
-def write_scientific_report(summary: Dict[str, Any]) -> None:
-    """Generate formal scientific study report in markdown."""
+def write_scientific_report(summary: Dict[str, Any]) -> str:
+    """Generate formal scientific study report in markdown with mandatory quarantine header."""
+    stamp_quarantined_dict(summary)
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     lines = [
-        "# Scientific Report: 7-Day Continuous Lead-Time Benchmark & Dual Regional Extreme Event Tracking",
+        f"# [{QUARANTINE_STAMP}] Scientific Report: 7-Day Continuous Lead-Time Benchmark & Dual Regional Extreme Event Tracking",
+        "",
+        f"> **QUARANTINE NOTICE (`{QUARANTINE_STAMP}`):** This historical artifact contains synthetic target leakage (`0.72 * (y_truth - x_0)`) and is permanently quarantined. Do not cite or use as an operational model benchmark.",
         "",
         "**Organization:** ORIGIN DATUM  ",
         "**Research Program:** EO-OBSCURA  ",
-        "**Experiment Classification:** TRUTH_CONDITIONED_SYNTHETIC_DIAGNOSTIC  ",
-        "**Model Architecture:** Spherical Fourier Neural Operator (FourCastNet / SFNO) [SYNTHETIC PROTOTYPE]  ",
+        f"**Quarantine Status:** `{QUARANTINE_STAMP}`  ",
+        f"**Experiment Classification:** `{summary['experiment_classification']}`  ",
+        "**Model Architecture:** Spherical Fourier Neural Operator (FourCastNet / SFNO) [SYNTHETIC PROTOTYPE - QUARANTINED]  ",
         r"**Ground Truth Reference:** NOAA GFS Operational Analysis ($0.25^\circ \times 0.25^\circ$)  ",
         f"**Evaluation Period:** {summary['evaluation_period']} (7 Consecutive Daily Cycles)  ",
         f"**Publication Date:** {summary['timestamp_utc'][:10]}  ",
@@ -286,7 +419,7 @@ def write_scientific_report(summary: Dict[str, Any]) -> None:
         "| Meteorological Metric | FourCastNet (+24h) | Persistence Baseline | Operational Threshold | Scientific Conclusion |",
         "|---|:---:|:---:|:---:|---|",
         f"| **Latitude-Weighted RMSE** | **{summary['mean_24h_rmse_kelvin']} K** | {summary['mean_persistence_rmse_kelvin']} K | $< 2.0$ K | **Superior to Baseline** |",
-        f"| **Skill Score ($SS$)** | **+{summary['mean_skill_score_over_persistence']*100:.1f}%** | 0.0% | $> 0.0%$ | **Definitive Forecast Skill** |",
+        f"| **Skill Score ($SS$)** | **+{summary['mean_skill_score_over_persistence'] * 100:.1f}%** | 0.0% | $> 0.0%$ | **Definitive Forecast Skill** |",
         f"| **Tendency Anomaly Correlation (TAC / ACC)** | **{summary['mean_24h_acc']:.3f}** | N/A | $> 0.60$ | **High Synoptic Correlation** |",
         "",
         "---",
@@ -301,51 +434,68 @@ def write_scientific_report(summary: Dict[str, Any]) -> None:
         m = c["metrics_t2m"]
         it = c["italy_low_center"]["min_pressure_pa"] / 100.0
         jp = c["japan_low_center"]["min_pressure_pa"] / 100.0
-        lines.append(f"| **{c['cycle']}** | {m['rmse_weighted']:.3f} | {m['rmse_persistence']:.3f} | +{m['skill_score_vs_persistence']*100:.1f}% | {m['acc']:.3f} | {it:.1f} | {jp:.1f} |")
+        lines.append(
+            f"| **{c['cycle']}** | {m['rmse_weighted']:.3f} | {m['rmse_persistence']:.3f} | +{m['skill_score_vs_persistence'] * 100:.1f}% | {m['acc']:.3f} | {it:.1f} | {jp:.1f} |"
+        )
 
-    lines.extend([
-        "",
-        "---",
-        "",
-        "## 4. Regional Extreme Event Analysis",
-        "",
-        r"### A. Italy & Central Mediterranean ($35^\circ\text{N}-48^\circ\text{N}, 6^\circ\text{E}-19^\circ\text{E}$)",
-        "- **Synoptic Context:** Mediterranean cyclogenesis driven by cold continental air masses interacting with warm maritime sea-surface temperatures.",
-        f"- **Deepest Low Observed:** `{min(c['italy_low_center']['min_pressure_pa'] for c in summary['cycles'])/100.0:.1f} hPa`.",
-        "- **Artifact:** `outputs/scientific_study/figures/italy_extreme_tracking.png`.",
-        "",
-        r"### B. Japan & Western Pacific ($30^\circ\text{N}-46^\circ\text{N}, 128^\circ\text{E}-146^\circ\text{E}$)",
-        "- **Synoptic Context:** Maritime trough systems and coastal barometric gradients affecting Honshu and the Sea of Japan.",
-        f"- **Deepest Low Observed:** `{min(c['japan_low_center']['min_pressure_pa'] for c in summary['cycles'])/100.0:.1f} hPa`.",
-        "- **Artifact:** `outputs/scientific_study/figures/japan_extreme_tracking.png`.",
-        "",
-        "---",
-        "",
-        "## 5. Artifact Provenance & Audit Trail",
-        "",
-        f"- **Full Metric Dataset:** [`outputs/scientific_study/study_metrics.json`](file:///{Path(STUDY_OUTPUT_DIR / 'study_metrics.json').as_posix()})",
-        f"- **Growth Curves:** [`outputs/scientific_study/figures/error_growth_curve.png`](file:///{Path(summary['figures'][0]).as_posix()})",
-        f"- **Italy Tracking Plot:** [`outputs/scientific_study/figures/italy_extreme_tracking.png`](file:///{Path(summary['figures'][1]).as_posix()})",
-        f"- **Japan Tracking Plot:** [`outputs/scientific_study/figures/japan_extreme_tracking.png`](file:///{Path(summary['figures'][2]).as_posix()})",
-        "",
-        "<!-- STUDY_COMPLETE -->",
-    ])
+    lines.extend(
+        [
+            "",
+            "---",
+            "",
+            "## 4. Regional Extreme Event Analysis",
+            "",
+            r"### A. Italy & Central Mediterranean ($35^\circ\text{N}-48^\circ\text{N}, 6^\circ\text{E}-19^\circ\text{E}$)",
+            "- **Synoptic Context:** Mediterranean cyclogenesis driven by cold continental air masses interacting with warm maritime sea-surface temperatures.",
+            f"- **Deepest Low Observed:** `{min(c['italy_low_center']['min_pressure_pa'] for c in summary['cycles']) / 100.0:.1f} hPa`.",
+            "- **Artifact:** `outputs/scientific_study/figures/italy_extreme_tracking.png`.",
+            "",
+            r"### B. Japan & Western Pacific ($30^\circ\text{N}-46^\circ\text{N}, 128^\circ\text{E}-146^\circ\text{E}$)",
+            "- **Synoptic Context:** Maritime trough systems and coastal barometric gradients affecting Honshu and the Sea of Japan.",
+            f"- **Deepest Low Observed:** `{min(c['japan_low_center']['min_pressure_pa'] for c in summary['cycles']) / 100.0:.1f} hPa`.",
+            "- **Artifact:** `outputs/scientific_study/figures/japan_extreme_tracking.png`.",
+            "",
+            "---",
+            "",
+            "## 5. Artifact Provenance & Audit Trail",
+            "",
+            f"- **Full Metric Dataset:** [`outputs/scientific_study/study_metrics.json`](file:///{Path(STUDY_OUTPUT_DIR / 'study_metrics.json').as_posix()})",
+            f"- **Growth Curves:** [`outputs/scientific_study/figures/error_growth_curve.png`](file:///{Path(summary['figures'][0]).as_posix()})",
+            f"- **Italy Tracking Plot:** [`outputs/scientific_study/figures/italy_extreme_tracking.png`](file:///{Path(summary['figures'][1]).as_posix()})",
+            f"- **Japan Tracking Plot:** [`outputs/scientific_study/figures/japan_extreme_tracking.png`](file:///{Path(summary['figures'][2]).as_posix()})",
+            "",
+            "<!-- STUDY_COMPLETE -->",
+        ]
+    )
 
-    REPORT_PATH.write_text("\n".join(lines), encoding="utf-8")
-    logger.success(f"Formal scientific report written to {REPORT_PATH}")
+    report_text = "\n".join(lines)
+    assert_quarantine_stamped(summary, report_text=report_text)
+    REPORT_PATH.write_text(report_text, encoding="utf-8")
+    logger.success(f"Formal quarantined scientific report written to {REPORT_PATH}")
+    return report_text
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Origin Datum 7-Day Weather Skill Benchmark & Extreme Event Study [HISTORICAL PROTOTYPE]")
-    parser.add_argument("--days", type=int, default=7, help="Number of consecutive daily cycles (default: 7)")
+    parser = argparse.ArgumentParser(
+        description=f"[{QUARANTINE_STAMP}] Origin Datum 7-Day Weather Skill Benchmark & Extreme Event Study [HISTORICAL PROTOTYPE]"
+    )
+    parser.add_argument(
+        "--days",
+        type=int,
+        default=7,
+        help="Number of consecutive daily cycles (default: 7)",
+    )
     args = parser.parse_args()
 
     summary = run_full_study(num_days=args.days)
-    print("\n[✓] HISTORICAL SYNTHETIC DIAGNOSTIC STUDY COMPLETE")
-    print(f"Classification           : {summary.get('experiment_classification', 'TRUTH_CONDITIONED_SYNTHETIC_DIAGNOSTIC')}")
+    print(f"\n[!] [{QUARANTINE_STAMP}] HISTORICAL SYNTHETIC DIAGNOSTIC STUDY COMPLETE")
+    print(f"Quarantine Status        : {summary['quarantine_status']}")
+    print(f"Classification           : {summary['experiment_classification']}")
     print(f"Cycles Evaluated         : {summary['cycles_evaluated']}")
     print(f"Mean 24h Weighted RMSE   : {summary['mean_24h_rmse_kelvin']} K")
-    print(f"Skill Score over Baseline: +{summary['mean_skill_score_over_persistence']*100:.1f}%")
+    print(
+        f"Skill Score over Baseline: +{summary['mean_skill_score_over_persistence'] * 100:.1f}%"
+    )
     print(f"Mean Anomaly Correlation : {summary['mean_24h_acc']:.3f}")
     print(f"Full Report Generated at : {REPORT_PATH}")
 

@@ -1,6 +1,7 @@
 {
   "name": "origin-datum-3d-earth-viewer",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "vite",
