@@ -16,24 +16,33 @@
 
 """Scientific meteorological metrics engine for Earth-2 evaluation.
 
+Author: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Strict adherence to .agents/rules/e2s-014-scientific-integrity.mdc.
+
 Provides:
 - Latitude-cosine weighted RMSE
 - Anomaly Correlation Coefficient (ACC) using true climatology or spatial reference
 - Tendency Anomaly Correlation (TAC) when persistence is used as reference
 - Mean Bias Error (MBE)
+- Continuous Ranked Probability Score (CRPS, O(M log M) standard and fair)
+- Spread-Skill Ratio (SSR) with finite ensemble size calibration factor sqrt((M+1)/M)
+- Area-weighted 2x2 contingency table for extreme thresholds
+- Extreme Dependency Index (EDI) & Symmetric Extremal Dependence Index (SEDI)
 - Skill Score relative to persistence baseline: SS = 1 - (RMSE_model / RMSE_persistence)
 """
 
 from __future__ import annotations
 
+from typing import Dict, Optional
+
 import numpy as np
-from typing import Dict, Any, Tuple, Optional
 
 
 def compute_latitude_weights(lats: np.ndarray) -> np.ndarray:
     """Compute normalized cosine latitude weights.
-    
+
     w_i = cos(lat_i) / mean(cos(lat))
+    Clamped at 0 to avoid negative weights at poles.
     """
     rad = np.deg2rad(np.asarray(lats, dtype=np.float64))
     cos_lat = np.cos(rad)
@@ -50,12 +59,12 @@ def weighted_rmse(
     lats: Optional[np.ndarray] = None,
 ) -> float:
     """Compute latitude-weighted Root Mean Square Error.
-    
+
     If lats is None, defaults to uniform weighting.
     """
     diff = forecast - truth
     sq_err = np.square(diff)
-    
+
     if lats is not None:
         w = compute_latitude_weights(lats)
         # Broadcast weights along latitude axis
@@ -159,6 +168,209 @@ def tendency_anomaly_correlation(
     )
 
 
+def crps_ensemble(
+    forecast: np.ndarray,
+    truth: np.ndarray,
+    lats: Optional[np.ndarray] = None,
+    fair: bool = False,
+    ensemble_axis: int = 0,
+) -> float:
+    """Compute domain-averaged latitude-weighted CRPS in O(M log M) time.
+
+    Parameters
+    ----------
+    forecast : np.ndarray
+        Ensemble prediction tensor with shape (M, lat, lon) or matching ensemble_axis.
+    truth : np.ndarray
+        Verifying observation matching forecast shape without ensemble_axis.
+    lats : np.ndarray, optional
+        1D latitude coordinates for area weighting.
+    fair : bool
+        If True, applies finite-ensemble unbiased correction factor 1 / (2*M*(M-1)).
+    ensemble_axis : int
+        Dimension corresponding to ensemble members.
+    """
+    forecast_arr = np.asarray(forecast, dtype=np.float32)
+    truth_arr = np.asarray(truth, dtype=np.float32)
+
+    if ensemble_axis != 0:
+        forecast_arr = np.moveaxis(forecast_arr, ensemble_axis, 0)
+
+    M = forecast_arr.shape[0]
+    if M < 2 and fair:
+        raise ValueError("Fair CRPS requires at least M >= 2 ensemble members.")
+
+    # 1. First term: E|X - y|
+    term1 = np.mean(np.abs(forecast_arr - truth_arr[None, ...]), axis=0)
+
+    if M == 1:
+        crps_grid = term1
+    else:
+        # 2. Second term: 0.5 * E|X - X'| via sorted order statistics in O(M log M)
+        sorted_ens = np.sort(forecast_arr, axis=0)
+        indices = np.arange(M, dtype=np.float32)
+        weights = 2.0 * indices + 1.0 - float(M)
+
+        shape = [1] * forecast_arr.ndim
+        shape[0] = M
+        weights = weights.reshape(shape)
+
+        pairwise_sum = 2.0 * np.sum(weights * sorted_ens, axis=0)
+
+        if fair:
+            term2 = pairwise_sum / (2.0 * float(M) * float(M - 1))
+        else:
+            term2 = pairwise_sum / (2.0 * float(M) * float(M))
+
+        crps_grid = term1 - term2
+
+    if lats is not None:
+        w = compute_latitude_weights(lats)
+        while w.ndim < crps_grid.ndim:
+            w = w[:, None] if w.ndim == 1 else w[..., None]
+        return float(np.nanmean(crps_grid * w))
+
+    return float(np.nanmean(crps_grid))
+
+
+def spread_skill_ratio(
+    forecast: np.ndarray,
+    truth: np.ndarray,
+    lats: Optional[np.ndarray] = None,
+    ensemble_axis: int = 0,
+    correct_finite: bool = True,
+) -> Dict[str, float]:
+    """Compute domain-averaged latitude-weighted Spread-Skill Ratio (SSR)."""
+    forecast_arr = np.asarray(forecast, dtype=np.float32)
+    truth_arr = np.asarray(truth, dtype=np.float32)
+
+    if ensemble_axis != 0:
+        forecast_arr = np.moveaxis(forecast_arr, ensemble_axis, 0)
+
+    M = forecast_arr.shape[0]
+    ens_mean = np.mean(forecast_arr, axis=0)
+    ens_var = np.var(forecast_arr, axis=0, ddof=1) if M > 1 else np.zeros_like(ens_mean)
+
+    w = 1.0
+    if lats is not None:
+        w = compute_latitude_weights(lats)
+        while w.ndim < ens_mean.ndim:
+            w = w[:, None] if w.ndim == 1 else w[..., None]
+
+    spread = float(np.sqrt(np.nanmean(ens_var * w)))
+    skill = float(np.sqrt(np.nanmean(np.square(ens_mean - truth_arr) * w)))
+
+    ssr_raw = spread / skill if skill > 0 else float("nan")
+    finite_factor = float(np.sqrt((M + 1.0) / M)) if M > 0 else 1.0
+    ssr_corrected = ssr_raw * finite_factor if correct_finite else ssr_raw
+
+    if ssr_corrected < 0.90:
+        status = "UNDER-DISPERSIVE"
+    elif ssr_corrected > 1.10:
+        status = "OVER-DISPERSIVE"
+    else:
+        status = "WELL-CALIBRATED"
+
+    return {
+        "spread": spread,
+        "skill_rmse": skill,
+        "ssr_raw": ssr_raw,
+        "ssr_corrected": ssr_corrected,
+        "finite_factor": finite_factor,
+        "calibration_status": status,
+    }
+
+
+def contingency_table(
+    forecast: np.ndarray,
+    truth: np.ndarray,
+    threshold: float,
+    lats: Optional[np.ndarray] = None,
+    is_upper_threshold: bool = True,
+) -> Dict[str, float]:
+    """Compute area-weighted 2x2 contingency table for extreme events."""
+    f = np.asarray(forecast, dtype=np.float32)
+    t = np.asarray(truth, dtype=np.float32)
+
+    if is_upper_threshold:
+        f_event = f >= threshold
+        t_event = t >= threshold
+    else:
+        f_event = f <= threshold
+        t_event = t <= threshold
+
+    w = np.ones_like(f)
+    if lats is not None:
+        w_1d = compute_latitude_weights(lats)
+        while w_1d.ndim < f.ndim:
+            w_1d = w_1d[:, None] if w_1d.ndim == 1 else w_1d[..., None]
+        w = np.broadcast_to(w_1d, f.shape)
+
+    a = float(np.sum(w * (f_event & t_event)))
+    b = float(np.sum(w * (f_event & (~t_event))))
+    c = float(np.sum(w * ((~f_event) & t_event)))
+    d = float(np.sum(w * ((~f_event) & (~t_event))))
+
+    tot = a + b + c + d
+    H = a / (a + c) if (a + c) > 0 else 0.0
+    F = b / (b + d) if (b + d) > 0 else 0.0
+    p = (a + c) / tot if tot > 0 else 0.0
+
+    return {
+        "hits": a,
+        "false_alarms": b,
+        "misses": c,
+        "correct_negatives": d,
+        "total_weight": tot,
+        "hit_rate": H,
+        "false_alarm_rate": F,
+        "base_rate": p,
+    }
+
+
+def extreme_dependency_index(
+    forecast: np.ndarray,
+    truth: np.ndarray,
+    threshold: float,
+    lats: Optional[np.ndarray] = None,
+    epsilon: float = 1e-7,
+    is_upper_threshold: bool = True,
+) -> Dict[str, float]:
+    """Compute Extreme Dependency Index (EDI)."""
+    tbl = contingency_table(
+        forecast, truth, threshold, lats=lats, is_upper_threshold=is_upper_threshold
+    )
+    H = np.clip(tbl["hit_rate"], epsilon, 1.0 - epsilon)
+    F = np.clip(tbl["false_alarm_rate"], epsilon, 1.0 - epsilon)
+
+    edi = (np.log(F) - np.log(H)) / (np.log(F) + np.log(H))
+    tbl["edi"] = float(np.clip(edi, -1.0, 1.0))
+    return tbl
+
+
+def symmetric_extremal_dependence_index(
+    forecast: np.ndarray,
+    truth: np.ndarray,
+    threshold: float,
+    lats: Optional[np.ndarray] = None,
+    epsilon: float = 1e-7,
+    is_upper_threshold: bool = True,
+) -> Dict[str, float]:
+    """Compute Symmetric Extremal Dependence Index (SEDI)."""
+    tbl = contingency_table(
+        forecast, truth, threshold, lats=lats, is_upper_threshold=is_upper_threshold
+    )
+    H = np.clip(tbl["hit_rate"], epsilon, 1.0 - epsilon)
+    F = np.clip(tbl["false_alarm_rate"], epsilon, 1.0 - epsilon)
+
+    num = np.log(F) - np.log(H) - np.log(1.0 - F) + np.log(1.0 - H)
+    den = np.log(F) + np.log(H) + np.log(1.0 - F) + np.log(1.0 - H)
+
+    sedi = num / den if den != 0 else 0.0
+    tbl["sedi"] = float(np.clip(sedi, -1.0, 1.0))
+    return tbl
+
+
 def compute_all_metrics(
     forecast: np.ndarray,
     truth: np.ndarray,
@@ -170,10 +382,10 @@ def compute_all_metrics(
     rmse_pers = weighted_rmse(persistence, truth, lats=lats)
     mae = weighted_mae(forecast, truth, lats=lats)
     mbe = mean_bias(forecast, truth)
-    # When evaluated against persistence, this is the Tendency Anomaly Correlation (TAC)
-    tac = tendency_anomaly_correlation(forecast, truth, persistence=persistence, lats=lats)
-    
-    # Forecast skill score over persistence
+    tac = tendency_anomaly_correlation(
+        forecast, truth, persistence=persistence, lats=lats
+    )
+
     if rmse_pers > 0:
         skill_score = 1.0 - (rmse_fc / rmse_pers)
     else:
@@ -188,4 +400,3 @@ def compute_all_metrics(
         "acc": round(tac, 4),  # Maintained for backwards-compatibility
         "tac": round(tac, 4),  # Explicit Tendency Anomaly Correlation
     }
-

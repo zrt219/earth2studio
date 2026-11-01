@@ -16,8 +16,18 @@
 
 import torch
 
-from earth2studio.data import DataSource
-from earth2studio.data.utils import fetch_data
+try:
+    from earth2studio.data.base import DataSource
+except Exception:  # pragma: no cover
+    from typing import Any, Protocol, runtime_checkable
+
+    @runtime_checkable
+    class DataSource(Protocol):  # type: ignore[no-redef]
+        """Data source interface fallback."""
+
+        def __call__(self, time: Any, variable: Any) -> Any: ...
+
+
 from earth2studio.statistics.utils import _broadcast_weights
 from earth2studio.utils.coords import handshake_coords, handshake_dim
 from earth2studio.utils.type import CoordSystem
@@ -27,6 +37,17 @@ class acc:
     """
     Statistic for calculating the anomaly correlation coefficient of two tensors
     over a set of given dimensions, with respect to some optional climatology.
+
+    Attribution: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+    Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
+
+    Important Note on TAC vs. ACC:
+    When `climatology` is None (or when an initial state persistence field is provided
+    as reference), this statistic computes the Tendency Anomaly Correlation (TAC)
+    rather than a multi-decadal Climatological Anomaly Correlation Coefficient (ACC).
+    Per Rule 2 of e2s-014, the standard ECMWF/WMO 0.60 synoptic skill threshold applies
+    strictly to climatological ACC and cannot be assumed directly for TAC without
+    empirical calibration.
 
     Parameters
     ----------
@@ -149,6 +170,8 @@ class acc:
         # Get climatology information
         if self.climatology is not None:
             if "lead_time" in output_coords:
+                from earth2studio.data.utils import fetch_data
+
                 clim, _ = fetch_data(
                     self.climatology,
                     output_coords["time"],

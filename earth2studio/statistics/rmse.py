@@ -13,6 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# Author: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
+
+"""Root mean squared error and ensemble spread-skill metrics."""
 
 import numpy as np
 import torch
@@ -233,6 +238,10 @@ class spread_skill_ratio:
         as passed in reduction_dimensions.
         Example: if reduction_dimensions = ['lat', 'lon'] then
         assert weights.ndim == 2. Ignored if None, by default None.
+    correct_finite : bool, optional
+        Whether to apply the finite ensemble size calibration factor sqrt((M + 1) / M)
+        (Fortin et al. 2014, Leutbecher & Palmer 2008), ensuring an expected ratio of 1.0
+        for calibrated finite ensembles. By default True.
     ensemble_batch_update : bool, optional
         Whether to apply batch updates to the ensemble mean and variance components
         of the spread and skill with each invocation of __call__. This is particularly
@@ -250,11 +259,13 @@ class spread_skill_ratio:
         reduction_dimensions: list[str],
         ensemble_weights: torch.Tensor | None = None,
         reduction_weights: torch.Tensor = None,
+        correct_finite: bool = True,
         ensemble_batch_update: bool = False,
         reduction_batch_update: bool = False,
     ):
         self.ensemble_dimension = [ensemble_dimension]
         self._reduction_dimensions = reduction_dimensions
+        self.correct_finite = correct_finite
         self.ensemble_mean = mean(
             reduction_dimensions=self.ensemble_dimension,
             weights=ensemble_weights,
@@ -342,7 +353,42 @@ class spread_skill_ratio:
         em, output_coords = self.ensemble_mean(x, x_coords)
         skill, output_coords = self.reduced_rmse(em, output_coords, y, y_coords)
         spread, output_coords = self.reduced_mean(*self.ensemble_var(x, x_coords))
-        return torch.sqrt(spread) / skill, output_coords
+        spread_std = torch.sqrt(spread)
+        ratio = torch.where(
+            skill > 0,
+            spread_std / torch.clamp(skill, min=1e-12),
+            torch.where(
+                spread_std > 0,
+                torch.full_like(skill, float("inf")),
+                torch.full_like(skill, float("nan")),
+            ),
+        )
+
+        if self.correct_finite:
+            if hasattr(self.ensemble_var, "n") and getattr(
+                self.ensemble_var, "batch_update", False
+            ):
+                n_val = self.ensemble_var.n
+                M = int(n_val.item() if isinstance(n_val, torch.Tensor) else n_val)
+            else:
+                ens_dim_name = self.ensemble_dimension[0]
+                if ens_dim_name in x_coords:
+                    M = len(x_coords[ens_dim_name])
+                else:
+                    dim_idx = (
+                        list(x_coords).index(ens_dim_name)
+                        if ens_dim_name in x_coords
+                        else 0
+                    )
+                    M = x.shape[dim_idx]
+            if M < 2:
+                raise ValueError(
+                    f"Spread-skill ratio requires at least M >= 2 ensemble members, got {M}."
+                )
+            finite_factor = np.sqrt((M + 1.0) / M)
+            ratio = ratio * finite_factor
+
+        return ratio, output_coords
 
 
 class skill_spread(spread_skill_ratio):

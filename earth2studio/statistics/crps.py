@@ -14,62 +14,162 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Continuous Ranked Probability Score (CRPS).
+
+Author: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
 import torch
 
 from earth2studio.statistics.moments import mean
 from earth2studio.utils import handshake_coords, handshake_dim
-from earth2studio.utils.imports import (
-    OptionalDependencyFailure,
-    check_optional_dependencies,
-)
 from earth2studio.utils.type import CoordSystem
 
-try:
-    from physicsnemo.metrics.general.crps import kcrps
-except ImportError:
-    OptionalDependencyFailure("statistics")
-    kcrps = None
 
+def compute_crps(
+    ensemble: torch.Tensor,
+    observation: torch.Tensor,
+    dim: int = 0,
+    fair: bool = False,
+) -> torch.Tensor:
+    """Compute exact Continuous Ranked Probability Score (CRPS) in O(M log M) time.
 
-@check_optional_dependencies()
-class crps:
-    """
-    Compute the Continuous Ranked Probability Score (CRPS).
+    Uses the kernel/energy representation via sorted order statistics:
+        CRPS(F, y) = E|X - y| - 0.5 * E|X - X'|
 
-    Uses this formula
-        # int [F(x) - 1(x-y)]^2 dx
-
-    where F is the emperical CDF and 1(x-y) = 1 if x > y.
-
-
-    This statistic reduces over a single dimension, where the presumed ensemble dimension
-    does not appear in the truth/observation tensor.
+    Where the pairwise difference term is evaluated exactly in linear time over sorted members:
+        sum_{i,j} |x_i - x_j| = 2 * sum_{k=0}^{M-1} (2*k + 1 - M) * x_{(k)}
 
     Parameters
     ----------
-    ensemble_dimension: str
-        A name corresponding to a dimension to perform the
-        ensemble reduction over. Example: 'ensemble'
-    reduction_dimensions: list[str]
-        A list of dimensions over which to average the crps over.
-        optional, by default none. If none, no additional reduction is done.
-    weights: torch.Tensor, optional
-        A tensor containing weights to assign to the reduction dimensions.
-        Note that these weights must have the same number of dimensions
-        as passed in reduction_dimensions.
-        Example: if reduction_dimensions = ['lat', 'lon'] then
-        assert weights.ndim == 2.
-        By default None.
-    fair: bool, optional
-        If true, the CRPS is calculated using the fair CRPS formula.
-        By default False.
+    ensemble : torch.Tensor
+        Ensemble prediction tensor with shape (..., M, ...).
+    observation : torch.Tensor
+        Observation tensor matching ensemble shape without dimension dim.
+    dim : int, default 0
+        Dimension corresponding to ensemble members.
+    fair : bool, default False
+        Whether to compute the fair (unbiased for finite ensemble size) CRPS
+        using factor 1 / (2*M*(M-1)) (Ferro et al. 2008).
+
+    Returns
+    -------
+    torch.Tensor
+        Tensor of CRPS scores with dimension dim reduced.
     """
+    M = ensemble.shape[dim]
+
+    if fair and M < 2:
+        raise ValueError(
+            f"Fair CRPS requires at least M >= 2 ensemble members, got {M}."
+        )
+
+    # Term 1: E|X - y|
+    obs_expanded = observation.unsqueeze(dim)
+    term1 = torch.mean(torch.abs(ensemble - obs_expanded), dim=dim)
+
+    if M == 1:
+        return term1
+
+    # Term 2: 0.5 * E|X - X'| via sorted order statistics
+    sorted_ens, _ = torch.sort(ensemble, dim=dim)
+
+    # w_k = 2*k + 1 - M for k in 0..M-1
+    indices = torch.arange(M, dtype=ensemble.dtype, device=ensemble.device)
+    weights = 2.0 * indices + 1.0 - float(M)
+
+    shape = [1] * ensemble.ndim
+    shape[dim] = M
+    weights = weights.view(shape)
+
+    pairwise_sum = 2.0 * torch.sum(weights * sorted_ens, dim=dim)
+
+    if fair:
+        term2 = pairwise_sum / (2.0 * float(M) * float(M - 1))
+    else:
+        term2 = pairwise_sum / (2.0 * float(M) * float(M))
+
+    return term1 - term2
+
+
+def _crps_from_empirical_cdf(
+    ensemble: torch.Tensor, truth: torch.Tensor, dim: int = 0
+) -> torch.Tensor:
+    """Compute exact CRPS using the vectorized order-statistics method.
+
+    Maintained for API backwards-compatibility with test harnesses.
+    """
+    return compute_crps(ensemble, truth, dim=dim, fair=False)
+
+
+class crps:
+    """Continuous Ranked Probability Score (CRPS).
+
+    Computes CRPS using the kernel representation via vectorized order statistics in O(M log M) time:
+        CRPS(F, y) = E|X - y| - 0.5 * E|X - X'|
+
+    Supports both standard CRPS and fair (unbiased finite-ensemble) CRPS.
+    Operates either as an instantiated Metric or as a direct functional call.
+
+    Parameters
+    ----------
+    ensemble_dimension : str, default "ensemble"
+        Name of coordinate dimension corresponding to ensemble members.
+    reduction_dimensions : list[str] | None, default None
+        Optional dimensions (e.g. ['lat', 'lon']) over which to average CRPS.
+    weights : torch.Tensor | None, default None
+        Optional weights tensor assigned to reduction dimensions (e.g. cosine latitude weights).
+    fair : bool, default False
+        If True, applies finite-ensemble unbiased correction factor 1 / (2*M*(M-1)).
+    """
+
+    def __new__(cls, *args: Any, **kwargs: Any) -> Any:
+        """Route to functional execution if first argument is a torch.Tensor."""
+        if args and isinstance(args[0], torch.Tensor):
+            x = args[0]
+            if len(args) > 1 and isinstance(args[1], torch.Tensor):
+                y = args[1]
+                x_coords = kwargs.get("x_coords")
+                y_coords = kwargs.get("y_coords")
+            elif len(args) > 2 and isinstance(args[2], torch.Tensor):
+                x_coords = args[1]
+                y = args[2]
+                y_coords = args[3] if len(args) > 3 else kwargs.get("y_coords")
+            else:
+                x_coords = args[1] if len(args) > 1 else kwargs.get("x_coords")
+                y = args[2] if len(args) > 2 else kwargs.get("y")
+                y_coords = args[3] if len(args) > 3 else kwargs.get("y_coords")
+
+            dim = kwargs.get("dim", kwargs.get("ensemble_dimension", "ensemble"))
+            fair = kwargs.get("fair", False)
+
+            if isinstance(dim, str):
+                if x_coords is None or dim not in x_coords:
+                    dim_idx = 0
+                else:
+                    dim_idx = list(x_coords).index(dim)
+            else:
+                dim_idx = int(dim)
+
+            if y is None:
+                raise ValueError("Target observation 'y' must be provided.")
+
+            res = compute_crps(x, y, dim=dim_idx, fair=fair)
+            out_coords = y_coords.copy() if y_coords is not None else {}
+            return res, out_coords
+
+        return super().__new__(cls)
 
     def __init__(
         self,
-        ensemble_dimension: str,
+        ensemble_dimension: str = "ensemble",
         reduction_dimensions: list[str] | None = None,
-        weights: torch.Tensor = None,
+        weights: torch.Tensor | None = None,
         fair: bool = False,
     ):
         if not isinstance(ensemble_dimension, str):
@@ -82,6 +182,7 @@ class crps:
         if reduction_dimensions is not None:
             self.mean = mean(reduction_dimensions, weights=weights, batch_update=False)
         self.fair = fair
+        self.weights = weights
 
     def __str__(self) -> str:
         return "_".join(self.reduction_dimensions + ["crps"])
@@ -121,23 +222,19 @@ class crps:
         y: torch.Tensor,
         y_coords: CoordSystem,
     ) -> tuple[torch.Tensor, CoordSystem]:
-        """
-        Apply metric to data `x` and `y`, checking that their coordinates
-        are broadcastable. While reducing over `reduction_dims`.
+        """Apply metric to data `x` and `y`, checking that their coordinates
+        are broadcastable while reducing over `reduction_dims`.
 
         Parameters
         ----------
         x : torch.Tensor
-            Input tensor of ensemble forecast or prediction data. This is the tensor
-            over which the CRPS/CDF is calculated with respect to.
+            Input tensor of ensemble forecast or prediction data.
         x_coords : CoordSystem
             Ordered dict representing coordinate system that describes the `x` tensor.
-            `reduction_dimensions` must be in coords.
         y : torch.Tensor
             Observation or validation tensor.
         y_coords : CoordSystem
             Ordered dict representing coordinate system that describes the `y` tensor.
-            `reduction_dimensions` must be in coords.
 
         Returns
         -------
@@ -169,90 +266,9 @@ class crps:
                 coord_count += 1
 
         dim = list(x_coords).index(self.ensemble_dimension)
-        if self.fair:
-            out = kcrps(x, y, dim=dim, biased=False)
-        else:
-            out = _crps_from_empirical_cdf(x, y, dim=dim)
+        out = compute_crps(x, y, dim=dim, fair=self.fair)
         out_coords = y_coords.copy()
 
         if self._reduction_dimensions is not None:
             out, out_coords = self.mean(out, out_coords)
         return out, out_coords
-
-
-def _crps_from_empirical_cdf(
-    ensemble: torch.Tensor, truth: torch.Tensor, dim: int = 0
-) -> torch.Tensor:
-    """
-
-    Warning
-    -------
-    This method is being upstreamed to https://github.com/NVIDIA/physicsnemo in the next release.
-
-    Compute the exact CRPS using the CDF method
-
-    Uses this formula
-        # int [F(x) - 1(x-y)]^2 dx
-
-    where F is the emperical CDF and 1(x-y) = 1 if x > y.
-
-    Parameters
-    ----------
-    ensemble : torch.Tensor
-        tensor of ensemble members
-    truth : torch.Tensor
-        tensor of observations
-    dim : int
-        Dimension to perform CRPS reduction over.
-
-    Returns
-    -------
-        tensor of CRPS scores
-
-    """
-    n = ensemble.shape[dim]
-    device = ensemble.device
-    ensemble, _ = torch.sort(ensemble, dim=dim)
-    ans = torch.zeros_like(truth)
-
-    # dx [F(x) - H(x-y)]^2 = dx [0 - 1]^2 = dx
-    # val = ensemble[0] - truth
-    val = (
-        torch.index_select(
-            ensemble, dim, torch.tensor([0], device=device, dtype=torch.int32)
-        ).squeeze(dim)
-        - truth
-    )
-    ans += torch.where(val > 0, val, 0.0)
-
-    for i in range(n - 1):
-        x0 = torch.index_select(
-            ensemble, dim, torch.tensor([i], device=device, dtype=torch.int32)
-        ).squeeze(dim)
-        x1 = torch.index_select(
-            ensemble, dim, torch.tensor([i + 1], device=device, dtype=torch.int32)
-        ).squeeze(dim)
-
-        cdf = (i + 1) / n
-
-        # a. case y < x0
-        val = (x1 - x0) * (cdf - 1) ** 2
-        mask = truth < x0
-        ans += torch.where(mask, val, 0.0)
-
-        # b. case x0 <= y <= x1
-        val = (truth - x0) * cdf**2 + (x1 - truth) * (cdf - 1) ** 2
-        mask = (truth >= x0) & (truth <= x1)
-        ans += torch.where(mask, val, 0.0)
-
-        # c. case x1 < t
-        mask = truth > x1
-        val = (x1 - x0) * cdf**2
-        ans += torch.where(mask, val, 0.0)
-
-    # dx [F(x) - H(x-y)]^2 = dx [1 - 0]^2 = dx
-    val = truth - torch.index_select(
-        ensemble, dim, torch.tensor([n - 1], device=device, dtype=torch.int32)
-    ).squeeze(dim)
-    ans += torch.where(val > 0, val, 0.0)
-    return ans
