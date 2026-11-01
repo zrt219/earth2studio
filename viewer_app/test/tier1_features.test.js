@@ -640,7 +640,9 @@ export function registerTier1Tests() {
 
   describe('Tier 1 - Feature 13: Main Integration & E2E Verification', () => {
     it('F13.1: verifies canvas-container element exists in index.html', () => {
-      const htmlPath = path.resolve('viewer_app/index.html');
+      const htmlPath = fs.existsSync(path.resolve('viewer_app/index.html'))
+        ? path.resolve('viewer_app/index.html')
+        : path.resolve('index.html');
       assert.ok(fs.existsSync(htmlPath), 'index.html exists');
       const html = fs.readFileSync(htmlPath, 'utf8');
       assert.ok(html.includes('id="canvas-container"'));
@@ -691,7 +693,9 @@ export function registerTier1Tests() {
     });
 
     it('F13.5: verifies index.html loads main.js as an ES module', () => {
-      const htmlPath = path.resolve('viewer_app/index.html');
+      const htmlPath = fs.existsSync(path.resolve('viewer_app/index.html'))
+        ? path.resolve('viewer_app/index.html')
+        : path.resolve('index.html');
       const html = fs.readFileSync(htmlPath, 'utf8');
       assert.ok(html.includes('<script type="module" src="/main.js"></script>') || html.includes('type="module"'));
     });
@@ -699,7 +703,9 @@ export function registerTier1Tests() {
 
   describe('Tier 1 - Feature 14: Production Vercel Redeployment', () => {
     it('F14.1: verifies package.json contains valid build script', () => {
-      const pkgPath = path.resolve('viewer_app/package.json');
+      const pkgPath = fs.existsSync(path.resolve('viewer_app/package.json'))
+        ? path.resolve('viewer_app/package.json')
+        : path.resolve('package.json');
       assert.ok(fs.existsSync(pkgPath), 'package.json exists');
       const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
       assert.strictEqual(pkg.scripts.build, 'vite build');

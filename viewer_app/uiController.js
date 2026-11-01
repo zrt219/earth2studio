@@ -31,6 +31,8 @@
  */
 
 import studyData from './studyData.js';
+import windParticles from './windParticles.js';
+import hazardAlerts from './hazardAlerts.js';
 
 // =============================================================================
 // 1. UTILITIES & SECURITY SANITIZATION
@@ -558,6 +560,56 @@ export function initUI(globe, camera, renderer, layers3D) {
       const val = parseFloat(e.target.value);
       if (studyData.setSpreadOpacity) studyData.setSpreadOpacity(val);
       if (activeLayers3D?.setEnsembleSpreadOpacity) activeLayers3D.setEnsembleSpreadOpacity(val);
+    });
+  }
+
+  // 5b. Cinematic Atmospheric Layers (Wind Particles & Extreme Hazards)
+  const btnWind = document.getElementById('layer-wind');
+  const btnHazards = document.getElementById('layer-hazards');
+
+  if (btnWind) {
+    btnWind.addEventListener('click', () => {
+      const active = btnWind.classList.toggle('active-btn');
+      windParticles.setWindParticlesVisibility(active);
+    });
+  }
+
+  if (btnHazards) {
+    btnHazards.addEventListener('click', () => {
+      const active = btnHazards.classList.toggle('active-btn');
+      hazardAlerts.setHazardAlertsVisibility(active);
+    });
+  }
+
+  // 5c. Forecast Lead-Time Animation Scrubber
+  const btnPlayForecast = document.getElementById('btn-play-forecast');
+  const forecastLabel = document.getElementById('forecast-time-label');
+  let isPlayingForecast = false;
+  let forecastStep = 0;
+  let forecastInterval = null;
+
+  if (btnPlayForecast) {
+    btnPlayForecast.addEventListener('click', () => {
+      isPlayingForecast = !isPlayingForecast;
+      btnPlayForecast.innerText = isPlayingForecast ? '⏸ Pause' : '▶ Play 24h';
+      btnPlayForecast.style.background = isPlayingForecast ? '#e11d48' : '#0284c7';
+
+      if (isPlayingForecast) {
+        forecastInterval = setInterval(() => {
+          forecastStep = (forecastStep + 1) % 5;
+          const leadHours = forecastStep * 6;
+          if (forecastLabel) {
+            forecastLabel.innerText = `Valid: +${leadHours}h (Step ${forecastStep})`;
+          }
+          // Slight rotational nudge to simulate dynamic atmospheric wave translation
+          if (globe) {
+            globe.rotation.y += 0.04;
+          }
+        }, 1200);
+      } else {
+        if (forecastInterval) clearInterval(forecastInterval);
+        forecastInterval = null;
+      }
     });
   }
 

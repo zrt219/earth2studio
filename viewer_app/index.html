@@ -368,6 +368,13 @@
       <button id="layer-spread">🔮 Ensemble Spread</button>
     </div>
 
+    <!-- Cinematic Atmospheric Layers -->
+    <div class="control-label">Cinematic Dynamics</div>
+    <div class="btn-group">
+      <button id="layer-wind" class="active-btn">💨 Wind Streamlines</button>
+      <button id="layer-hazards" class="active-btn">⚠️ Extreme Hazards</button>
+    </div>
+
     <!-- Spread Opacity Slider Control -->
     <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 0.70rem; color: #94a3b8;">
       <span>Spread Layer Opacity:</span>
@@ -404,7 +411,14 @@
 
   <!-- Segmented Timeline Navigation Bar -->
   <div class="timeline-bar glass-card">
-    <div class="timeline-title">Study Trajectory:</div>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+      <div class="timeline-title" style="margin-bottom: 0;">Study Trajectory:</div>
+      <!-- Forecast Lead Time Animation Scrubber -->
+      <div id="forecast-scrubber-box" style="display: flex; align-items: center; gap: 8px; font-size: 0.72rem; color: #38bdf8;">
+        <button id="btn-play-forecast" style="padding: 2px 8px; font-size: 0.68rem; background: #0284c7; border: 1px solid #38bdf8; border-radius: 4px; color: #fff; cursor: pointer;">▶ Play 24h</button>
+        <span id="forecast-time-label" style="font-weight: 600; font-family: monospace;">Valid: +0h (T0)</span>
+      </div>
+    </div>
     <div class="timeline-tabs">
       <button id="tab-v1">V1: Synthetic Audit</button>
       <button id="tab-v2">V2: Real Decoupled</button>

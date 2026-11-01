@@ -35,6 +35,8 @@ import * as THREE from 'three';
 import studyData from './studyData.js';
 import layers3D from './layers3D.js';
 import uiController from './uiController.js';
+import windParticles from './windParticles.js';
+import hazardAlerts from './hazardAlerts.js';
 
 // =============================================================================
 // 1. APPLICATION STATE & CONTEXT
@@ -147,6 +149,10 @@ export function init() {
 
   // 8. Initialize 3D Scientific Layers Engine
   layers3D.initLayers(globe, camera, renderer);
+
+  // 8b. Initialize Animated Atmospheric Wind Particles & Global Hazard Alerts
+  windParticles.initWindParticles(globe, 3500);
+  hazardAlerts.initHazardAlerts(globe);
 
   // 9. Initialize UI Controller & Glassmorphic HUD
   uiController.initUI(globe, camera, renderer, layers3D);
@@ -410,6 +416,10 @@ function animate() {
 
   // 3. Update 3D Scientific Layers (Pulsing Beacons, Plasma Shaders)
   layers3D.updateLayers(elapsedTime, camera);
+
+  // 3b. Update Wind Particles Advection & Hazard Alert Pulses
+  windParticles.updateWindParticles(0.016);
+  hazardAlerts.updateHazardAlerts(elapsedTime);
 
   // 4. Render Scene
   if (renderer && scene && camera) {
