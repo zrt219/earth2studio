@@ -38,6 +38,7 @@ import uiController from './uiController.js';
 import windParticles from './windParticles.js';
 import hazardAlerts from './hazardAlerts.js';
 import sarTasking from './sarTasking.js';
+import tutorialTour from './tutorialTour.js';
 
 // =============================================================================
 // 1. APPLICATION STATE & CONTEXT
@@ -52,8 +53,8 @@ let starField = null;
 
 let isSpinning = true;
 let isReliefActive = true;
-let bumpScaleValue = 0.18;
-let currentTextureName = 'earth_t2m.jpg';
+let bumpScaleValue = 0.14;
+let currentTextureName = 'earth_satellite_4k.jpg';
 
 // Pointer interaction tracking
 let isDragging = false;
@@ -72,19 +73,28 @@ let targetGlobeRot = null;
 // Clock for time-based animation updates
 const clock = new THREE.Clock();
 
-// Texture Assets
+// Texture Assets (4K [-180, +180] Geospatially Aligned)
 const textureLoader = new THREE.TextureLoader();
+const satTex = textureLoader.load('/textures/earth_satellite_4k.jpg');
 const t2mTex = textureLoader.load('/textures/earth_t2m.jpg');
 const tendTex = textureLoader.load('/textures/earth_tendency.jpg');
 const bumpTex = textureLoader.load('/textures/earth_elevation.jpg');
+const roughTex = textureLoader.load('/textures/earth_roughness.jpg');
 
-// Ensure textures wrap and filter cleanly
-[t2mTex, tendTex, bumpTex].forEach(tex => {
+// Ensure textures wrap, generate mipmaps, and use proper color spaces
+[satTex, t2mTex, tendTex].forEach(tex => {
   if (tex) {
-    tex.wrapS = THREE.ClampToEdgeWrapping;
+    tex.colorSpace = THREE.SRGBColorSpace;
+  }
+});
+
+[satTex, t2mTex, tendTex, bumpTex, roughTex].forEach(tex => {
+  if (tex) {
+    tex.wrapS = THREE.RepeatWrapping;
     tex.wrapT = THREE.ClampToEdgeWrapping;
-    tex.minFilter = THREE.LinearFilter;
-    tex.generateMipmaps = false;
+    tex.generateMipmaps = true;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    tex.magFilter = THREE.LinearFilter;
   }
 });
 
@@ -120,6 +130,11 @@ export function init() {
   container.innerHTML = '';
   container.appendChild(renderer.domElement);
 
+  const maxAniso = Math.min(8, renderer.capabilities?.getMaxAnisotropy?.() || 4);
+  [satTex, t2mTex, tendTex, bumpTex, roughTex].forEach(tex => {
+    if (tex) tex.anisotropy = maxAniso;
+  });
+
   // 4. Illumination
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
   scene.add(ambientLight);
@@ -134,11 +149,12 @@ export function init() {
   // 6. Base Earth Sphere Mesh (R = 5.000)
   const geometry = new THREE.SphereGeometry(layers3D.RADIAL_SHELLS.BASE_GLOBE, 128, 128);
   const material = new THREE.MeshStandardMaterial({
-    map: t2mTex,
+    map: satTex,
     bumpMap: bumpTex,
     bumpScale: bumpScaleValue,
-    roughness: 0.55,
-    metalness: 0.1
+    roughnessMap: roughTex,
+    roughness: 0.92,
+    metalness: 0.08
   });
   globe = new THREE.Mesh(geometry, material);
   scene.add(globe);
@@ -164,6 +180,14 @@ export function init() {
 
   // 9. Initialize UI Controller & Glassmorphic HUD
   uiController.initUI(globe, camera, renderer, layers3D);
+
+  // 9b. Initialize Interactive 6-Step Guided Mission Tutorial
+  tutorialTour.initMissionTutorial({
+    setBaseTexture,
+    flyToLatLon,
+    flyTo,
+    setSpinState
+  });
 
   // 10. Wire DOM Event Listeners
   window.addEventListener('resize', onWindowResize);
@@ -555,34 +579,54 @@ export function getSpinState() {
     : isSpinning;
 }
 
+export function setBaseTexture(mode) {
+  const norm = String(mode || 'sat').toLowerCase();
+  let nextTex = satTex;
+  if (norm === 't2m') {
+    currentTextureName = 'earth_t2m.jpg';
+    nextTex = t2mTex;
+  } else if (norm === 'tend' || norm === 'tendency') {
+    currentTextureName = 'earth_tendency.jpg';
+    nextTex = tendTex;
+  } else {
+    currentTextureName = 'earth_satellite_4k.jpg';
+    nextTex = satTex;
+  }
+
+  if (globe && globe.material) {
+    globe.material.map = nextTex;
+    // Preserve bumpScale across texture swaps per Item 1 & T3.5
+    const reliefActive = getReliefState();
+    globe.material.bumpScale = reliefActive ? bumpScaleValue : 0.0;
+    globe.material.needsUpdate = true;
+  }
+
+  if (typeof document !== 'undefined') {
+    const btnSat = document.getElementById('layer-sat');
+    const btnT2m = document.getElementById('layer-t2m');
+    const btnTend = document.getElementById('layer-tend');
+    if (btnSat) btnSat.classList.toggle('active-btn', norm === 'sat' || norm === 'satellite');
+    if (btnT2m) btnT2m.classList.toggle('active-btn', norm === 't2m');
+    if (btnTend) btnTend.classList.toggle('active-btn', norm === 'tend' || norm === 'tendency');
+  }
+  uiController?.updateLegend?.(norm === 'sat' ? 'sat' : (norm === 't2m' ? 't2m' : 'tendency'));
+}
+
 function setupAtmosphereLayerButtons() {
+  const btnSat = document.getElementById('layer-sat');
   const btnT2m = document.getElementById('layer-t2m');
   const btnTend = document.getElementById('layer-tend');
 
+  if (btnSat) {
+    btnSat.addEventListener('click', () => setBaseTexture('sat'));
+  }
+
   if (btnT2m) {
-    btnT2m.addEventListener('click', () => {
-      currentTextureName = 'earth_t2m.jpg';
-      if (globe && globe.material) {
-        globe.material.map = t2mTex;
-        // Preserve bumpScale across texture swaps per Item 1 & T3.5
-        const reliefActive = getReliefState();
-        globe.material.bumpScale = reliefActive ? bumpScaleValue : 0.0;
-        globe.material.needsUpdate = true;
-      }
-    });
+    btnT2m.addEventListener('click', () => setBaseTexture('t2m'));
   }
 
   if (btnTend) {
-    btnTend.addEventListener('click', () => {
-      currentTextureName = 'earth_tendency.jpg';
-      if (globe && globe.material) {
-        globe.material.map = tendTex;
-        // Preserve bumpScale across texture swaps per Item 1 & T3.5
-        const reliefActive = getReliefState();
-        globe.material.bumpScale = reliefActive ? bumpScaleValue : 0.0;
-        globe.material.needsUpdate = true;
-      }
-    });
+    btnTend.addEventListener('click', () => setBaseTexture('tend'));
   }
 }
 

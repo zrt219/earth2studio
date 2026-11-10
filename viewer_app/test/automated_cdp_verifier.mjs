@@ -20,7 +20,11 @@ const PROD_URL = 'https://earth2-sar-insar.vercel.app';
 // Assets to verify directly
 const ASSETS_TO_CHECK = [
   '/',
+  '/favicon.svg',
+  '/favicon.ico',
   '/reports/EARTH2_X_BAND_SAR_INSAR_ENGINEERING_REPORT.pdf',
+  '/textures/earth_satellite_4k.jpg',
+  '/textures/earth_roughness.jpg',
   '/textures/earth_t2m.jpg',
   '/textures/earth_elevation.jpg',
   '/textures/earth_tendency.jpg',
@@ -477,6 +481,39 @@ async function runCdpSession(targetUrl, suiteLabel, cdpPort) {
       details: modalCheck.result.value
     });
     console.log(`  [${interactPass ? 'PASS' : 'FAIL'}] Interactive Stress Test (Modal Opened: ${modalCheck.result.value.modalOpened})`);
+
+    // -------------------------------------------------------------------------
+    // TEST 5b: Interactive 6-Step Mission Tutorial Tour
+    // -------------------------------------------------------------------------
+    const tourCheck = await send('Runtime.evaluate', {
+      expression: `(async () => {
+        const startBtn = document.querySelector('#btn-mission-tutorial');
+        const card = document.querySelector('#mission-tour-card');
+        const nextBtn = document.querySelector('#tour-next-btn');
+        const closeBtn = document.querySelector('#tour-close-btn');
+        if (!startBtn || !card || !nextBtn || !closeBtn) return { ok: false, reason: 'missing tour elements' };
+        startBtn.click();
+        const open1 = !card.classList.contains('hidden');
+        const badge1 = document.querySelector('#tour-step-badge')?.innerText || '';
+        nextBtn.click();
+        const badge2 = document.querySelector('#tour-step-badge')?.innerText || '';
+        nextBtn.click();
+        nextBtn.click();
+        const badge4 = document.querySelector('#tour-step-badge')?.innerText || '';
+        closeBtn.click();
+        const closed = card.classList.contains('hidden');
+        return { ok: open1 && badge1.includes('1 / 6') && badge2.includes('2 / 6') && badge4.includes('4 / 6') && closed, badge1, badge2, badge4, closed };
+      })()`,
+      awaitPromise: true,
+      returnByValue: true
+    });
+    const tRes = tourCheck.result.value;
+    testReport.tests.push({
+      name: 'Interactive 6-Step Mission Tutorial Tour',
+      passed: Boolean(tRes?.ok),
+      details: tRes
+    });
+    console.log(`  [${tRes?.ok ? 'PASS' : 'FAIL'}] Mission Tutorial Tour (Step 1 -> 2 -> 4 -> Close: ${tRes?.ok})`);
 
     // -------------------------------------------------------------------------
     // TEST 6: Brand Scrub & Attribution Verification in Rendered DOM

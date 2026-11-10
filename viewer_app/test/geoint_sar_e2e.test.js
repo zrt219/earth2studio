@@ -14,6 +14,7 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import studyData from '../studyData.js';
 import sarTasking from '../sarTasking.js';
+import tutorialTour from '../tutorialTour.js';
 
 let passed = 0;
 let failed = 0;
@@ -243,8 +244,12 @@ function createMockDOM() {
     'legend-title', 'legend-bar', 'legend-min', 'legend-max',
     'tab-v1', 'tab-v2', 'tab-v3', 'timeline-slider',
     'layer-cyclone', 'layer-da', 'layer-spread', 'layer-mesoscale',
+    'layer-sat', 'layer-t2m', 'layer-tend',
     'layer-sar-tasking', 'toggle-catalyst-aps', 'toggle-sar-mode', 'btn-export-stac',
-    'sar-aps-status-line', 'sar-telemetry-drawer', 'btn-play-forecast', 'toggle-spin', 'toggle-relief'
+    'sar-aps-status-line', 'sar-telemetry-drawer', 'btn-play-forecast', 'toggle-spin', 'toggle-relief',
+    'btn-mission-tutorial', 'mission-tour-card', 'tour-step-badge', 'tour-step-title',
+    'tour-step-target', 'tour-step-body', 'tour-step-eq', 'tour-progress-fill',
+    'tour-prev-btn', 'tour-next-btn', 'tour-close-btn'
   ].forEach(id => elements.set(id, makeEl(id)));
 
   globalThis.document = {
@@ -326,6 +331,61 @@ runTest('3.3 Rapid concurrent toggling of V3 <-> V1, #layer-sar-tasking, #toggle
   els.get('toggle-catalyst-aps').click();
   assert.equal(sarTasking.getCatalystApsCorrection(), true);
   assert.ok(els.get('sar-aps-status-line').innerText.includes('CATALYST GFS-Corrected'));
+
+  sarTasking.disposeSarTasking();
+  delete globalThis.document;
+  delete globalThis.window;
+});
+
+console.log('\n--- Suite 4: tutorialTour.js Interactive 6-Step Mission Briefing Tour ---');
+
+runTest('4.1 initMissionTutorial() binds tour controls and walks all 6 steps updating camera, SAR modes & APS state', () => {
+  const els = createMockDOM();
+  sarTasking.initSarTasking(globe);
+  let lastTex = null;
+  let lastFly = null;
+  tutorialTour.initMissionTutorial({
+    setBaseTexture: (m) => { lastTex = m; },
+    flyToLatLon: (lat, lon, dist) => { lastFly = { lat, lon, dist }; },
+    flyTo: (x, y, z) => { lastFly = { x, y, z }; },
+    setSpinState: () => {}
+  });
+
+  assert.equal(tutorialTour.TOUR_STEPS.length, 6, 'Mission briefing must have 6 curated steps');
+  els.get('btn-mission-tutorial').click();
+  assert.equal(tutorialTour.isMissionTourActive(), true);
+  assert.equal(tutorialTour.getCurrentTourStep(), 0);
+  assert.equal(lastTex, 'sat');
+
+  // Step 2: ICEYE flood mode over Po Valley
+  els.get('tour-next-btn').click();
+  assert.equal(tutorialTour.getCurrentTourStep(), 1);
+  assert.equal(sarTasking.getSarDisplayMode(), 'flood_coherence');
+  assert.ok(lastFly && Math.abs(lastFly.lat - 45.1) < 0.1, 'Step 2 must fly to Po Valley');
+
+  // Step 3: CATALYST raw uncorrected fringes
+  els.get('tour-next-btn').click();
+  assert.equal(tutorialTour.getCurrentTourStep(), 2);
+  assert.equal(sarTasking.getSarDisplayMode(), 'insar_fringes');
+  assert.equal(sarTasking.getCatalystApsCorrection(), false);
+
+  // Step 4: CATALYST APS corrected ON
+  els.get('tour-next-btn').click();
+  assert.equal(tutorialTour.getCurrentTourStep(), 3);
+  assert.equal(sarTasking.getCatalystApsCorrection(), true);
+
+  // Step 5: Synspective StriX-3 Honshu
+  els.get('tour-next-btn').click();
+  assert.equal(tutorialTour.getCurrentTourStep(), 4);
+  assert.ok(lastFly && Math.abs(lastFly.lat - 35.5) < 0.1, 'Step 5 must fly to Honshu');
+
+  // Step 6 & Finish closes tour cleanly
+  els.get('tour-next-btn').click();
+  assert.equal(tutorialTour.getCurrentTourStep(), 5);
+  assert.equal(els.get('tour-next-btn').innerText, 'Finish ✓');
+  els.get('tour-next-btn').click();
+  assert.equal(tutorialTour.isMissionTourActive(), false);
+  assert.equal(els.get('mission-tour-card').classList.contains('hidden'), true);
 
   sarTasking.disposeSarTasking();
   delete globalThis.document;

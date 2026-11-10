@@ -126,6 +126,11 @@ export function updateLegend(typeOrVersion = 'V3') {
     legendBar.style.background = 'linear-gradient(to right, #0d0887, #6a00a8, #b12a90, #e16462, #fca636, #f0f921)';
     if (legendMin) legendMin.innerText = '0.0 K';
     if (legendMax) legendMax.innerText = '1.5 K';
+  } else if (key === 'sat' || key === 'satellite') {
+    legendTitle.innerText = '4K Physical Satellite Earth + ETOPO Relief (m)';
+    legendBar.style.background = 'linear-gradient(to right, #061838, #14406b, #3a6b40, #9b8c5c, #e5e7eb)';
+    if (legendMin) legendMin.innerText = 'Ocean';
+    if (legendMax) legendMax.innerText = '4,808 m Peaks';
   } else if (key === 't2m' || key === 'surface') {
     legendTitle.innerText = 'Surface Temperature (°C)';
     legendBar.style.background = 'linear-gradient(to right, #30123b, #4686fb, #1ae4b6, #a2fc3c, #fbb41a, #e4460a, #7a0403)';
@@ -869,13 +874,24 @@ export function initUI(globe, camera, renderer, layers3D) {
     });
   }
 
-  // 6. Baseline Atmospheric Layer Toggles (T2m & Tendency)
+  // 6. Baseline Atmospheric & Satellite Layer Toggles (Sat, T2m, Tendency)
+  const btnSat = document.getElementById('layer-sat');
   const btnT2m = document.getElementById('layer-t2m');
   const btnTend = document.getElementById('layer-tend');
+
+  if (btnSat) {
+    btnSat.addEventListener('click', () => {
+      btnSat.classList.add('active-btn');
+      if (btnT2m) btnT2m.classList.remove('active-btn');
+      if (btnTend) btnTend.classList.remove('active-btn');
+      updateLegend('sat');
+    });
+  }
 
   if (btnT2m) {
     btnT2m.addEventListener('click', () => {
       btnT2m.classList.add('active-btn');
+      if (btnSat) btnSat.classList.remove('active-btn');
       if (btnTend) btnTend.classList.remove('active-btn');
       updateLegend('t2m');
     });
@@ -884,6 +900,7 @@ export function initUI(globe, camera, renderer, layers3D) {
   if (btnTend) {
     btnTend.addEventListener('click', () => {
       btnTend.classList.add('active-btn');
+      if (btnSat) btnSat.classList.remove('active-btn');
       if (btnT2m) btnT2m.classList.remove('active-btn');
       updateLegend('tendency');
     });
@@ -926,7 +943,7 @@ export function initUI(globe, camera, renderer, layers3D) {
           btnRelief.classList.toggle('active-btn', isReliefActiveState);
         }
         if (activeGlobe && activeGlobe.material) {
-          activeGlobe.material.bumpScale = isReliefActiveState ? 0.18 : 0.0;
+          activeGlobe.material.bumpScale = isReliefActiveState ? 0.14 : 0.0;
           activeGlobe.material.needsUpdate = true;
         }
       } else if (layerId === 'rotation') {

@@ -10,6 +10,8 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://earth2-sar-insar.vercel.app" />
   <meta property="og:image" content="https://earth2-sar-insar.vercel.app/06_geoint_sar_aps_trifecta.png" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate icon" href="/favicon.ico" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -546,6 +548,100 @@
       .timeline-slider-wrapper {
         width: 100%;
       }
+
+      #mission-tour-card {
+        bottom: 120px;
+        width: calc(100vw - 20px);
+        padding: 12px 14px;
+      }
+    }
+
+    /* Interactive 6-Step Guided Mission Briefing Card */
+    #mission-tour-card {
+      position: fixed;
+      bottom: 108px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92vw, 540px);
+      z-index: 25;
+      padding: 14px 18px;
+      border-color: rgba(56, 189, 248, 0.55);
+      box-shadow: 0 16px 48px rgba(2, 132, 199, 0.32);
+    }
+
+    .tour-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      gap: 8px;
+    }
+
+    .tour-badge {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+
+    .tour-target {
+      font-size: 0.68rem;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    .tour-title {
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 5px;
+    }
+
+    .tour-body {
+      font-size: 0.76rem;
+      line-height: 1.48;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+    }
+
+    .tour-eq {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.69rem;
+      color: #38bdf8;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 6px;
+      padding: 6px 9px;
+      margin-bottom: 10px;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .tour-progress-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    #tour-progress-fill {
+      height: 100%;
+      width: 16.6%;
+      background: linear-gradient(90deg, #0284c7, #38bdf8, #10b981);
+      transition: width 0.25s ease;
+    }
+
+    .tour-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
     }
   </style>
 </head>
@@ -561,15 +657,17 @@
     </div>
     <div class="subhead">Zhane Daye — SAR &amp; Earth System Engineering | ICEYE · Synspective StriX · CATALYST APS</div>
     <div class="btn-group" style="margin-bottom: 10px;">
+      <button id="btn-mission-tutorial" style="background:rgba(16,185,129,0.22); border:1px solid #10b981; color:#ecfdf5; padding:5px 9px; border-radius:6px; font-size:0.71rem; font-weight:700;">🎓 Mission Tutorial</button>
       <a href="/reports/EARTH2_X_BAND_SAR_INSAR_ENGINEERING_REPORT.pdf" target="_blank" rel="noopener noreferrer" style="text-decoration:none; background:rgba(2,132,199,0.28); border:1px solid #38bdf8; color:#f0f9ff; padding:5px 9px; border-radius:6px; font-size:0.71rem; font-weight:600; display:inline-flex; align-items:center; gap:4px;">📄 Engineering Report PDF</a>
       <a href="https://github.com/zrt219/earth2studio" target="_blank" rel="noopener noreferrer" style="text-decoration:none; background:rgba(30,41,59,0.85); border:1px solid rgba(255,255,255,0.18); color:#e2e8f0; padding:5px 9px; border-radius:6px; font-size:0.71rem; font-weight:600; display:inline-flex; align-items:center; gap:4px;">💻 GitHub Repo</a>
       <a href="https://www.linkedin.com/in/zhane-umattr" target="_blank" rel="noopener noreferrer" style="text-decoration:none; background:rgba(30,41,59,0.85); border:1px solid rgba(255,255,255,0.18); color:#e2e8f0; padding:5px 9px; border-radius:6px; font-size:0.71rem; font-weight:600; display:inline-flex; align-items:center; gap:4px;">🔗 LinkedIn</a>
     </div>
 
-    <!-- Atmospheric Data Layer -->
-    <div class="control-label">Atmospheric Data Layer</div>
+    <!-- Base Globe & Atmospheric Data Layer -->
+    <div class="control-label">Base Globe &amp; Atmospheric Layer (4K Aligned)</div>
     <div class="btn-group">
-      <button id="layer-t2m" class="active-btn">Surface Temp (T2m)</button>
+      <button id="layer-sat" class="active-btn">🛰 Satellite Relief</button>
+      <button id="layer-t2m">Surface Temp (T2m)</button>
       <button id="layer-tend">24h Tendency (ΔT)</button>
     </div>
 
@@ -739,6 +837,25 @@
       </div>
       <div id="comparison-grid">
         <!-- Rendered dynamically by uiController.openComparisonModal() -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive 6-Step Guided Mission Briefing Card -->
+  <div id="mission-tour-card" class="glass-card hidden" role="dialog" aria-label="Mission Briefing Tutorial">
+    <div class="tour-top-row">
+      <span id="tour-step-badge" class="tour-badge">STEP 1 / 6 · MISSION OVERVIEW</span>
+      <span id="tour-step-target" class="tour-target">CATALYST · ICEYE · Synspective</span>
+    </div>
+    <div id="tour-step-title" class="tour-title">4K Earth-2 Twin &amp; Anti-Leakage Architecture</div>
+    <div id="tour-step-body" class="tour-body"></div>
+    <div id="tour-step-eq" class="tour-eq"></div>
+    <div class="tour-progress-track"><div id="tour-progress-fill"></div></div>
+    <div class="tour-actions">
+      <button id="tour-close-btn">✕ Exit Tour</button>
+      <div style="display:flex; gap:6px;">
+        <button id="tour-prev-btn">← Prev</button>
+        <button id="tour-next-btn" class="active-btn">Next →</button>
       </div>
     </div>
   </div>
