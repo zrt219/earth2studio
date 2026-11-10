@@ -334,9 +334,10 @@ export function resetCameraView() {
   if (uiController?.stopForecastAnimation) {
     uiController.stopForecastAnimation(true);
   }
+  const { rotX, rotY } = layers3D.boresightRotation(0, 0);
   targetCameraPos = { x: 0, y: 0, z: 14 };
   targetCameraTarget = new THREE.Vector3(0, 0, 0);
-  targetGlobeRot = { x: 0, y: globe ? globe.rotation.y : 0 };
+  targetGlobeRot = { x: rotX, y: rotY };
   isFlying = true;
 }
 
@@ -443,6 +444,37 @@ function setupPointerEvents(canvas) {
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(ndc, camera);
             const hits = raycaster.intersectObjects(sarPickables, true);
+            for (const cand of hits) {
+              const worldPt = cand.point;
+              if (layers3D?.isFrontFacing && !layers3D.isFrontFacing(worldPt, new THREE.Vector3(0, 0, 0), camera.position)) {
+                continue;
+              }
+              let obj = cand.object;
+              while (obj && (!obj.userData || !obj.userData.type)) {
+                obj = obj.parent;
+              }
+              if (obj && obj.userData) {
+                const payload = obj.userData.data ? { ...obj.userData.data, type: obj.userData.type } : obj.userData;
+                hit = {
+                  object: obj,
+                  point: worldPt,
+                  data: payload,
+                  screenPos: { x: e.clientX, y: e.clientY }
+                };
+                break;
+              }
+            }
+          }
+        }
+        if (!hit && hazardAlerts?.getHazardPickableObjects && hazardAlerts.getHazardAlertsVisibility?.()) {
+          const hazardPickables = hazardAlerts.getHazardPickableObjects();
+          if (hazardPickables.length > 0 && camera) {
+            const w = window.innerWidth || 1;
+            const h = window.innerHeight || 1;
+            const ndc = new THREE.Vector2((e.clientX / w) * 2 - 1, -(e.clientY / h) * 2 + 1);
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(ndc, camera);
+            const hits = raycaster.intersectObjects(hazardPickables, true);
             for (const cand of hits) {
               const worldPt = cand.point;
               if (layers3D?.isFrontFacing && !layers3D.isFrontFacing(worldPt, new THREE.Vector3(0, 0, 0), camera.position)) {
@@ -728,7 +760,9 @@ function setupNavigationButtons() {
 
   if (btnGlobal) {
     btnGlobal.addEventListener('click', () => {
-      flyTo(0, 0, 14);
+      isSpinning = false;
+      uiController.setSpinState(false);
+      flyToLatLon(0.0, 0.0, 14.0);
     });
   }
 

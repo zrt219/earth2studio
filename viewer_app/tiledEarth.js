@@ -97,9 +97,11 @@ function configureTileTexture(tex, maxAniso = 8) {
  */
 export function getCameraBoresightLatLon(camera, globe) {
   if (!camera) return { lat: 0, lon: 0, dist: 14.0 };
+  const globePos = (globe && globe.position) ? globe.position : new THREE.Vector3(0, 0, 0);
   const camPos = camera.position ? camera.position.clone() : new THREE.Vector3(0, 0, 14);
-  const dist = camPos.length() || 14.0;
-  const localDir = camPos.clone().normalize();
+  const toCam = camPos.clone().sub(globePos);
+  const dist = toCam.length() || 14.0;
+  const localDir = toCam.normalize();
 
   if (globe && globe.quaternion) {
     const invQuat = globe.quaternion.clone().invert();
@@ -108,7 +110,8 @@ export function getCameraBoresightLatLon(camera, globe) {
 
   const ny = Math.max(-1.0, Math.min(1.0, localDir.y));
   const lat = Math.asin(ny) * (180.0 / Math.PI);
-  const lon = Math.atan2(-localDir.z, localDir.x) * (180.0 / Math.PI);
+  let lon = Math.atan2(-localDir.z, localDir.x) * (180.0 / Math.PI);
+  lon = ((((lon + 180.0) % 360.0) + 360.0) % 360.0) - 180.0;
   return { lat, lon, dist };
 }
 
@@ -137,9 +140,12 @@ function loadOctantsIfNeeded(maxAniso = 8) {
         map: tex,
         roughness: 0.78,
         metalness: 0.05,
-        transparent: true,
+        transparent: false,
         opacity: 1.0,
-        depthWrite: true
+        depthWrite: true,
+        polygonOffset: true,
+        polygonOffsetFactor: -0.5,
+        polygonOffsetUnits: -0.5
       });
       const mesh = new THREE.Mesh(geom, mat);
       mesh.name = `octant_r${r}_c${c}`;
@@ -171,7 +177,10 @@ function loadRegionalInsetsIfNeeded(maxAniso = 8) {
       metalness: 0.04,
       transparent: true,
       opacity: 0.96,
-      depthWrite: false
+      depthWrite: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -1.0,
+      polygonOffsetUnits: -1.0
     });
     const mesh = new THREE.Mesh(geom, mat);
     mesh.name = spec.id;

@@ -125,11 +125,11 @@ console.log('▸ Suite 1: Coordinate Transformation Signs & Camera Navigation');
   const camPos = new THREE.Vector3(0, 1.5, 8.5);
   const globeCenter = new THREE.Vector3(0, 0, 0);
 
-  // Boresight rotation math from main.js / layers3D.js
+  // Exact boresight rotation math from main.js / layers3D.js
   const rot = boresightRotation(latItaly, lonItaly);
-  const expectedRotX = latItaly * (Math.PI / 180.0) * 0.4;
+  const expectedRotX = latItaly * (Math.PI / 180.0);
   const expectedRotY = -lonItaly * (Math.PI / 180.0) - Math.PI / 2.0;
-  assertCloseTo(rot.rotX, expectedRotX, 1e-6, 'rotX equals lat * (PI/180) * 0.4');
+  assertCloseTo(rot.rotX, expectedRotX, 1e-6, 'rotX equals lat * (PI/180) without damping');
   assertCloseTo(rot.rotY, expectedRotY, 1e-6, 'rotY equals -lon * (PI/180) - PI/2');
 
   const euler = new THREE.Euler(rot.rotX, rot.rotY, 0, 'XYZ');

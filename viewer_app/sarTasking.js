@@ -163,7 +163,10 @@ function createSarSwathShaderMaterial(satConfig) {
     },
     transparent: true,
     depthWrite: false,
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
+    polygonOffset: true,
+    polygonOffsetFactor: -1.0,
+    polygonOffsetUnits: -1.0
   });
 }
 
@@ -370,6 +373,8 @@ export function updateSarTasking(elapsedTime) {
     const satPos = latLonToVector3(curLat, curLon, SAR_SHELLS.SSO_ORBIT);
 
     satRig.position.copy(satPos);
+    const normal = satPos.clone().normalize();
+    satRig.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
     if (entry.busMesh?.userData?.data) {
       entry.busMesh.userData.data.lat = curLat;
       entry.busMesh.userData.data.lon = curLon;

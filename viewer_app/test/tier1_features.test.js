@@ -326,11 +326,11 @@ export function registerTier1Tests() {
   });
 
   describe('Tier 1 - Feature 8: Boresight Camera Navigation', () => {
-    it('F8.1: verifies boresight rotation formula rotY = pi/2 - lon_rad, rotX = lat_rad * 0.4', () => {
+    it('F8.1: verifies exact boresight rotation formula rotY = -lon_rad - pi/2, rotX = lat_rad', () => {
       const lat = 45.0;
       const lon = 10.0;
       const { rotX, rotY } = CoordinateTransforms.boresightRotation(lat, lon);
-      const expectedRotX = 45.0 * (Math.PI / 180) * 0.4;
+      const expectedRotX = 45.0 * (Math.PI / 180);
       const expectedRotY = -(10.0 * (Math.PI / 180)) - Math.PI / 2;
       assert.closeTo(rotX, expectedRotX, 1e-4);
       assert.closeTo(rotY, expectedRotY, 1e-4);

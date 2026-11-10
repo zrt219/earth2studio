@@ -312,6 +312,8 @@
       display: none;
       padding: 14px 18px;
       max-width: 320px;
+      max-height: 70vh;
+      overflow-y: auto;
       pointer-events: auto;
     }
 
@@ -473,6 +475,16 @@
 
     /* Responsive Mobile & Narrow Viewport Layout (< 768px) */
     @media (max-width: 768px) {
+      #comparison-grid > div {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+
+      .modal-content {
+        padding: 16px 14px;
+        max-height: 90vh;
+      }
+
       .hud-panel {
         top: 10px;
         left: 10px;
@@ -514,7 +526,7 @@
 
     @media (max-width: 480px) {
       .hud-panel {
-        max-height: 40vh;
+        max-height: 38vh;
         padding: 10px 12px;
       }
 
@@ -536,7 +548,8 @@
       }
 
       #poi-popup-card {
-        max-width: calc(100vw - 32px);
+        max-width: calc(100vw - 24px);
+        max-height: 50vh;
       }
 
       .timeline-bar {
@@ -550,9 +563,10 @@
       }
 
       #mission-tour-card {
-        bottom: 120px;
+        bottom: 110px;
         width: calc(100vw - 20px);
-        padding: 12px 14px;
+        padding: 10px 12px;
+        max-height: calc(100vh - 140px);
       }
     }
 
@@ -563,6 +577,8 @@
       left: 50%;
       transform: translateX(-50%);
       width: min(92vw, 540px);
+      max-height: calc(100vh - 160px);
+      overflow-y: auto;
       z-index: 25;
       padding: 14px 18px;
       border-color: rgba(56, 189, 248, 0.55);

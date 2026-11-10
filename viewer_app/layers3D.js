@@ -93,20 +93,103 @@ export function latLonToCartesian(lat, lon, radius = RADIAL_SHELLS.BASE_GLOBE) {
 }
 
 /**
- * Compute boresight Euler angles to orient geographic target directly facing camera.
- * rotY = -lonRad - PI/2
- * rotX = latRad * 0.4
+ * Compute exact boresight Euler angles to orient geographic target directly facing camera.
+ * Conforms to Three.js SphereGeometry UV parameterization and Euler rotation order 'XYZ':
+ *   rotY = -lonRad - PI/2
+ *   rotX = latRad
  *
- * @param {number} lat - Latitude in degrees
- * @param {number} lon - Longitude in degrees
+ * Rotating the globe by Euler(rotX, rotY, 0, 'XYZ') transforms the spherical surface
+ * point at (lat, lon) to (0, 0, +R), orienting it dead-center along the camera boresight
+ * with zero offsets and zero artificial damping.
+ *
+ * @param {number} lat - Latitude in degrees [-90, +90]
+ * @param {number} lon - Longitude in degrees [-180, +180] or [0, 360]
  * @returns {{ rotX: number, rotY: number }}
  */
 export function boresightRotation(lat, lon) {
-  const latRad = lat * (Math.PI / 180.0);
-  const lonRad = lon * (Math.PI / 180.0);
+  const numLat = Number.isFinite(Number(lat)) ? Number(lat) : 0.0;
+  const clampedLat = Math.max(-90.0, Math.min(90.0, numLat));
+  const numLon = Number.isFinite(Number(lon)) ? Number(lon) : 0.0;
+  const latRad = clampedLat * (Math.PI / 180.0);
+  const lonRad = numLon * (Math.PI / 180.0);
   return {
-    rotX: latRad * 0.4,
+    rotX: latRad,
     rotY: -lonRad - Math.PI / 2.0
+  };
+}
+
+/**
+ * Global camera target focus point, centered at globe origin.
+ */
+export const cameraTarget = new THREE.Vector3(0, 0, 0);
+
+/**
+ * Smoothly pan camera along its viewing plane without geographic distortion.
+ *
+ * @param {number} deltaX - Horizontal screen delta
+ * @param {number} deltaY - Vertical screen delta
+ * @param {THREE.Camera} [camera=activeCamera] - Camera instance
+ * @param {THREE.Vector3} [target=cameraTarget] - Camera target
+ * @returns {THREE.Vector3} Updated target vector
+ */
+export function panCamera(deltaX, deltaY, camera = activeCamera, target = cameraTarget) {
+  if (!camera || !target) return target;
+  const right = new THREE.Vector3();
+  const up = new THREE.Vector3();
+  if (camera.matrixWorld && typeof camera.matrixWorld.extractBasis === 'function') {
+    camera.matrixWorld.extractBasis(right, up, new THREE.Vector3());
+  } else {
+    right.set(1, 0, 0);
+    up.set(0, 1, 0);
+  }
+
+  const dist = camera.position ? camera.position.distanceTo(target) : 14.0;
+  const factor = Math.max(0.002, dist * 0.0012);
+
+  const moveX = right.multiplyScalar(-deltaX * factor);
+  const moveY = up.multiplyScalar(deltaY * factor);
+
+  if (camera.position) camera.position.add(moveX).add(moveY);
+  target.add(moveX).add(moveY);
+  return target;
+}
+
+/**
+ * Configure globe rotation and camera focus to center precisely on (lat, lon) at camera boresight.
+ *
+ * @param {number} lat - Latitude in degrees
+ * @param {number} lon - Longitude in degrees
+ * @param {number} [distance=8.5] - Radial distance from origin
+ * @param {THREE.Object3D} [globe=activeGlobe] - Globe mesh or group
+ * @param {THREE.Camera} [camera=activeCamera] - Camera instance
+ * @param {THREE.Vector3} [target=cameraTarget] - Camera focus target
+ * @returns {{ rotX: number, rotY: number, cameraPos: {x: number, y: number, z: number}, cameraTarget: THREE.Vector3 }}
+ */
+export function flyToLatLon(lat, lon, distance = 8.5, globe = activeGlobe, camera = activeCamera, target = cameraTarget) {
+  const { rotX, rotY } = boresightRotation(lat, lon);
+  if (globe && globe.rotation) {
+    globe.rotation.set(rotX, rotY, 0);
+    if (typeof globe.updateMatrixWorld === 'function') {
+      globe.updateMatrixWorld(true);
+    }
+  }
+  if (target) {
+    target.set(0, 0, 0);
+  }
+  if (camera && camera.position) {
+    camera.position.set(0, 0, distance);
+    if (typeof camera.lookAt === 'function' && target) {
+      camera.lookAt(target.x, target.y, target.z);
+    }
+    if (typeof camera.updateMatrixWorld === 'function') {
+      camera.updateMatrixWorld(true);
+    }
+  }
+  return {
+    rotX,
+    rotY,
+    cameraPos: { x: 0, y: 0, z: distance },
+    cameraTarget: target
   };
 }
 
@@ -1188,6 +1271,9 @@ export default {
   latLonToVector3,
   latLonToCartesian,
   boresightRotation,
+  cameraTarget,
+  panCamera,
+  flyToLatLon,
   isFrontFacing,
   projectToScreen,
   getMslpColor,

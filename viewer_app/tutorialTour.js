@@ -41,7 +41,11 @@ export const TOUR_STEPS = Object.freeze([
       sarTasking.setCatalystApsCorrection(false);
       sarTasking.setSarDisplayMode('insar_fringes');
       ctx.setSpinState?.(false);
-      ctx.flyTo?.(0, 0, 14);
+      if (ctx.flyToLatLon) {
+        ctx.flyToLatLon(0.0, 0.0, 14.0);
+      } else {
+        ctx.flyTo?.(0, 0, 14);
+      }
     }
   },
   {
@@ -156,13 +160,13 @@ function syncHudControlsAfterStep() {
   if (apsStatus) {
     apsStatus.style.color = isCorrected ? '#10b981' : '#fbbf24';
     apsStatus.innerText = isCorrected
-      ? 'APS STATUS: CATALYST GFS-APS Corrected (-98.7% RMSE, 0.16–0.19 rad)'
+      ? 'APS STATUS: CATALYST GFS-Corrected (RMSE: 0.16 rad, -98.8%)'
       : 'APS STATUS: Uncorrected Raw Phase (9.2–12.2 Tropo Fringes)';
   }
   if (modeBtn) {
     modeBtn.classList.toggle('active-btn', mode === 'flood_coherence');
     modeBtn.innerText =
-      mode === 'flood_coherence' ? '🌊 Mode: Flood σ⁰ & γ' : '🌊 Mode: InSAR Fringes';
+      mode === 'flood_coherence' ? '🌊 Mode: Flood σ⁰ / γ CCD' : '🌊 Mode: InSAR Fringes';
   }
 }
 
@@ -281,6 +285,11 @@ export function initMissionTutorial(context = {}) {
       } else if (e.key === 'ArrowLeft') {
         prevTourStep();
       } else if (e.key === 'Escape') {
+        const modalEl = document.getElementById('comparison-modal');
+        if (modalEl && (modalEl.style.display === 'flex' || !modalEl.classList.contains('hidden'))) {
+          // Comparison modal has priority for Escape dismissal
+          return;
+        }
         stopTour();
       }
     });

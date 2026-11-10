@@ -29,11 +29,13 @@
  */
 
 import * as THREE from 'three';
+import { latLonToVector3 } from './layers3D.js';
 
 let alertGroup = null;
 let activeGlobe = null;
 let isVisible = true;
 let pulsingMeshes = [];
+const interactiveHazardObjects = [];
 
 const HAZARD_ALERTS = Object.freeze([
   {
@@ -81,18 +83,6 @@ const HAZARD_ALERTS = Object.freeze([
 ]);
 
 /**
- * Spherical coordinates to 3D Cartesian coordinates.
- */
-function latLonToVector3(latDeg, lonDeg, radius = 5.055) {
-  const phi = (90.0 - latDeg) * (Math.PI / 180.0);
-  const theta = (lonDeg * Math.PI) / 180.0;
-  const x = radius * Math.sin(phi) * Math.cos(theta);
-  const y = radius * Math.cos(phi);
-  const z = -radius * Math.sin(phi) * Math.sin(theta);
-  return new THREE.Vector3(x, y, z);
-}
-
-/**
  * Initialize 3D Hazard Warning Rings & Cones on the Globe.
  */
 export function initHazardAlerts(globeMesh) {
@@ -101,6 +91,7 @@ export function initHazardAlerts(globeMesh) {
   alertGroup = new THREE.Group();
   alertGroup.name = 'extreme_weather_hazard_group';
   pulsingMeshes = [];
+  interactiveHazardObjects.length = 0;
 
   HAZARD_ALERTS.forEach(alert => {
     const center = latLonToVector3(alert.lat, alert.lon, 5.052);
@@ -120,10 +111,17 @@ export function initHazardAlerts(globeMesh) {
     const ringMesh = new THREE.Mesh(ringGeom, ringMat);
     ringMesh.position.copy(center);
     ringMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
-    ringMesh.userData = { alert, baseScale: 1.0, isRing: true };
+    ringMesh.userData = {
+      type: 'hazard_alert',
+      data: { ...alert, isRing: true, isHazardAlert: true },
+      alert,
+      baseScale: 1.0,
+      isRing: true
+    };
 
     alertGroup.add(ringMesh);
     pulsingMeshes.push(ringMesh);
+    interactiveHazardObjects.push(ringMesh);
 
     // 2. Central Pulsing Beacon Cylinder / Cone
     const coneGeom = new THREE.ConeGeometry(0.08, 0.45, 16);
@@ -138,10 +136,16 @@ export function initHazardAlerts(globeMesh) {
     const conePos = center.clone().add(normal.clone().multiplyScalar(0.25));
     coneMesh.position.copy(conePos);
     coneMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), normal);
-    coneMesh.userData = { alert, isBeacon: true };
+    coneMesh.userData = {
+      type: 'hazard_alert',
+      data: { ...alert, isBeacon: true, isHazardAlert: true },
+      alert,
+      isBeacon: true
+    };
 
     alertGroup.add(coneMesh);
     pulsingMeshes.push(coneMesh);
+    interactiveHazardObjects.push(coneMesh);
   });
 
   alertGroup.visible = isVisible;
@@ -180,12 +184,25 @@ export function setHazardAlertsVisibility(visible) {
   }
 }
 
+export function getHazardAlertsVisibility() {
+  return isVisible;
+}
+
 /**
  * Return static list of active hazard alerts for UI rendering.
  */
 export function getActiveHazards() {
   return HAZARD_ALERTS;
 }
+
+/**
+ * Return pickable hazard alert meshes for raycasting.
+ */
+export function getHazardPickableObjects() {
+  return interactiveHazardObjects;
+}
+
+export const getInteractiveHazardObjects = getHazardPickableObjects;
 
 /**
  * Dispose hazard alert meshes, geometries and materials.
@@ -209,6 +226,7 @@ export function disposeHazardAlerts() {
     });
   }
   pulsingMeshes = [];
+  interactiveHazardObjects.length = 0;
   alertGroup = null;
   activeGlobe = null;
 }
@@ -217,6 +235,9 @@ export default {
   initHazardAlerts,
   updateHazardAlerts,
   setHazardAlertsVisibility,
+  getHazardAlertsVisibility,
   getActiveHazards,
+  getHazardPickableObjects,
+  getInteractiveHazardObjects,
   disposeHazardAlerts
 };

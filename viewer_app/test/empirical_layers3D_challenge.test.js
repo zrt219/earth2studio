@@ -635,7 +635,7 @@ test('8.3: Boresight rotation mathematical inverse property', () => {
   // Target: lat = 42, lon = 12 (Rome)
   const rot = boresightRotation(42.0, 12.0);
   assert(typeof rot.rotX === 'number' && typeof rot.rotY === 'number', 'Boresight returns valid Euler angles');
-  assertCloseTo(rot.rotX, (42.0 * Math.PI / 180.0) * 0.4, 1e-6, 'Boresight rotX formula');
+  assertCloseTo(rot.rotX, 42.0 * Math.PI / 180.0, 1e-6, 'Boresight rotX formula (exact without damping)');
   assertCloseTo(rot.rotY, -(12.0 * Math.PI / 180.0) - Math.PI / 2.0, 1e-6, 'Boresight rotY formula');
 });
 

@@ -29,6 +29,7 @@
  */
 
 import * as THREE from 'three';
+import { latLonToVector3 } from './layers3D.js';
 
 let particleCount = 3500;
 let particlePoints = null;
@@ -103,13 +104,9 @@ export function getAtmosphericWindVector(latDeg, lonDeg) {
  * Convert spherical coordinates (lat, lon, radius) to Cartesian coordinates (x, y, z)
  * matching Three.js convention where lon=0 is on +X axis.
  */
-function sphericalToCartesian(latDeg, lonDeg, radius) {
-  const phi = (90.0 - latDeg) * (Math.PI / 180.0);
-  const theta = (lonDeg * Math.PI) / 180.0;
-  const x = radius * Math.sin(phi) * Math.cos(theta);
-  const y = radius * Math.cos(phi);
-  const z = -radius * Math.sin(phi) * Math.sin(theta);
-  return { x, y, z };
+function sphericalToCartesian(latDeg, lonDeg, radius = WIND_SHELL_RADIUS) {
+  const v = latLonToVector3(latDeg, lonDeg, radius);
+  return { x: v.x, y: v.y, z: v.z };
 }
 
 /**
@@ -137,7 +134,8 @@ export function initWindParticles(globeMesh, count = 3500) {
     // Distribute uniformly on sphere surface using area-preserving sampling
     const u = Math.random();
     const v = Math.random();
-    lats[i] = Math.asin(2.0 * u - 1.0) * (180.0 / Math.PI);
+    const sinLat = Math.max(-0.9999, Math.min(0.9999, 2.0 * u - 1.0));
+    lats[i] = Math.asin(sinLat) * (180.0 / Math.PI);
     lons[i] = v * 360.0;
     particleLifetimes[i] = Math.random() * 100.0; // Phase offset
 
@@ -231,7 +229,8 @@ export function updateWindParticles(deltaSeconds = 0.016) {
       // Re-spawn randomly across globe
       const u = Math.random();
       const v = Math.random();
-      lats[i] = Math.asin(2.0 * u - 1.0) * (180.0 / Math.PI);
+      const sinLat = Math.max(-0.9999, Math.min(0.9999, 2.0 * u - 1.0));
+      lats[i] = Math.asin(sinLat) * (180.0 / Math.PI);
       lons[i] = v * 360.0;
       particleLifetimes[i] = 0.0;
     }
@@ -246,6 +245,7 @@ export function updateWindParticles(deltaSeconds = 0.016) {
 
     lons[i] += (wind.u * dt * degPerMeter * 80.0) / cosLat;
     lats[i] += wind.v * dt * degPerMeter * 80.0;
+    lats[i] = Math.max(-89.9, Math.min(89.9, lats[i]));
 
     // Wrap longitude into [0, 360)
     lons[i] = ((lons[i] % 360.0) + 360.0) % 360.0;

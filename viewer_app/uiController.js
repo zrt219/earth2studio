@@ -192,6 +192,7 @@ export function showPopup(rawPoiData, screenPos) {
 
   const isSar = Boolean(poiData.isSarSatellite || poiData.isSarSwath || poiData.operator === 'ICEYE' || poiData.operator === 'Synspective');
   const isStation = !isSar && Boolean(poiData.increment !== undefined || poiData.wmoId || poiData.type?.includes('Sounding'));
+  const isHazard = !isSar && !isStation && Boolean(poiData.isHazardAlert || poiData.type === 'hazard_alert' || poiData.severity);
 
   const rawLat = poiData.lat !== undefined ? poiData.lat : poiData.center?.lat;
   const rawLon = poiData.lon !== undefined ? poiData.lon : poiData.center?.lon;
@@ -236,6 +237,22 @@ export function showPopup(rawPoiData, screenPos) {
         </div>
       `;
     }
+  } else if (isHazard) {
+    if (titleEl) {
+      const icon = poiData.severity === 'EXTREME' ? '🚨' : (poiData.severity === 'WARNING' ? '⚠️' : '⚡');
+      titleEl.innerText = `${icon} ${poiData.name || poiData.id || 'Hazard Alert'}`;
+    }
+    if (bodyEl) {
+      const sevColor = poiData.severity === 'EXTREME' ? '#ef4444' : (poiData.severity === 'WARNING' ? '#38bdf8' : '#f59e0b');
+      bodyEl.innerHTML = `
+        <div style="font-size:0.75rem; line-height:1.45; color:#cbd5e1;">
+          <div style="margin-bottom:4px;"><strong>Severity:</strong> <span style="background:rgba(255,255,255,0.1); color:${sevColor}; padding:2px 6px; border-radius:4px; font-weight:700; font-size:0.7rem;">${sanitizeHTML(poiData.severity)}</span> — ${sanitizeHTML(poiData.category || poiData.type)}</div>
+          <div style="margin-bottom:4px;"><strong>Location:</strong> ${latVal}°N, ${lonVal}°E (Radius: <b>${poiData.radiusKm || 300} km</b>)</div>
+          <div style="margin-bottom:4px;"><strong>Conditions:</strong> Min MSLP: <b>${sanitizeHTML(poiData.minMslp || 'N/A')}</b> | Max Wind: <b>${sanitizeHTML(poiData.maxWind || 'N/A')}</b></div>
+          <div style="margin-top:6px; font-size:0.72rem; color:#94a3b8; border-top:1px solid rgba(255,255,255,0.08); padding-top:4px;">${sanitizeHTML(poiData.description || '')}</div>
+        </div>
+      `;
+    }
   } else {
     // Cyclone Waypoint
     if (titleEl) {
@@ -267,8 +284,11 @@ export function showPopup(rawPoiData, screenPos) {
     const posX = typeof screenPos.x === 'number' ? screenPos.x : vpW / 2;
     const posY = typeof screenPos.y === 'number' ? screenPos.y : vpH / 2;
 
-    const clampedX = Math.max(16, Math.min(vpW - 320, posX + 16));
-    const clampedY = Math.max(16, Math.min(vpH - 240, posY - 40));
+    const popupWidth = Math.min(320, vpW - 32);
+    const maxLeft = Math.max(16, vpW - popupWidth - 16);
+    const clampedX = Math.max(16, Math.min(maxLeft, posX + 16));
+    const maxTop = Math.max(16, vpH - 240);
+    const clampedY = Math.max(16, Math.min(maxTop, posY - 40));
 
     popup.style.left = `${clampedX}px`;
     popup.style.top = `${clampedY}px`;
@@ -611,23 +631,32 @@ export function updatePopupPosition(camera = activeCamera, vpW = null, vpH = nul
   if (typeof poiLat === 'number' && typeof poiLon === 'number' && activeLayers3D?.latLonToVector3) {
     const isSarSat = Boolean(activePopupPOI.isSarSatellite || activePopupPOI.type === 'sar_satellite');
     const isSarSwath = Boolean(activePopupPOI.isSarSwath || activePopupPOI.type === 'sar_swath');
-    const isStation = !isSarSat && !isSarSwath && Boolean(activePopupPOI.increment !== undefined || activePopupPOI.wmoId);
+    const isHazard = Boolean(activePopupPOI.isHazardAlert || activePopupPOI.type === 'hazard_alert');
+    const isStation = !isSarSat && !isSarSwath && !isHazard && Boolean(activePopupPOI.increment !== undefined || activePopupPOI.wmoId);
     let radius = activeLayers3D.RADIAL_SHELLS?.CYCLONE_TUBE || 5.050;
     if (isSarSat) {
       radius = sarTasking?.SAR_SHELLS?.SSO_ORBIT || 5.420;
     } else if (isSarSwath) {
       radius = sarTasking?.SAR_SHELLS?.SAR_FOOTPRINT || 5.040;
+    } else if (isHazard) {
+      radius = 5.052;
     } else if (isStation) {
       radius = activeLayers3D.RADIAL_SHELLS?.DA_STATION_CAP || 5.350;
     }
     const worldPos = activeLayers3D.latLonToVector3(poiLat, poiLon, radius);
     if (activeGlobe) {
       worldPos.applyEuler(activeGlobe.rotation);
+      if (activeGlobe.position) {
+        worldPos.add(activeGlobe.position);
+      }
     }
     const screenPos = activeLayers3D.projectToScreen(worldPos, targetCamera, width, height);
     if (screenPos && screenPos.visible) {
-      const clampedX = Math.max(16, Math.min(width - 320, screenPos.x + 16));
-      const clampedY = Math.max(16, Math.min(height - 240, screenPos.y - 40));
+      const popupWidth = Math.min(320, width - 32);
+      const maxLeft = Math.max(16, width - popupWidth - 16);
+      const clampedX = Math.max(16, Math.min(maxLeft, screenPos.x + 16));
+      const maxTop = Math.max(16, height - 240);
+      const clampedY = Math.max(16, Math.min(maxTop, screenPos.y - 40));
       popup.style.left = `${clampedX}px`;
       popup.style.top = `${clampedY}px`;
     } else {

@@ -393,16 +393,16 @@ export const CoordinateTransforms = {
   },
 
   /**
-   * Compute boresight rotation angles to orient target (lat, lon) directly facing camera.
+   * Compute exact boresight rotation angles to orient target (lat, lon) directly facing camera.
    * From PROJECT.md § Feature 8:
-   * rotY = PI/2 - lon_rad
-   * rotX = lat_rad * 0.4
+   * rotY = -lon_rad - PI/2
+   * rotX = lat_rad
    */
   boresightRotation(lat, lon) {
     const latRad = lat * (Math.PI / 180);
     const lonRad = lon * (Math.PI / 180);
     return {
-      rotX: latRad * 0.4,
+      rotX: latRad,
       rotY: -(lonRad) - Math.PI / 2
     };
   },
