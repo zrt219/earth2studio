@@ -36,7 +36,7 @@ VERIFIED_ROOT = Path("outputs/scientific_study_verified")
 FORECAST_DIR = VERIFIED_ROOT / "forecast"
 VERIFICATION_DIR = VERIFIED_ROOT / "verification"
 LOGS_DIR = VERIFIED_ROOT / "logs"
-REPORT_PATH = Path("docs/origin_datum/EO_EARTH2_REAL_RUN_REPORT.md")
+REPORT_PATH = Path("docs/engineering_reports/EO_EARTH2_REAL_RUN_REPORT.md")
 
 
 def setup_logger() -> logging.Logger:

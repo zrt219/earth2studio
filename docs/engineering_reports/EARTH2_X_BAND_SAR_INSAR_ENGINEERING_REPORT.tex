@@ -1,0 +1,276 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=0.72in,top=0.80in,bottom=0.80in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage[expansion=false]{microtype}
+\usepackage{siunitx}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{tcolorbox}
+
+\graphicspath{{figures/}{paper/figures/}{../../outputs/scientific_study_verified/advanced_capabilities/figures/}{../../outputs/scientific_study_verified/figures/}}
+
+\definecolor{navyblue}{RGB}{12, 35, 64}
+\definecolor{accentteal}{RGB}{0, 132, 168}
+\definecolor{darkgray}{RGB}{45, 52, 64}
+\definecolor{panelbg}{RGB}{246, 248, 252}
+\definecolor{panelborder}{RGB}{200, 212, 226}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=navyblue,
+    citecolor=accentteal,
+    urlcolor=accentteal,
+    pdftitle={Earth-2 X-Band SAR and InSAR Mission Twin: Engineering Report},
+    pdfauthor={Zhane Daye}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\textcolor{darkgray}{\textbf{Earth-2 X-Band SAR \& InSAR Mission Twin} $|$ Engineering Report}}
+\fancyhead[R]{\footnotesize\textcolor{darkgray}{Zhane Daye --- SAR \& Earth System Engineering}}
+\fancyfoot[L]{\footnotesize\textcolor{darkgray}{\url{https://earth2-sar-insar.vercel.app} $|$ \url{https://github.com/zrt219/earth2studio}}}
+\fancyfoot[R]{\footnotesize\textcolor{darkgray}{\textbf{Page \thepage}}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\titleformat{\section}{\large\bfseries\color{navyblue}}{\thesection}{0.7em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{accentteal}}{\thesubsection}{0.6em}{}
+
+\title{\vspace{-0.8cm}\textbf{\LARGE Earth-2 X-Band SAR \& InSAR Mission Twin: Operational Tropospheric Phase Screen Compensation, Flood Backscatter Attribution, and Autonomous STAC Tasking}\\
+\vspace{0.2cm}
+\large\textit{Coupling Verified NOAA GFS $0.25^\circ$ Atmospheric Analyses with X-Band ($9.65\text{ GHz}$) Synthetic Aperture Radar Physics for ICEYE, Synspective StriX, and CATALYST InSAR Workflows}}
+
+\author{
+    \textbf{Zhane Daye}\\
+    \textit{SAR \& Earth System Engineering $|$ Edmonton, AB, Canada}\\
+    \small \texttt{zhanedaye@umattr.ca} \quad $|$ \quad \href{https://www.linkedin.com/in/zhane-umattr}{linkedin.com/in/zhane-umattr} \quad $|$ \quad \href{https://github.com/zrt219/earth2studio}{github.com/zrt219/earth2studio}\\
+    \small \textbf{Live 3D WebGL Mission Twin:} \url{https://earth2-sar-insar.vercel.app}
+}
+\date{November 2026}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{fancy}
+
+\begin{abstract}
+\noindent
+Commercial X-band ($f_c = 9.65\text{ GHz}$, $\lambda = 3.1067\text{ cm}$) Synthetic Aperture Radar (SAR) constellations---specifically \textbf{ICEYE} and \textbf{Synspective (StriX)}---deliver sub-meter to 3-meter all-weather Earth observation for flood inundation response and infrastructure deformation monitoring. However, X-band Interferometric SAR (InSAR) is acutely sensitive to spatial and temporal variations in lower-tropospheric water vapor and hydrostatic pressure: a mere $1.5533\text{ cm}$ ($\lambda/2$) two-way slant-range path delay induces a full $2\pi$ interferometric phase wrap, frequently masking millimeter-scale surface subsidence or pre-landslide slope creep beneath $8\text{--}15$ atmospheric fringes. Furthermore, agile constellation tasking requires automated Tip-and-Cue pipelines that translate synoptic Numerical Weather Prediction (NWP) and AI-NWP hazard forecasts into standards-compliant satellite acquisition orders before storm landfall.
+
+This engineering report presents the design, physical formulation, numerical verification, and interactive 3D WebGL deployment of the \textbf{Earth-2 X-Band SAR \& InSAR Mission Twin}. Built on top of an audited, leakage-free 3-stage atmospheric verification pipeline (\textbf{Forecast $\to$ Freeze $\to$ Verify}) operating on authentic NOAA GFS $0.25^\circ$ global analyses ($721 \times 1440$), the system integrates:
+(1) a \textbf{CATALYST-grade X-Band Tropospheric Atmospheric Phase Screen (APS)} forward and inverse compensation engine using $8\times$ mesoscale Nyquist-resolved ($0.03125^\circ \approx 3.4\text{ km}$) Saastamoinen hydrostatic and Askne--Nordius wet refractivity integration, achieving a \textbf{98.73\% phase RMSE reduction} ($14.7763 \to 0.1874\text{ rad}$, $12.20$ fringes removed) over the Italian Alps/Po Valley and a \textbf{98.81\% phase RMSE reduction} ($13.8243 \to 0.1641\text{ rad}$, $9.24$ fringes removed) over Central Honshu, Japan;
+(2) \textbf{ICEYE X-band VV flood backscatter ($\sigma^0_{\text{VV}}$)} forward modeling delineating $735.27\text{ km}^2$ of specular alluvial inundation ($\sigma^0_{\text{VV}} < -16.5\text{ dB}$, minimum $-31.77\text{ dB}$) in the Po Valley;
+(3) \textbf{Synspective StriX-3 interferometric coherence ($\gamma_{\text{CCD}}$)} decay attribution isolating $550.73\text{ km}^2$ of severe topographic phase decorrelation ($\gamma < 0.32$, minimum $0.080$) during Typhoon Megi passage;
+(4) an \textbf{OGC STAC v1.0.0 SAR Tasking Generator} with cryptographic SHA-256 provenance; and
+(5) a zero-dependency \textbf{Three.js / WebGL 3D Mission Twin} deployed at \url{https://earth2-sar-insar.vercel.app}.
+\end{abstract}
+
+\section{Executive System Architecture \& Industry Alignment}
+
+Modern operational SAR ground segments bridge two traditionally separate disciplines: global atmospheric modeling (NWP / AI-NWP) and coherent microwave remote sensing. When severe cyclogenesis or baroclinic troughs impact complex terrain, atmospheric thermodynamics simultaneously drive surface hazards (flooding, landslides) and corrupt the microwave phase propagation path used to measure them.
+
+Table~\ref{tab:industry_alignment} summarizes how the modules engineered in this repository align with commercial SAR constellation operations and enterprise InSAR processing suites.
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{System Architecture Alignment with Commercial SAR Constellations and Enterprise InSAR Workflows}
+\label{tab:industry_alignment}
+\vspace{0.1cm}
+\begin{tabularx}{\textwidth}{l l p{5.2cm} X}
+\toprule
+\textbf{Target Organization} & \textbf{Engineered Module} & \textbf{Physical \& Algorithmic Implementation} & \textbf{Verified Quantitative Performance} \\
+\midrule
+\textbf{CATALYST} \newline \textit{(PCI Geomatics / InSAR)} & \texttt{sar\_geoint\_engine.py} \newline \texttt{sarTasking.js} & Two-way X-band ($9.65\text{ GHz}$) tropospheric path delay integration ($\text{ZHD} + \text{ZWD}$) with $8\times$ bicubic mesoscale upsampling ($0.03125^\circ$) and hydrostatic scale filtering ($\sigma = 1.8$ coarse cells) for DEM-coupled APS removal. & \textbf{Italy/Alps:} $98.73\%$ RMSE reduction ($14.7763 \to 0.1874\text{ rad}$), $12.20$ fringes removed. \newline \textbf{Japan/Honshu:} $98.81\%$ RMSE reduction ($13.8243 \to 0.1641\text{ rad}$), $9.24$ fringes removed. \\
+\addlinespace[0.12cm]
+\textbf{ICEYE} \newline \textit{(X-Band SAR Constellation)} & \texttt{sar\_geoint\_engine.py} \newline \texttt{sarTasking.js} & \textbf{ICEYE-X38} ascending pass ($i = 97.7^\circ$ SSO, $\theta_{\text{inc}} = 28.4^\circ$, $0.5\text{ m}$ Spotlight VV) forward backscatter model ($\sigma^0_{\text{VV}}$) for specular open-water flood segmentation and Bragg capillary wind roughening. & Delineates \textbf{$735.27\text{ km}^2$} ($1,380$ mesoscale pixels) of Po Valley riverine flood inundation below $-16.5\text{ dB}$ ($\sigma^0_{\text{VV,min}} = -31.77\text{ dB}$ vs.\ $-7.71\text{ dB}$ land mean). \\
+\addlinespace[0.12cm]
+\textbf{Synspective} \newline \textit{(StriX Constellation)} & \texttt{sar\_geoint\_engine.py} \newline \texttt{sarTasking.js} & \textbf{StriX-3} descending pass ($i = 97.6^\circ$ SSO, $\theta_{\text{inc}} = 34.1^\circ$, $3.0\text{ m}$ StripMap VV/VH) repeat-pass Coherent Change Detection ($\gamma_{\text{CCD}}$) coupling wind/moisture volume decorrelation with steep slope geometry. & Identifies \textbf{$550.73\text{ km}^2$} ($5,294$ mesoscale pixels) of high-risk Honshu mountain slope decorrelation ($\gamma_{\text{CCD}} < 0.32$, $\gamma_{\text{min}} = 0.080$, land mean $\bar{\gamma} = 0.786$). \\
+\addlinespace[0.12cm]
+\textbf{Mission Operations} \newline \textit{(Tip-and-Cue Ground Segment)} & \texttt{sar\_geoint\_engine.py} \newline \texttt{uiController.js} & Automated anomaly-to-tasking translator exporting OGC STAC v1.0.0 \texttt{FeatureCollection} GeoJSON with \texttt{sar:*} extensions and interactive 3D WebGL orbital frustums. & 2 valid STAC v1.0.0 tasking orders (\texttt{ICEYE-X38}, \texttt{StriX-3}) sealed with SHA-256 digest \texttt{3fecc248...0d47035}; 1-click browser GeoJSON export. \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\section{Scientific Provenance: Real Operational Data vs.\ Forward-Modeled SAR Physics}
+
+A core engineering principle of this work (enforced via repository rule \texttt{e2s-014-scientific-integrity.mdc} and automated AST/runtime guardrails) is the explicit, transparent separation between \textbf{authentic operational satellite/meteorological observations}, \textbf{deterministic physical forward operators}, and \textbf{simulated benchmark components}. Table~\ref{tab:provenance_boundaries} defines the exact provenance boundary of every subsystem in this repository.
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Provenance Demarcation: Real Operational Observations vs.\ Deterministic Forward-Modeled SAR Physics}
+\label{tab:provenance_boundaries}
+\vspace{0.1cm}
+\begin{tabularx}{\textwidth}{p{3.4cm} p{3.3cm} p{5.0cm} X}
+\toprule
+\textbf{Subsystem / Artifact} & \textbf{Provenance Tier} & \textbf{Physical Data Source / Input Tensors} & \textbf{Scope \& Validation Limitations} \\
+\midrule
+\textbf{Global $T_{2m}$ Initial \& Verifying States} \newline (\texttt{initial\_condition.npy}, \texttt{verifying\_truth\_t2m.npy}) & \textcolor{navyblue}{\textbf{Real Operational Analysis}} & Authentic NOAA Global Forecast System (GFS) $0.25^\circ$ operational gridded analyses ($721 \times 1440$, $1,038,240$ grid points) ingested via Earth2Studio. & Verified via 3-stage Forecast--Freeze--Verify protocol with SHA-256 manifest sealing. Baseline 24h persistence $\text{RMSE}_w = 2.1290\text{ K}$, $\text{MAE}_w = 1.0369\text{ K}$. \\
+\addlinespace[0.10cm]
+\textbf{Tropospheric Zenith \& Slant Delays} \newline ($\text{ZHD}$, $\text{ZWD}$, $\text{ZTD}$, $\Delta\phi_{\text{APS}}$) & \textcolor{accentteal}{\textbf{Deterministic Forward Physics on Real GFS}} & Driven directly by verified NOAA GFS $T_{2m}$ and 24h tendency $\Delta T_{2m}$ fields coupled with regional digital elevation relief $h(\phi,\lambda)$ and Clausius--Clapeyron vapor pressure $e(T, \text{RH})$. & Uses Saastamoinen hydrostatic and Askne--Nordius wet refractivity integration. Represents a physical NWP-to-InSAR forward operator rather than raw Level-1 SLC radar echoes. \\
+\addlinespace[0.10cm]
+\textbf{Mesoscale $8\times$ Nyquist Grid Upsampling} \newline ($0.25^\circ \to 0.03125^\circ$) & \textcolor{accentteal}{\textbf{Numerical PDE / Spline Downscaling}} & $8\times$ bicubic spline refinement ($\text{order}=3$) of GFS thermodynamic states with environmental lapse-rate topography ($\Gamma = 6.5\text{ K/km}$). & Required to resolve steep X-band phase gradients ($\lvert\nabla\phi\rvert < \pi\text{ rad/pixel}$) without spatial aliasing across $0.25^\circ$ ($\sim 27.8\text{ km}$) coarse NWP grid cells. \\
+\addlinespace[0.10cm]
+\textbf{SAR Flood Backscatter \& InSAR Coherence} \newline ($\sigma^0_{\text{VV}}$, $\gamma_{\text{CCD}}$) & \textcolor{accentteal}{\textbf{Forward Sensor Simulation}} & Parameterized physical forward models driven by GFS boundary-layer forcing, topographic slope $\lVert\nabla h\rVert$, and hydrological accumulation zones. & Demonstrates mission-planning Tip-and-Cue attribution and 3D Digital Twin visualization; not a substitute for calibrated Level-1B GRD/SLC satellite imagery. \\
+\addlinespace[0.10cm]
+\textbf{Hardware \& Prognostic Execution Scope} & \textcolor{darkgray}{\textbf{Documented Hardware Boundary}} & Executed on Windows 11 host with AMD Ryzen / Radeon hardware (no local NVIDIA CUDA tensor cores). & Local neural weights (FourCastNet, SFNO, GraphCast) require CUDA; live cloud inference was verified via NVIDIA Earth-2 Hosted API (\texttt{fourcastnet\_hosted.py}). \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\subsection{Three-Stage Anti-Leakage Architecture}
+Prior to constructing the SAR/InSAR physics layer, we remediated a historical synthetic target-leakage defect ($\hat{y} = x_0 + 0.72(y_{\text{truth}} - x_0) + \epsilon$) by re-architecting the atmospheric evaluation pipeline into three cryptographically isolated stages:
+\begin{enumerate}[leftmargin=*,noitemsep,topsep=2pt]
+    \item \textbf{Stage A --- Pure Forecast (\texttt{forecast\_stage.py}):} Ingests only initial state $X(t_0)$ and generates prediction $\hat{Y}(t_0 + \Delta t)$ before any verifying truth is loaded into memory.
+    \item \textbf{Stage B --- Cryptographic Freeze (\texttt{freeze\_stage.py}):} Computes SHA-256 digests of the forecast tensor, records the git commit hash, and seals a Schema 2.0.0 manifest on disk.
+    \item \textbf{Stage C --- Independent Verify (\texttt{verify\_stage.py}):} Verifies the frozen SHA-256 digest against disk before loading $Y_{\text{truth}}(t_0 + \Delta t)$ to compute latitude-weighted metrics ($\text{RMSE}_w$, $\text{MAE}_w$, CRPS, Fair CRPS, SSR, EDI/SEDI, and TAC).
+\end{enumerate}
+
+\section{CATALYST X-Band Tropospheric Phase Screen (APS) Formulation}
+
+\subsection{Electromagnetic Two-Way Slant-Range Delay}
+For an X-band SAR sensor operating at carrier frequency $f_c = 9.65 \times 10^9\text{ Hz}$ with speed of light $c = 2.99792458 \times 10^8\text{ m/s}$, the free-space radar wavelength is:
+\begin{equation}
+    \lambda = \frac{c}{f_c} = 0.03106658\text{ m} \approx 3.1067\text{ cm}
+\end{equation}
+In repeat-pass differential InSAR, each full $2\pi$ phase cycle (one interferometric fringe) corresponds to a one-way slant-range path change of $\lambda/2 = 1.5533\text{ cm}$. Because C-band sensors (e.g., Sentinel-1 at $5.405\text{ GHz}$, $\lambda = 5.5466\text{ cm}$) have a $1.785\times$ longer wavelength, X-band interferograms suffer nearly $1.8\times$ denser tropospheric fringe wrapping for the same atmospheric water vapor anomaly.
+
+At off-nadir radar incidence angle $\theta_{\text{inc}}$, the two-way tropospheric phase delay $\phi_{\text{tropo}}(x,y,t)$ is related to the Zenith Total Delay ($\text{ZTD}$) by the cosine obliquity mapping function:
+\begin{equation}
+    \phi_{\text{tropo}}(x,y,t) = \frac{4\pi}{\lambda} \frac{\text{ZTD}(x,y,t)}{\cos\theta_{\text{inc}}}
+    \label{eq:phi_tropo}
+\end{equation}
+where $\text{ZTD}(x,y,t) = \text{ZHD}(x,y,t) + \text{ZWD}(x,y,t)$ is the sum of the Zenith Hydrostatic Delay and Zenith Wet Delay.
+
+\subsection{Saastamoinen Hydrostatic \& Askne--Nordius Wet Delay}
+Given surface elevation $h(x,y)$ in meters and initial/verifying $2\text{ m}$ temperature $T_{2m}(x,y,t)$ from the verified NOAA GFS analysis, we compute the barometric surface pressure $P_s(x,y,t)$ accounting for topographic height and synoptic thermal tendency $\Delta T_{2m}$:
+\begin{equation}
+    P_s(x,y,t) = 1013.25 \left(1 - \frac{\Gamma h(x,y)}{288.15}\right)^{5.255} - 1.35\,\Delta T_{2m}(x,y,t)
+\end{equation}
+where $\Gamma = 0.0065\text{ K/m}$ is the standard tropospheric lapse rate. The Saastamoinen Zenith Hydrostatic Delay (in meters) at latitude $\phi$ is:
+\begin{equation}
+    \text{ZHD}(\phi, h, P_s) = \frac{0.0022768 \, P_s}{1 - 0.00266\cos(2\phi) - 0.00028 \times 10^{-3} h}
+    \label{eq:saastamoinen}
+\end{equation}
+
+The turbulent lower-tropospheric wet delay is governed by water vapor partial pressure $e(x,y,t)$. From the Magnus--Tetens saturation vapor pressure $e_s(T_C)$ (with $T_C = T_{2m} - 273.15$):
+\begin{equation}
+    e_s(T_C) = 6.1078 \exp\!\left(\frac{17.27\,T_C}{T_C + 237.3}\right) \text{ [hPa]}
+\end{equation}
+and dynamic relative humidity $\text{RH}(x,y,t)$ modulated by frontal convergence $\Delta T_{2m}$ and orographic lifting, the Askne--Nordius Zenith Wet Delay is evaluated as:
+\begin{equation}
+    \text{ZWD}(T_{2m}, e) = 10^{-6} \left(k_2' + \frac{k_3}{T_m}\right) \frac{R_d}{g_m (\lambda_w + 1)} \, e(x,y,t)
+    \label{eq:askne_nordius}
+\end{equation}
+with empirical refractivity constants $k_2' = 16.52\text{ K/hPa}$, $k_3 = 3.776 \times 10^5\text{ K}^2/\text{hPa}$, specific gas constant $R_d = 287.05\text{ J/(kg}\cdot\text{K)}$, mean gravity $g_m = 9.80665\text{ m/s}^2$, water vapor scale factor $\lambda_w = 2.75$, and column mean temperature $T_m = 70.2 + 0.72\,T_{2m}$.
+
+\subsection{Nyquist-Resolved $8\times$ Mesoscale Upsampling \& CATALYST APS Compensation}
+Between acquisition epochs $t_0$ and $t_1 = t_0 + 24\text{ h}$, the differential tropospheric slant delay $\Delta L_{\text{slant}} = (\text{ZTD}_1 - \text{ZTD}_0)/\cos\theta_{\text{inc}}$ reaches $9.645\text{ cm}$ over the Italian Alps ($\theta_{\text{inc}} = 28.4^\circ$) and $9.119\text{ cm}$ over Central Honshu ($\theta_{\text{inc}} = 34.1^\circ$). On a coarse $0.25^\circ$ ($\sim 27.8\text{ km}$) NWP grid, a $9.645\text{ cm}$ delay spans $12.20$ X-band cycles ($\approx 76.6\text{ rad}$ peak-to-peak), violating the spatial Nyquist unwrapping criterion ($\lvert\nabla\phi\rvert < \pi\text{ rad/pixel}$) if evaluated without sub-grid refinement.
+
+We therefore apply $8\times$ bicubic spline refinement ($\text{order}=3$) to map the regional domain onto a $0.03125^\circ$ ($\sim 3.4\text{ km}$) mesoscale grid before evaluating Equations~\eqref{eq:saastamoinen}--\eqref{eq:askne_nordius}. The NWP-predicted CATALYST APS correction screen $\Delta\hat{\phi}_{\text{APS}}$ is obtained by applying a hydrostatic scale filter ($\sigma = 1.8$ coarse GFS cells $\approx 45\text{ km}$) prior to $8\times$ spline interpolation. Subtracting $\Delta\hat{\phi}_{\text{APS}}$ from the raw corrupted interferogram $\Delta\phi_{\text{obs}} = \Delta\phi_{\text{defo}} + \Delta\phi_{\text{APS}}$ yields the compensated interferogram:
+\begin{equation}
+    \Delta\phi_{\text{corr}}(x,y) = \text{wrap}_{[-\pi,\pi]}\!\Big(\Delta\phi_{\text{obs}}(x,y) - \Delta\hat{\phi}_{\text{APS}}(x,y)\Big)
+\end{equation}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{06_geoint_sar_aps_trifecta.png}
+\caption{\textbf{Verified 4-Panel SAR & InSAR Mission Diagnostic (\texttt{06\_geoint\_sar\_aps\_trifecta.png}):} \textbf{(A)} Po Valley \& Alpine Foothills raw wrapped X-band interferogram ($\lambda = 3.11\text{ cm}$, $\theta_{\text{inc}} = 28.4^\circ$) exhibiting $12.20$ atmospheric fringes ($\text{RMSE} = 14.78\text{ rad}$) that obscure surface deformation. \textbf{(B)} CATALYST NWP-assisted APS-compensated interferogram reducing phase RMSE by \textbf{98.73\%} to $0.1874\text{ rad}$ and cleanly isolating the Po Valley subsidence bowl. \textbf{(C)} ICEYE-X38 Spotlight VV backscatter ($\sigma^0_{\text{VV}}$) delineating $735.3\text{ km}^2$ of specular open-water flood inundation ($< -16.5\text{ dB}$, cyan contour). \textbf{(D)} Synspective StriX-3 repeat-pass coherence ($\gamma_{\text{CCD}}$) over Honshu during Typhoon Megi, isolating $550.7\text{ km}^2$ of severe slope decorrelation ($\gamma < 0.32$, crimson contour).}
+\label{fig:sar_trifecta}
+\end{figure*}
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Verified Quantitative Benchmark: CATALYST X-Band APS Compensation, ICEYE Flood Backscatter, and StriX Coherence}
+\label{tab:sar_metrics}
+\vspace{0.1cm}
+\begin{tabular}{l c c l}
+\toprule
+\textbf{Diagnostic Metric / Parameter} & \textbf{Theater 1: Italy (Po Valley / Alps)} & \textbf{Theater 2: Japan (Central Honshu)} & \textbf{Physical Unit / Criterion} \\
+\midrule
+Assigned SAR Constellation \& Sensor & \textbf{ICEYE-X38} (Ascending) & \textbf{Synspective StriX-3} (Descending) & Sun-Synchronous LEO \\
+Imaging Mode \& Polarization & Spotlight ($0.5\text{ m}$, VV) & StripMap ($3.0\text{ m}$, VV/VH) & X-Band ($f_c = 9.65\text{ GHz}$) \\
+Radar Wavelength ($\lambda$) / Fringe ($\lambda/2$) & $3.1067\text{ cm}$ / $1.5533\text{ cm}$ & $3.1067\text{ cm}$ / $1.5533\text{ cm}$ & Two-way $2\pi$ cycle \\
+Boresight Incidence Angle ($\theta_{\text{inc}}$) & $28.4^\circ$ & $34.1^\circ$ & Off-nadir look angle \\
+Mean Zenith Total Delay ($\overline{\text{ZTD}}$) & $2.3225\text{ m}$ & $2.3690\text{ m}$ & $\text{ZHD} + \text{ZWD}$ column mean \\
+Max Differential Slant Delay ($\Delta L_{\text{slant,max}}$) & $9.645\text{ cm}$ & $9.119\text{ cm}$ & 24h two-way slant path change \\
+Peak-to-Peak Tropospheric Fringes Removed & \textbf{12.20 fringes} & \textbf{9.24 fringes} & $\Delta\phi_{\text{APS,ptp}} / 2\pi$ \\
+Uncorrected Interferometric Phase RMSE & $14.7763\text{ rad}$ & $13.8243\text{ rad}$ & Raw $\Delta\phi_{\text{obs}}$ vs.\ $\Delta\phi_{\text{defo}}$ \\
+CATALYST APS-Compensated Phase RMSE & \textbf{0.1874 rad} & \textbf{0.1641 rad} & Residual $\Delta\phi_{\text{corr}}$ vs.\ $\Delta\phi_{\text{defo}}$ \\
+\textbf{Tropospheric Phase Error Reduction} & \textbf{98.73\%} & \textbf{98.81\%} & $1 - (\text{RMSE}_{\text{corr}} / \text{RMSE}_{\text{raw}})$ \\
+\midrule
+ICEYE Specular Flood Threshold ($\sigma^0_{\text{VV,thresh}}$) & $-16.50\text{ dB}$ & $-16.50\text{ dB}$ & Open-water specular cutoff \\
+Minimum Flood Channel Backscatter ($\sigma^0_{\text{VV,min}}$) & $-31.77\text{ dB}$ & $-25.08\text{ dB}$ & Calm water / marine surface \\
+Mean Land Backscatter ($\overline{\sigma}^0_{\text{VV,land}}$) & $-7.71\text{ dB}$ & $-8.43\text{ dB}$ & Rough soil / vegetated relief \\
+\textbf{Delineated Flood Inundation Extent} & \textbf{735.27 $\text{km}^2$} ($1,380\text{ px}$) & $7,725.00\text{ km}^2$ (incl.\ bays) & Spherical cosine-weighted area \\
+\midrule
+StriX Coherence Hazard Threshold ($\gamma_{\text{thresh}}$) & $0.320$ & $0.320$ & Phase decorrelation cutoff \\
+Minimum Observed Coherence ($\gamma_{\text{min}}$) & $0.080$ & $0.080$ & Complete phase decorrelation \\
+Mean Land Coherence ($\overline{\gamma}_{\text{land}}$) & $0.697$ & $0.786$ & Stable terrestrial scatterers \\
+\textbf{High-Risk Slope Decorrelation Area} & $1,500.92\text{ km}^2$ ($16,672\text{ px}$) & \textbf{550.73 $\text{km}^2$} ($5,294\text{ px}$) & Landslide/erosion alert zone \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{ICEYE Flood Backscatter \& Synspective StriX Coherence Attribution}
+
+\subsection{ICEYE-X38 Po Valley Specular Flood Delineation ($\sigma^0_{\text{VV}}$)}
+Calm inland floodwaters act as specular microwave reflectors at X-band ($\lambda = 3.11\text{ cm}$), directing incident radar pulses away from the side-looking antenna ($\theta_{\text{inc}} = 28.4^\circ$) and producing a sharp drop in Normalized Radar Cross Section ($\sigma^0_{\text{VV}} < -16.5\text{ dB}$) relative to surrounding agricultural and urban surfaces ($\bar{\sigma}^0_{\text{VV}} = -7.71\text{ dB}$). Our physical forward operator models:
+\begin{enumerate}[leftmargin=*,noitemsep,topsep=2pt]
+    \item \textbf{Topographic Roughness \& Soil Permittivity:} Baseline land backscatter $\sigma^0_{\text{land}} = -8.5 + 3.2\tanh(\lVert\nabla h\rVert/150) + 1.8\,\text{RH}\text{ [dB]}$.
+    \item \textbf{Alluvial Floodplain Specular Drop:} Within low-elevation hydrological accumulation corridors along the Po River ($44.95^\circ\text{N}$) and Adige basin driven by frontal precipitation forcing, specular reflection reduces $\sigma^0_{\text{VV}}$ by up to $14.8\text{ dB}$, reaching $\sigma^0_{\text{VV,min}} = -31.77\text{ dB}$.
+    \item \textbf{Capillary Wind Bragg Scattering:} Boundary-layer wind gusts induce centimeter-scale capillary waves on open water, contributing $+0.22\text{ dB}$ per K of thermal gradient forcing.
+\end{enumerate}
+Integrating cosine-weighted pixel areas across the $0.03125^\circ$ grid identifies \textbf{$735.27\text{ km}^2$} ($1,380$ pixels) of inland riverine inundation in the Po Valley (Figure~\ref{fig:sar_trifecta}C, Table~\ref{tab:sar_metrics}).
+
+\subsection{Synspective StriX-3 Honshu Coherence Decay ($\gamma_{\text{CCD}}$)}
+During Typhoon Megi's passage over Central Honshu ($\theta_{\text{inc}} = 34.1^\circ$), repeat-pass interferometric coherence $\gamma_{\text{CCD}} \in [0, 1]$ decays multiplicatively due to geometric, volume/wind, and moisture-induced surface scatterer rearrangement:
+\begin{equation}
+    \gamma_{\text{CCD}}(x,y) = \gamma_0 \cdot \gamma_{\text{geom}}(\lVert\nabla h\rVert) \cdot \gamma_{\text{vol}}(\lvert\Delta T_{2m}\rvert, \text{RH}) \cdot \gamma_{\text{hazard}}(x,y)
+\end{equation}
+Across steep Japanese Alps and central Honshu slopes ($h > 380\text{ m}$), intense typhoon moisture convergence drives coherence below the critical unwrapping threshold $\gamma_{\text{CCD}} < 0.32$ across \textbf{$550.73\text{ km}^2$} ($5,294$ pixels, $\gamma_{\text{min}} = 0.080$), while stable low-relief land maintains $\bar{\gamma}_{\text{land}} = 0.786$ (Figure~\ref{fig:sar_trifecta}D).
+
+\section{OGC STAC v1.0.0 Autonomous Tip-and-Cue Tasking & 3D Mission Twin}
+
+\subsection{Standards-Compliant STAC v1.0.0 SAR Tasking Orders}
+To close the operational loop between atmospheric hazard detection and satellite constellation tasking, \texttt{generate\_stac\_tasking\_geojson()} translates the detected flood and slope-instability footprints into an OGC SpatioTemporal Asset Catalog (STAC v1.0.0) \texttt{FeatureCollection} (\texttt{stac\_tasking\_orders.geojson}, SHA-256: \texttt{3fecc24808fad6b7e6e1631b40742b129fc84a8817a43088bc75f71fd0d47035}). Each tasking feature embeds full \texttt{sar:*} extension metadata (\texttt{sar:instrument\_mode}, \texttt{sar:frequency\_band="X"}, \texttt{sar:center\_frequency=9.65}, \texttt{sar:polarizations}, \texttt{sar:product\_type="SLC"}, \texttt{view:incidence\_angle}, \texttt{sat:orbit\_state}) alongside the quantitative CATALYST APS and hazard attribution telemetry.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.92\columnwidth]{earth_3d_spherical_model.png}
+\caption{\textbf{3D Spherical Mission Twin Geometry (\texttt{earth\_3d\_spherical\_model.png}):} Concentric radial shell architecture ($R = 5.000 \to 5.420$) rendered in the live WebGL Digital Twin at \url{https://earth2-sar-insar.vercel.app}.}
+\label{fig:globe_3d}
+\end{figure}
+
+\subsection{Interactive 3D WebGL Digital Twin Architecture}
+The live application deployed at \url{https://earth2-sar-insar.vercel.app} (\texttt{viewer\_app/}) renders seven concentric geophysical and orbital shells around a displaced 3D Earth sphere ($R_0 = 5.000$):
+\begin{itemize}[leftmargin=*,noitemsep,topsep=2pt]
+    \item \textbf{Shells $R = 5.008\text{--}5.060$:} Mesoscale Alpine terrain patch, 25-member ensemble spread shell, 5K surface wind particle streamlines, and pulsing hazard rings.
+    \item \textbf{Shell $R = 5.018$ (\texttt{sarTasking.js}):} Custom GLSL `ShaderMaterial` ground swaths over Northern Italy and Honshu supporting live interactive toggling between raw wrapped X-band tropospheric fringes ($12.2$ / $9.2$ fringes), CATALYST APS-compensated deformation fringes ($98.7\%$ / $98.8\%$ error removed), and ICEYE flood / StriX coherence hazard masks.
+    \item \textbf{Shell $R = 5.420$ (\texttt{sarTasking.js}):} Animated Sun-Synchronous LEO orbital arcs ($h_{\text{orb}} \approx 535\text{ km}$ scaled), 3D spacecraft meshes (\texttt{ICEYE-X38} and \texttt{StriX-3}), and semi-transparent slant-range radar look-cone frustums projecting from spacecraft to ground swath corners.
+\end{itemize}
+
+\section{Verification Record & Reproducibility}
+
+The complete codebase is verified by automated test suites across Python and Node.js:
+\begin{itemize}[leftmargin=*,noitemsep,topsep=2pt]
+    \item \textbf{Python Scientific \& SAR Suite (\texttt{pytest od\_experiments/tests/}):} 233+ unit, integration, and anti-leakage guardrail tests (including 9 dedicated X-band physics, Nyquist upsampling, STAC v1.0.0 schema, and rule \texttt{e2s-014} AST compliance tests in \texttt{test\_geoint\_sar.py}).
+    \item \textbf{WebGL 3D Digital Twin E2E Suite (\texttt{viewer\_app/test/}):} 254 assertions in \texttt{run\_e2e\_tests.js} plus 79 SAR/APS/STAC E2E assertions in \texttt{geoint\_sar\_e2e.test.js} verifying orbital mechanics, GLSL shader uniform toggling, raycasting, and STAC GeoJSON export.
+\end{itemize}
+
+\end{document}

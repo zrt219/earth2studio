@@ -69,7 +69,7 @@ from od_experiments.scientific_study.regional_tracker import (
 
 QUARANTINE_STAMP = "QUARANTINED_DEFECTIVE_SYNTHETIC"
 STUDY_OUTPUT_DIR = Path("outputs/scientific_study")
-REPORT_PATH = Path("docs/origin_datum/SCIENTIFIC_STUDY_REPORT.md")
+REPORT_PATH = Path("docs/engineering_reports/SCIENTIFIC_STUDY_REPORT.md")
 
 
 def stamp_quarantined_dict(payload: Dict[str, Any]) -> Dict[str, Any]:

@@ -14,11 +14,11 @@
 // limitations under the License.
 
 /**
- * OD-EARTH2-001 / EO-OBSCURA: 3D WebGL Digital Twin
+ * Earth-2 X-Band SAR & InSAR Mission Twin
  * Main Application Orchestrator & Scene Coordinator
  *
  * Module: viewer_app/main.js
- * Author: Zhane Daye (Origin Datum — Independent Research Initiative)
+ * Author: Zhane Daye (SAR & Earth System Engineering | zhanedaye@umattr.ca)
  * Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
  *
  * Coordinates:
@@ -37,6 +37,7 @@ import layers3D from './layers3D.js';
 import uiController from './uiController.js';
 import windParticles from './windParticles.js';
 import hazardAlerts from './hazardAlerts.js';
+import sarTasking from './sarTasking.js';
 
 // =============================================================================
 // 1. APPLICATION STATE & CONTEXT
@@ -156,9 +157,10 @@ export function init() {
   // 8. Initialize 3D Scientific Layers Engine
   layers3D.initLayers(globe, camera, renderer);
 
-  // 8b. Initialize Animated Atmospheric Wind Particles & Global Hazard Alerts
+  // 8b. Initialize Animated Atmospheric Wind Particles, Global Hazard Alerts & GEOINT SAR Tasking
   windParticles.initWindParticles(globe, 3500);
   hazardAlerts.initHazardAlerts(globe);
+  sarTasking.initSarTasking(globe);
 
   // 9. Initialize UI Controller & Glassmorphic HUD
   uiController.initUI(globe, camera, renderer, layers3D);
@@ -193,6 +195,9 @@ export function init() {
   studyData.on('study-version-changed', ({ versionId }) => {
     if (uiController?.stopForecastAnimation) {
       uiController.stopForecastAnimation(true);
+    }
+    if (sarTasking?.setSarTaskingVisibility) {
+      sarTasking.setSarTaskingVisibility(versionId === 'V3');
     }
     if (versionId === 'V1') {
       // V1 defaults to global synoptic perspective
@@ -369,7 +374,38 @@ function setupPointerEvents(canvas) {
       // Click threshold (<=5px) on left click or touch tap without shift: execute raycast POI selection
       const isLeftOrTouch = pointerButton === 0 || e.pointerType === 'touch' || e.pointerType === 'pen';
       if (deltaDist <= 5 && isLeftOrTouch && !e.shiftKey) {
-        const hit = layers3D.handleRaycast(e, camera, window.innerWidth, window.innerHeight);
+        let hit = layers3D.handleRaycast(e, camera, window.innerWidth, window.innerHeight);
+        if (!hit && sarTasking?.getSarPickableObjects && sarTasking.getSarTaskingVisibility()) {
+          const sarPickables = sarTasking.getSarPickableObjects();
+          if (sarPickables.length > 0 && camera) {
+            const w = window.innerWidth || 1;
+            const h = window.innerHeight || 1;
+            const ndc = new THREE.Vector2((e.clientX / w) * 2 - 1, -(e.clientY / h) * 2 + 1);
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(ndc, camera);
+            const hits = raycaster.intersectObjects(sarPickables, true);
+            for (const cand of hits) {
+              const worldPt = cand.point;
+              if (layers3D?.isFrontFacing && !layers3D.isFrontFacing(worldPt, new THREE.Vector3(0, 0, 0), camera.position)) {
+                continue;
+              }
+              let obj = cand.object;
+              while (obj && (!obj.userData || !obj.userData.type)) {
+                obj = obj.parent;
+              }
+              if (obj && obj.userData) {
+                const payload = obj.userData.data ? { ...obj.userData.data, type: obj.userData.type } : obj.userData;
+                hit = {
+                  object: obj,
+                  point: worldPt,
+                  data: payload,
+                  screenPos: { x: e.clientX, y: e.clientY }
+                };
+                break;
+              }
+            }
+          }
+        }
         if (hit && hit.data) {
           uiController.showPopup(hit.data, hit.screenPos);
           isSpinning = false;
@@ -754,9 +790,10 @@ function animate() {
   // 3. Update 3D Scientific Layers (Pulsing Beacons, Plasma Shaders)
   layers3D.updateLayers(elapsedTime, camera);
 
-  // 3b. Update Wind Particles Advection & Hazard Alert Pulses
+  // 3b. Update Wind Particles Advection, Hazard Alert Pulses & GEOINT SAR Orbits
   windParticles.updateWindParticles(0.016);
   hazardAlerts.updateHazardAlerts(elapsedTime);
+  sarTasking.updateSarTasking(elapsedTime);
 
   // 4. Render Scene
   if (renderer && scene && camera) {

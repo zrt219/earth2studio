@@ -14,11 +14,11 @@
 // limitations under the License.
 
 /**
- * OD-EARTH2-001 / EO-OBSCURA: 3D WebGL Digital Twin
+ * Earth-2 X-Band SAR & InSAR Mission Twin
  * Interactive User Interface Controller & Glassmorphic HUD
  *
  * Module: viewer_app/uiController.js
- * Author: Zhane Daye (Origin Datum — Independent Research Initiative)
+ * Author: Zhane Daye (SAR & Earth System Engineering | zhanedaye@umattr.ca)
  * Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
  *
  * Features:
@@ -33,6 +33,7 @@
 import studyData from './studyData.js';
 import windParticles from './windParticles.js';
 import hazardAlerts from './hazardAlerts.js';
+import sarTasking from './sarTasking.js';
 
 // =============================================================================
 // 1. UTILITIES & SECURITY SANITIZATION
@@ -140,6 +141,16 @@ export function updateLegend(typeOrVersion = 'V3') {
     legendBar.style.background = 'linear-gradient(to right, #000004, #51127c, #b63679, #fb8861, #fcfdbf)';
     if (legendMin) legendMin.innerText = '+3.0 K';
     if (legendMax) legendMax.innerText = '+8.0 K';
+  } else if (key === 'sar' || key === 'insar' || key === 'aps') {
+    legendTitle.innerText = 'X-Band InSAR Wrapped Phase [-π, +π] (λ=3.11 cm)';
+    legendBar.style.background = 'linear-gradient(to right, #1f1447, #2694e0, #2ee0a6, #f5d138, #eb3861)';
+    if (legendMin) legendMin.innerText = '-π rad';
+    if (legendMax) legendMax.innerText = '+π rad';
+  } else if (key === 'sar_flood' || key === 'flood_coherence') {
+    legendTitle.innerText = 'SAR Flood Backscatter σ⁰ (dB) & Slope Coherence γ';
+    legendBar.style.background = 'linear-gradient(to right, #05c7fa, #2e425c, #291f57, #fa3d52)';
+    if (legendMin) legendMin.innerText = 'Flood <-16.5 dB';
+    if (legendMax) legendMax.innerText = 'Hazard γ<0.32';
   }
 }
 
@@ -151,31 +162,58 @@ export function updateLegend(typeOrVersion = 'V3') {
  * Displays glassmorphic popup card pinned to screen coordinates
  * Conforms to F9.5, T3.2, T3.10
  *
- * @param {object} poiData - Station or Cyclone Waypoint data
+ * @param {object} rawPoiData - Station, Cyclone Waypoint, or SAR Satellite/Swath data
  * @param {{ x: number, y: number, visible?: boolean }} screenPos
  */
-export function showPopup(poiData, screenPos) {
+export function showPopup(rawPoiData, screenPos) {
   if (typeof document === 'undefined') return;
 
   const popup = document.getElementById('poi-popup-card') || document.getElementById('poi-popup');
   if (!popup) return;
 
-  if (!poiData) {
+  if (!rawPoiData) {
     hidePopup();
     return;
   }
+
+  const poiData = (rawPoiData.data && typeof rawPoiData.data === 'object' && !rawPoiData.operator && !rawPoiData.wmoId && rawPoiData.mslp === undefined)
+    ? { ...rawPoiData.data, type: rawPoiData.type || rawPoiData.data.type }
+    : rawPoiData;
 
   activePopupPOI = poiData;
 
   const titleEl = document.getElementById('popup-title');
   const bodyEl = document.getElementById('popup-body');
 
-  const isStation = Boolean(poiData.increment !== undefined || poiData.wmoId || poiData.type?.includes('Sounding'));
+  const isSar = Boolean(poiData.isSarSatellite || poiData.isSarSwath || poiData.operator === 'ICEYE' || poiData.operator === 'Synspective');
+  const isStation = !isSar && Boolean(poiData.increment !== undefined || poiData.wmoId || poiData.type?.includes('Sounding'));
 
-  const latVal = typeof poiData.lat === 'number' ? poiData.lat.toFixed(2) : (Number(poiData.lat) ? Number(poiData.lat).toFixed(2) : '0.00');
-  const lonVal = typeof poiData.lon === 'number' ? poiData.lon.toFixed(2) : (Number(poiData.lon) ? Number(poiData.lon).toFixed(2) : '0.00');
+  const rawLat = poiData.lat !== undefined ? poiData.lat : poiData.center?.lat;
+  const rawLon = poiData.lon !== undefined ? poiData.lon : poiData.center?.lon;
+  const latVal = typeof rawLat === 'number' ? rawLat.toFixed(2) : (Number(rawLat) ? Number(rawLat).toFixed(2) : '0.00');
+  const lonVal = typeof rawLon === 'number' ? rawLon.toFixed(2) : (Number(rawLon) ? Number(rawLon).toFixed(2) : '0.00');
 
-  if (isStation) {
+  if (isSar) {
+    if (titleEl) {
+      titleEl.innerText = `🛰️ ${poiData.name || poiData.id || 'SAR Acquisition'}`;
+    }
+    if (bodyEl) {
+      const aps = poiData.apsMetrics || {};
+      const attr = poiData.attributionMetrics || {};
+      const hazardLine = attr.hazardType === 'FLOOD_SPECULAR_BACKSCATTER'
+        ? `Flood σ⁰ &lt; ${attr.thresholdDb} dB: <b>${attr.inundatedAreaKm2} km²</b> (min ${attr.minSigma0VvDb} dB)`
+        : `Slope CCD γ &lt; ${attr.coherenceThreshold}: <b>${attr.highRiskSlopeAreaKm2} km²</b> (min γ=${attr.minCoherenceGamma})`;
+      bodyEl.innerHTML = `
+        <div style="font-size:0.75rem; line-height:1.45; color:#cbd5e1;">
+          <div style="margin-bottom:4px;"><strong>Operator / Mode:</strong> ${sanitizeHTML(poiData.operator)} — ${sanitizeHTML(poiData.mode)}</div>
+          <div style="margin-bottom:4px;"><strong>Geometry:</strong> ${sanitizeHTML(poiData.orbitState)} | Inc: <b>${poiData.incidenceAngleDeg}°</b> | 9.65 GHz</div>
+          <div style="margin-bottom:4px;"><strong>CATALYST APS ZTD:</strong> ${aps.meanZtdM} m (${aps.fringesRemoved} fringes removed)</div>
+          <div style="margin-bottom:4px;"><strong>InSAR Phase RMSE:</strong> <span style="color:#f43f5e;">${aps.uncorrectedRmseRad} rad</span> → <span style="color:#10b981; font-weight:700;">${aps.correctedRmseRad} rad (-${aps.rmseReductionPct}%)</span></div>
+          <div><strong>Attribution:</strong> ${hazardLine}</div>
+        </div>
+      `;
+    }
+  } else if (isStation) {
     if (titleEl) {
       titleEl.innerText = `${poiData.name || 'Station'} (${poiData.id || poiData.wmoId || 'N/A'})`;
     }
@@ -409,6 +447,11 @@ function syncLayerButtonsForVersion(versionId) {
   const btnSpread = document.getElementById('layer-spread');
   const btnMeso = document.getElementById('layer-mesoscale');
   const btnPlayForecast = document.getElementById('btn-play-forecast');
+  const btnSarTasking = document.getElementById('layer-sar-tasking');
+  const btnCatalystAps = document.getElementById('toggle-catalyst-aps');
+  const btnSarMode = document.getElementById('toggle-sar-mode');
+  const btnExportStac = document.getElementById('btn-export-stac');
+  const sarDrawer = document.getElementById('sar-telemetry-drawer');
 
   if (btnCyclone) {
     btnCyclone.classList.toggle('active-btn', isV3);
@@ -433,6 +476,29 @@ function syncLayerButtonsForVersion(versionId) {
   if (btnPlayForecast) {
     btnPlayForecast.disabled = !isV3;
     btnPlayForecast.style.opacity = isV3 ? '1.0' : '0.4';
+  }
+  if (sarTasking?.setSarTaskingVisibility) {
+    sarTasking.setSarTaskingVisibility(isV3);
+  }
+  if (btnSarTasking) {
+    btnSarTasking.classList.toggle('active-btn', isV3);
+    btnSarTasking.disabled = !isV3;
+    btnSarTasking.style.opacity = isV3 ? '1.0' : '0.4';
+  }
+  if (btnCatalystAps) {
+    btnCatalystAps.disabled = !isV3;
+    btnCatalystAps.style.opacity = isV3 ? '1.0' : '0.4';
+  }
+  if (btnSarMode) {
+    btnSarMode.disabled = !isV3;
+    btnSarMode.style.opacity = isV3 ? '1.0' : '0.4';
+  }
+  if (btnExportStac) {
+    btnExportStac.disabled = !isV3;
+    btnExportStac.style.opacity = isV3 ? '1.0' : '0.4';
+  }
+  if (sarDrawer) {
+    sarDrawer.style.opacity = isV3 ? '1.0' : '0.45';
   }
 }
 
@@ -534,12 +600,22 @@ export function updatePopupPosition(camera = activeCamera, vpW = null, vpH = nul
   const width = (vpW && vpW > 0) ? vpW : (typeof window !== 'undefined' ? window.innerWidth : 1920);
   const height = (vpH && vpH > 0) ? vpH : (typeof window !== 'undefined' ? window.innerHeight : 1080);
 
-  if (typeof activePopupPOI.lat === 'number' && typeof activePopupPOI.lon === 'number' && activeLayers3D?.latLonToVector3) {
-    const isStation = Boolean(activePopupPOI.increment !== undefined || activePopupPOI.wmoId);
-    const radius = isStation
-      ? (activeLayers3D.RADIAL_SHELLS?.DA_STATION_CAP || 5.350)
-      : (activeLayers3D.RADIAL_SHELLS?.CYCLONE_TUBE || 5.050);
-    const worldPos = activeLayers3D.latLonToVector3(activePopupPOI.lat, activePopupPOI.lon, radius);
+  const poiLat = typeof activePopupPOI.lat === 'number' ? activePopupPOI.lat : activePopupPOI.center?.lat;
+  const poiLon = typeof activePopupPOI.lon === 'number' ? activePopupPOI.lon : activePopupPOI.center?.lon;
+
+  if (typeof poiLat === 'number' && typeof poiLon === 'number' && activeLayers3D?.latLonToVector3) {
+    const isSarSat = Boolean(activePopupPOI.isSarSatellite || activePopupPOI.type === 'sar_satellite');
+    const isSarSwath = Boolean(activePopupPOI.isSarSwath || activePopupPOI.type === 'sar_swath');
+    const isStation = !isSarSat && !isSarSwath && Boolean(activePopupPOI.increment !== undefined || activePopupPOI.wmoId);
+    let radius = activeLayers3D.RADIAL_SHELLS?.CYCLONE_TUBE || 5.050;
+    if (isSarSat) {
+      radius = sarTasking?.SAR_SHELLS?.SSO_ORBIT || 5.420;
+    } else if (isSarSwath) {
+      radius = sarTasking?.SAR_SHELLS?.SAR_FOOTPRINT || 5.040;
+    } else if (isStation) {
+      radius = activeLayers3D.RADIAL_SHELLS?.DA_STATION_CAP || 5.350;
+    }
+    const worldPos = activeLayers3D.latLonToVector3(poiLat, poiLon, radius);
     if (activeGlobe) {
       worldPos.applyEuler(activeGlobe.rotation);
     }
@@ -700,6 +776,64 @@ export function initUI(globe, camera, renderer, layers3D) {
     btnHazards.addEventListener('click', () => {
       const active = btnHazards.classList.toggle('active-btn');
       hazardAlerts.setHazardAlertsVisibility(active);
+    });
+  }
+
+  // 5b-2. GEOINT SAR Tip-and-Cue & CATALYST X-Band APS Controls
+  const btnSarTasking = document.getElementById('layer-sar-tasking');
+  const btnCatalystAps = document.getElementById('toggle-catalyst-aps');
+  const btnSarMode = document.getElementById('toggle-sar-mode');
+  const btnExportStac = document.getElementById('btn-export-stac');
+  const apsStatusLine = document.getElementById('sar-aps-status-line');
+
+  if (btnSarTasking) {
+    btnSarTasking.addEventListener('click', () => {
+      const active = btnSarTasking.classList.toggle('active-btn');
+      sarTasking.setSarTaskingVisibility(active);
+      if (active) {
+        updateLegend(sarTasking.getSarDisplayMode() === 'flood_coherence' ? 'sar_flood' : 'sar');
+      } else {
+        updateLegend(studyData.getActiveVersionId ? studyData.getActiveVersionId() : 'V3');
+      }
+    });
+  }
+
+  if (btnCatalystAps) {
+    btnCatalystAps.addEventListener('click', () => {
+      const nextAps = !sarTasking.getCatalystApsCorrection();
+      sarTasking.setCatalystApsCorrection(nextAps);
+      btnCatalystAps.classList.toggle('active-btn', nextAps);
+      btnCatalystAps.innerText = nextAps ? '🌈 CATALYST APS Fix: ON' : '🌈 CATALYST APS Fix: OFF';
+      if (apsStatusLine) {
+        apsStatusLine.innerText = nextAps
+          ? 'APS STATUS: CATALYST GFS-Corrected (RMSE: 0.16 rad, -98.8%)'
+          : 'APS STATUS: Uncorrected Raw Phase (9.2–12.2 Tropo Fringes)';
+        apsStatusLine.style.color = nextAps ? '#10b981' : '#fbbf24';
+      }
+      updateLegend('sar');
+    });
+  }
+
+  if (btnSarMode) {
+    btnSarMode.addEventListener('click', () => {
+      const currentMode = sarTasking.getSarDisplayMode();
+      const nextMode = currentMode === 'insar_fringes' ? 'flood_coherence' : 'insar_fringes';
+      sarTasking.setSarDisplayMode(nextMode);
+      btnSarMode.classList.toggle('active-btn', nextMode === 'flood_coherence');
+      btnSarMode.innerText = nextMode === 'flood_coherence'
+        ? '🌊 Mode: Flood σ⁰ / γ CCD'
+        : '🌊 Mode: InSAR Fringes';
+      updateLegend(nextMode === 'flood_coherence' ? 'sar_flood' : 'sar');
+    });
+  }
+
+  if (btnExportStac) {
+    btnExportStac.addEventListener('click', () => {
+      const stacOrder = sarTasking.exportStacTaskingOrder(true);
+      if (apsStatusLine && stacOrder?.features) {
+        apsStatusLine.innerText = `STAC v1.0.0 EXPORTED: ${stacOrder.features.length} Tasking Orders (ICEYE-X38 & StriX-3)`;
+        apsStatusLine.style.color = '#38bdf8';
+      }
     });
   }
 

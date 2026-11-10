@@ -33,6 +33,7 @@ from od_experiments.data_assimilation.da_engine import (
 from od_experiments.data_ingestion.ingestion_engine import MultiSourceIngestionEngine
 from od_experiments.downscaling.mesoscale_engine import downscale_regional_grid
 from od_experiments.ensemble.ensemble_engine import generate_ensemble_forecast
+from od_experiments.geoint_sar.sar_geoint_engine import run_geoint_sar_suite
 from od_experiments.model_comparison.comparison_suite import benchmark_model_suite
 from od_experiments.storm_tracking.storm_tracker import track_cyclone_trajectory
 
@@ -371,11 +372,22 @@ def run_all_advanced_capabilities(
     plt.close()
     print(f"  -> Saved {fig6_path.name}")
 
+    # -------------------------------------------------------------
+    # Pillar 7: GEOINT SAR Tip-and-Cue & CATALYST X-Band APS Suite
+    # -------------------------------------------------------------
+    print(
+        "\n[Pillar 7/7] Executing GEOINT SAR Tip-and-Cue & CATALYST X-Band APS Suite..."
+    )
+    geoint_res = run_geoint_sar_suite(output_dir=out)
+    print(
+        f"  -> Saved {Path(geoint_res['figure']).name} & STAC orders ({geoint_res['stac_orders_count']} items)"
+    )
+
     # Save complete metrics summary
     summary_manifest = {
         "project": "OD-EARTH2-001 / EO-OBSCURA",
         "timestamp": "2026-10-30T03:55:00Z",
-        "pillars_executed": 6,
+        "pillars_executed": 7,
         "pillar_results": {
             "p1_ensemble": {
                 "members": 25,
@@ -403,6 +415,7 @@ def run_all_advanced_capabilities(
                 "max_increment_k": da_res["max_increment"],
                 "figure": str(fig6_path),
             },
+            "p7_geoint_sar_trifecta": geoint_res,
         },
     }
 
@@ -410,7 +423,7 @@ def run_all_advanced_capabilities(
     with open(manifest_path, "w") as f:
         json.dump(summary_manifest, f, indent=2)
     print(
-        f"\n[SUCCESS] All 6 Earth-2 Advanced Pillars executed cleanly. Manifest saved to {manifest_path}"
+        f"\n[SUCCESS] All 7 Earth-2 Advanced & GEOINT SAR Pillars executed cleanly. Manifest saved to {manifest_path}"
     )
     return summary_manifest
 

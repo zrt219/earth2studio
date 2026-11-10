@@ -668,8 +668,8 @@ class TestEdgeCasesAndBoundaries:
             )
 
     def test_stored_historical_markdown_report_is_quarantine_stamped(self) -> None:
-        """docs/origin_datum/SCIENTIFIC_STUDY_REPORT.md on disk must carry QUARANTINED_DEFECTIVE_SYNTHETIC in its header."""
-        report_path = Path("docs/origin_datum/SCIENTIFIC_STUDY_REPORT.md")
+        """docs/engineering_reports/SCIENTIFIC_STUDY_REPORT.md on disk must carry QUARANTINED_DEFECTIVE_SYNTHETIC in its header."""
+        report_path = Path("docs/engineering_reports/SCIENTIFIC_STUDY_REPORT.md")
         assert report_path.exists()
         report_text = report_path.read_text(encoding="utf-8")
         metrics_data = json.loads(

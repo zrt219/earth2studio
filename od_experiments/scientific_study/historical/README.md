@@ -2,7 +2,7 @@
 
 **Directory Classification:** `TRUTH_CONDITIONED_SYNTHETIC_DIAGNOSTIC`  
 **Audited Commit:** `364dba83fa61856d23a3882be46c899ebcfed2a1`  
-**Reference Document:** `docs/origin_datum/EO_EARTH2_LEAKAGE_AUDIT.md`  
+**Reference Document:** `docs/engineering_reports/EO_EARTH2_LEAKAGE_AUDIT.md`  
 
 ---
 

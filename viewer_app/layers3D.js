@@ -14,11 +14,11 @@
 // limitations under the License.
 
 /**
- * OD-EARTH2-001 / EO-OBSCURA: 3D WebGL Digital Twin
+ * Earth-2 X-Band SAR & InSAR Mission Twin
  * 3D Scientific Layers Engine (Three.js r170)
  *
  * Module: viewer_app/layers3D.js
- * Author: Zhane Daye (Origin Datum — Independent Research Initiative)
+ * Author: Zhane Daye (SAR & Earth System Engineering | zhanedaye@umattr.ca)
  * Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
  *
  * Implements:

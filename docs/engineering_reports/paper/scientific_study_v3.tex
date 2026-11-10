@@ -30,18 +30,17 @@
     urlcolor=blue
 }
 
-\title{\textbf{OD-EO-003: Operational Diagnostic Verification, 5-Model Multi-Model Prognostic Ensembles, Quarantined Synthetic Case Study, and 34-Figure Compendium in Earth-2 Studio}}
+\title{\textbf{Operational Diagnostic Verification, 5-Model Multi-Model Prognostic Ensembles, Quarantined Synthetic Case Study, and 34-Figure Compendium in Earth-2 Studio}}
 
 \author{
     \textbf{Zhane Daye} \\
-    \textit{Origin Datum --- Independent Research Initiative} \\
-    Edmonton, Alberta, Canada \\
-    \texttt{contact@origindatum.space} \quad \url{https://origindatum.space/} \\
-    \small Repository: \url{https://github.com/zrt219/earth2studio} (Branch: \texttt{feat/od-earth2-001}) \\
-    \small Interactive 3D Digital Twin: \url{https://viewerapp.vercel.app}
+    \textit{SAR \& Earth System Engineering $|$ Edmonton, Alberta, Canada} \\
+    \texttt{zhanedaye@umattr.ca} \quad $|$ \quad \href{https://www.linkedin.com/in/zhane-umattr}{linkedin.com/in/zhane-umattr} \\
+    \small Repository: \url{https://github.com/zrt219/earth2studio} \\
+    \small Interactive 3D Mission Twin: \url{https://earth2-sar-insar.vercel.app}
 }
 
-\date{November 1, 2026}
+\date{November 2026}
 
 \begin{document}
 
@@ -56,7 +55,7 @@ Under \textbf{Pillar A (Operational Diagnostic Verification Suite)}, we formally
 
 Under \textbf{Pillar B (Multi-Model Prognostic Ensembles)}, we construct a heterogeneous ensemble suite integrating five diverse AI-NWP paradigms: GraphCast (Multi-Scale Graph Neural Network), FourCastNet v2 (Spherical Fourier Neural Operator on $\mathcal{S}^2$), Pangu-Weather (3D Earth-Specific Swin Transformer), ClimaX (Climate Foundation Vision Transformer), and Persistence Baseline ($X(t_0)$). We introduce a decoupled autonomous trajectory evolution protocol that evolves each model along its native auto-regressive latent manifold, completely preventing cross-model manifold shock at intermediate steps. Across multi-step lead-time horizons ($6\si{\hour}$, $12\si{\hour}$, $18\si{\hour}$, and $24\si{\hour}$), 24h global $T_\mathrm{2m}$ RMSE progresses from $1.2467\,\si{\kelvin}$ (GraphCast, $+66.29\%$ skill), $1.2939\,\si{\kelvin}$ (Pangu-Weather, $+65.02\%$), $1.3652\,\si{\kelvin}$ (SFNO, $+63.09\%$), to $1.4817\,\si{\kelvin}$ (ClimaX, $+59.94\%$), evaluated against NOAA GFS analysis.
 
-Furthermore, we preserve and algebraically analyze the quarantined historical synthetic case study, establish the 3-stage decoupled anti-leakage architecture (Tests~A--F), detail the six Earth-2 Advanced Capability Pillars, deploy the interactive 3D WebGL spherical digital twin (\url{https://viewerapp.vercel.app}), and integrate a compendium of all 34 publication-grade visual plates cataloged with full 64-character SHA-256 digests conforming to Schema 2.0.0 execution manifests.
+Furthermore, we preserve and algebraically analyze the quarantined historical synthetic case study, establish the 3-stage decoupled anti-leakage architecture (Tests~A--F), detail the six Earth-2 Advanced Capability Pillars, deploy the interactive 3D WebGL spherical digital twin (\url{https://earth2-sar-insar.vercel.app}), and integrate a compendium of all 34 publication-grade visual plates cataloged with full 64-character SHA-256 digests conforming to Schema 2.0.0 execution manifests.
 \end{abstract}
 
 \section{Introduction \& Research Motivation}
@@ -65,7 +64,7 @@ Furthermore, we preserve and algebraically analyze the quarantined historical sy
 \noindent\fbox{%
 \begin{minipage}{\dimexpr\columnwidth-2\fboxsep-2\fboxrule\relax}
 \textbf{Executive Provenance Statement (Scientific Audit \& Remediation):}
-All evaluation figures, tables, and manuscript text citing a Root Mean Square Error of $0.747\,\si{\kelvin}$, a $+64.9\%$ skill score, or a $0.959$ correlation in historical Project OD-EARTH2-001 documentation are formally classified as \texttt{STATUS: QUARANTINED\_DEFECTIVE\_SYNTHETIC}. These numbers are forensic artifacts representing target leakage where future verifying operational analyses were interpolated into the forecast generation pass. The authenticated physical baseline for this study is established by the decoupled persistence forecast ($\mathrm{RMSE}_\mathrm{w} = 2.1290\,\si{\kelvin}$, $\mathrm{MAE}_\mathrm{w} = 1.0369\,\si{\kelvin}$) and the authentic multi-model prognostic benchmark suite (GraphCast, SFNO, Pangu-Weather, ClimaX) sealed under cryptographic SHA-256 manifests.
+All evaluation figures, tables, and manuscript text citing a Root Mean Square Error of $0.747\,\si{\kelvin}$, a $+64.9\%$ skill score, or a $0.959$ correlation in historical study documentation are formally classified as \texttt{STATUS: QUARANTINED\_DEFECTIVE\_SYNTHETIC}. These numbers are forensic artifacts representing target leakage where future verifying operational analyses were interpolated into the forecast generation pass. The authenticated physical baseline for this study is established by the decoupled persistence forecast ($\mathrm{RMSE}_\mathrm{w} = 2.1290\,\si{\kelvin}$, $\mathrm{MAE}_\mathrm{w} = 1.0369\,\si{\kelvin}$) and the authentic multi-model prognostic benchmark suite (GraphCast, SFNO, Pangu-Weather, ClimaX) sealed under cryptographic SHA-256 manifests.
 \end{minipage}%
 }
 \vspace{6pt}
@@ -82,7 +81,7 @@ However, the rapid transition of deep learning models from exploratory benchmark
     \item \textbf{Vanishing Extremal Skill:} Relying on classical scores (e.g., Heidke Skill Score) that degenerate to zero for rare high-impact events.
 \end{enumerate}
 
-In Project OD-EARTH2-001 / EO-OBSCURA, developed within the Origin Datum research initiative for satellite cloud-obscuration reconstruction, an exhaustive internal audit revealed that historical evaluation scripts produced benchmark numbers using synthetic formulas conditioned directly on future verifying fields.
+During the development of our atmospheric and SAR observation pipeline, an exhaustive internal audit revealed that historical evaluation scripts produced benchmark numbers using synthetic formulas conditioned directly on future verifying fields.
 
 This paper establishes the definitive Version 3.1 treatise:
 \begin{itemize}
@@ -92,7 +91,7 @@ This paper establishes the definitive Version 3.1 treatise:
     \item We formulate and implement \textbf{Pillar A: Operational Diagnostic Verification Suite}, comprising vectorized $\mathcal{O}(M \log M)$ CRPS, Fair CRPS, finite-calibrated SSR ($\sqrt{(M+1)/M}$ factor), base-rate invariant EDI/SEDI, and TAC vs.\ ACC demarcation.
     \item We formulate and benchmark \textbf{Pillar B: Multi-Model Prognostic Ensembles}, comparing GraphCast, SFNO, Pangu-Weather, ClimaX, and Persistence across multi-step lead times ($6\text{h}$ to $24\text{h}$).
     \item We present the complete Earth-2 Advanced Capability Suite across six pillars: probabilistic ensembles, storm tracking, multi-source ingestion, prognostic architecture benchmarks, mesoscale downscaling, and surface data assimilation.
-    \item We introduce an interactive 3D WebGL spherical digital twin deployed live on Vercel (\url{https://viewerapp.vercel.app}).
+    \item We introduce an interactive 3D WebGL spherical digital twin deployed live on Vercel (\url{https://earth2-sar-insar.vercel.app}).
     \item We present the complete 34-figure publication compendium cataloged with full 64-character SHA-256 cryptographic digests under Schema 2.0.0.
 \end{itemize}
 
@@ -741,7 +740,7 @@ Evaluating across four Italian synoptic stations (Milan $+5.5\,\si{\kelvin}$, Ro
 \subsection{Architecture \& WebGL Implementation}
 Standard 2D equirectangular cartographic projections suffer from extreme area distortion near the poles, stretching high-latitude features by $\sec\phi$. To provide intuitive planetary inspection, we developed an interactive 3D WebGL spherical visualization suite shown in Fig.~\ref{fig:3d_visualization_suite}, implemented in \texttt{viewer\_app/} and deployed live on Vercel at:
 \begin{center}
-\textbf{\url{https://viewerapp.vercel.app}}
+\textbf{\url{https://earth2-sar-insar.vercel.app}}
 \end{center}
 
 \begin{figure*}[t]
@@ -766,7 +765,7 @@ Standard 2D equirectangular cartographic projections suffer from extreme area di
     \caption{Western Pacific Baroclinic Relief}
     \label{fig:japan_3d}
 \end{subfigure}
-\caption{\textbf{Interactive 3D WebGL Spherical Atmospheric Visualization.} (a) Global 3D spherical mesh rendering with Turbo spectral colormap, elevation bump relief ($\mathrm{scale}=0.18$), and atmospheric glow shell deployed live on Vercel (\url{https://viewerapp.vercel.app}). (b) Oblique 3D perspective relief over the Central Mediterranean and Alps. (c) Oblique 3D perspective relief over the Japanese archipelago capturing Western Pacific baroclinic troughs.}
+\caption{\textbf{Interactive 3D WebGL Spherical Atmospheric Visualization.} (a) Global 3D spherical mesh rendering with Turbo spectral colormap, elevation bump relief ($\mathrm{scale}=0.18$), and atmospheric glow shell deployed live on Vercel (\url{https://earth2-sar-insar.vercel.app}). (b) Oblique 3D perspective relief over the Central Mediterranean and Alps. (c) Oblique 3D perspective relief over the Japanese archipelago capturing Western Pacific baroclinic troughs.}
 \label{fig:3d_visualization_suite}
 \end{figure*}
 
@@ -924,7 +923,7 @@ All nine mandatory acceptance gates defined in the project specification were sy
 
 This work accomplishes the definitive, publication-grade scientific treatise of Project OD-EARTH2-001 (Version 3.1). We identified and eliminated historical target leakage, formulated an immutable 3-stage decoupled pipeline, verified its integrity through six formal anti-leakage invariants, executed the smallest genuine forecast experiment against NOAA GFS operational analyses, and established authentic baseline metrics ($2.1290\,\si{\kelvin}$ RMSE). 
 
-Furthermore, we established the theoretical formulations and empirical benchmarks for Operational Diagnostic Verification (Pillar A) and 5-Model Multi-Model Prognostic Ensembles (Pillar B), demonstrated the six foundational Earth-2 Advanced Capability Pillars, deployed an interactive 3D WebGL spherical digital twin on Vercel (\url{https://viewerapp.vercel.app}), and cataloged all 34 publication-grade visual plates under cryptographic SHA-256 seals.
+Furthermore, we established the theoretical formulations and empirical benchmarks for Operational Diagnostic Verification (Pillar A) and 5-Model Multi-Model Prognostic Ensembles (Pillar B), demonstrated the six foundational Earth-2 Advanced Capability Pillars, deployed an interactive 3D WebGL spherical digital twin on Vercel (\url{https://earth2-sar-insar.vercel.app}), and cataloged all 34 publication-grade visual plates under cryptographic SHA-256 seals.
 
 \section*{Data Availability \& Cryptographic Checksums}
 All code, manifests, and run artifacts are version-controlled under branch \texttt{feat/od-earth2-001} of repository \url{https://github.com/zrt219/earth2studio}. Table~\ref{tab:manifest_checksums_verified} records the master execution manifests, and Table~\ref{tab:hashes_34} records the full 34-figure cryptographic SHA-256 catalog.

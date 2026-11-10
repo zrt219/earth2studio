@@ -126,3 +126,11 @@ skills/*/evals/results/
 *.log
 *.out
 
+# Agent teamwork & scratch directories
+.agents/teamwork/
+.superpowers/
+PROJECT.md
+TEST_INFRA.md
+TEST_READY.md
+
+

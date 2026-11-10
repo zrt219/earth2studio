@@ -40,7 +40,7 @@ from od_experiments.scientific_study.historical.study_runner_historical import (
 )
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
-PAPER_FIGS = ROOT_DIR / "docs" / "origin_datum" / "paper" / "figures"
+PAPER_FIGS = ROOT_DIR / "docs" / "engineering_reports" / "paper" / "figures"
 STUDY_OUT = ROOT_DIR / "outputs" / "scientific_study"
 EARTH2_OUT = ROOT_DIR / "outputs" / "earth2_001"
 REALTIME_OUT = ROOT_DIR / "outputs" / "realtime_workflow"
@@ -502,7 +502,7 @@ def generate_visual_suite() -> None:
             logger.info(f"Synchronized {src.name} -> {dst_name}")
 
     logger.success(
-        "All visual assets successfully generated in docs/origin_datum/paper/figures/!"
+        "All visual assets successfully generated in docs/engineering_reports/paper/figures/!"
     )
 
 
