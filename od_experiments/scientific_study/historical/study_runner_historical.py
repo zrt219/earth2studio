@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
-# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Author: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# Author: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 
 """HISTORICAL RESEARCH ARTIFACT - DO NOT USE FOR BENCHMARKING.
 
@@ -354,7 +354,7 @@ def run_full_study(num_days: int = 7) -> Dict[str, Any]:
             "quarantine_status": QUARANTINE_STAMP,
             "quarantine_header": f"[{QUARANTINE_STAMP}] HISTORICAL TARGET-LEAKED DIAGNOSTIC",
             "study_title": f"[{QUARANTINE_STAMP}] 7-Day Continuous Lead-Time Skill Benchmark & Dual Regional Extreme Event Tracking",
-            "program": "EO-OBSCURA / ORIGIN DATUM",
+            "program": "Earth-2 SAR & InSAR Mission Twin",
             "experiment_classification": f"{QUARANTINE_STAMP} (TRUTH_CONDITIONED_SYNTHETIC_DIAGNOSTIC)",
             "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "evaluation_period": f"{cycles[0].strftime('%Y-%m-%d')} to {cycles[-1].strftime('%Y-%m-%d')}",
@@ -395,8 +395,8 @@ def write_scientific_report(summary: Dict[str, Any]) -> str:
         "",
         f"> **QUARANTINE NOTICE (`{QUARANTINE_STAMP}`):** This historical artifact contains synthetic target leakage (`0.72 * (y_truth - x_0)`) and is permanently quarantined. Do not cite or use as an operational model benchmark.",
         "",
-        "**Organization:** ORIGIN DATUM  ",
-        "**Research Program:** EO-OBSCURA  ",
+        "**Organization:** Zhane Daye (SAR & Earth System Engineering)  ",
+        "**Research Program:** Earth-2 SAR & InSAR Mission Twin  ",
         f"**Quarantine Status:** `{QUARANTINE_STAMP}`  ",
         f"**Experiment Classification:** `{summary['experiment_classification']}`  ",
         "**Model Architecture:** Spherical Fourier Neural Operator (FourCastNet / SFNO) [SYNTHETIC PROTOTYPE - QUARANTINED]  ",
@@ -477,7 +477,7 @@ def write_scientific_report(summary: Dict[str, Any]) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description=f"[{QUARANTINE_STAMP}] Origin Datum 7-Day Weather Skill Benchmark & Extreme Event Study [HISTORICAL PROTOTYPE]"
+        description=f"[{QUARANTINE_STAMP}] Earth-2 7-Day Weather Skill Benchmark & Extreme Event Study [HISTORICAL PROTOTYPE]"
     )
     parser.add_argument(
         "--days",

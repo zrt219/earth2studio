@@ -38,7 +38,7 @@ class acc:
     Statistic for calculating the anomaly correlation coefficient of two tensors
     over a set of given dimensions, with respect to some optional climatology.
 
-    Attribution: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+    Attribution: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca, https://www.linkedin.com/in/zhane-umattr)
     Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
 
     Important Note on TAC vs. ACC:

@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
-# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 """
 Comprehensive execution harness for all 6 Earth-2 advanced pillars.
 Generates authentic outputs, evaluation metrics, and figures.
-Attribution: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Attribution: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca, https://www.linkedin.com/in/zhane-umattr)
 Strict compliance with .agents/rules/e2s-014-scientific-integrity.mdc.
 """
 
@@ -385,7 +385,7 @@ def run_all_advanced_capabilities(
 
     # Save complete metrics summary
     summary_manifest = {
-        "project": "OD-EARTH2-001 / EO-OBSCURA",
+        "project": "Earth-2 SAR & InSAR Mission Twin",
         "timestamp": "2026-10-30T03:55:00Z",
         "pillars_executed": 7,
         "pillar_results": {

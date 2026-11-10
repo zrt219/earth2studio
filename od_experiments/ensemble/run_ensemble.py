@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """
 Multi-member atmospheric ensemble forecasting engine.
-Built for OD-EARTH2-001 / EO-OBSCURA research initiative.
+Built for Earth-2 X-Band SAR & InSAR Mission Twin research initiative.
 Strict adherence to .agents/rules/e2s-014-scientific-integrity.mdc.
 """
 

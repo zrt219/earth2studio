@@ -68,7 +68,7 @@ def inspect_components(
         print(json.dumps(info, indent=2))
     else:
         print("=" * 70)
-        print("          ORIGIN DATUM EARTH-2 INSPECTION REGISTRY")
+        print("          EARTH-2 INSPECTION REGISTRY — ZHANE DAYE")
         print("=" * 70)
         print(f"Earth2Studio Version: {info['earth2studio_version']}\n")
         print("Available Model Architectures:")

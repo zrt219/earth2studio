@@ -1,9 +1,9 @@
 # OD-EARTH2-001: Genuine AI Weather Forecast & Scientific Verification
 
 **Author:** Zhane Daye
-**Organization:** ORIGIN DATUM ([datum.space](https://datum.space))
+**Organization:** Zhane Daye (SAR & Earth System Engineering)
 **GitHub:** [github.com/zrt219](https://github.com/zrt219)
-**Program:** EO-OBSCURA
+**Program:** Earth-2 SAR & InSAR Mission Twin
 **Experiment ID:** OD-EARTH2-001
 **Execution Date:** 2026-10-26 (Simulated Atmospheric Time: 2024-01-01 00:00 UTC)
 **Classification:** GENUINE_ATMOSPHERIC_EXPERIMENT
@@ -16,7 +16,7 @@
 
 ## 1. Scientific Verification Integrity & Distinctions
 
-To ensure strict scientific and engineering rigor, Origin Datum enforces clear distinctions across experimental tiers:
+To ensure strict scientific and engineering rigor, We enforce clear distinctions across experimental tiers:
 1. **`SYNTHETIC_SMOKE_TEST`**: Run using synthetic random fields (`earth2studio.data.Random`). Validates pipeline execution, tensor plumbing, and Zarr I/O without asserting meteorological correctness.
 2. **`GENUINE_ATMOSPHERIC_EXPERIMENT`**: Uses real historical weather observations (`earth2studio.data.GFS`), runs model inference, extracts predictions directly from the generated Zarr array store, and compares against independent meteorological analyses at the verification lead time.
 3. **Execution vs. Validation**: Execution success proves software pipeline completion. Validation success requires genuine observation reference data and latitude-weighted error metric evaluation.

@@ -18,7 +18,7 @@
 Operational Diagnostic Metrics & Ensemble Verification Suite Test Suite.
 Fast CPU execution (< 5 seconds) without network downloads or model checkpoints.
 OD-EARTH2-001 research initiative.
-Attribution: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Attribution: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca, https://www.linkedin.com/in/zhane-umattr)
 Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
 """
 

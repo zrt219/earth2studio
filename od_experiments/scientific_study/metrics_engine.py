@@ -16,7 +16,7 @@
 
 """Scientific meteorological metrics engine for Earth-2 evaluation.
 
-Author: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Author: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 Strict adherence to .agents/rules/e2s-014-scientific-integrity.mdc.
 
 Provides:

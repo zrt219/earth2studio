@@ -1,9 +1,9 @@
 # OD-EARTH2-001: COMPREHENSIVE SCIENTIFIC FINDINGS & BENCHMARK REPORT
 
 **Author:** Zhane Daye
-**Organization:** ORIGIN DATUM ([datum.space](https://datum.space))
+**Organization:** Zhane Daye (SAR & Earth System Engineering)
 **GitHub:** [github.com/zrt219](https://github.com/zrt219)
-**Program:** EO-OBSCURA (Atmospheric Context & Incomplete Observation Reconstruction)
+**Program:** Earth-2 SAR & InSAR Mission Twin (Atmospheric Context & Incomplete Observation Reconstruction)
 **Study Identifier:** OD-EARTH2-001-REV2
 **Date of Completion:** October 26, 2026
 **Status:** FULLY VALIDATED & CRYPTOGRAPHICALLY ATTESTED
@@ -12,7 +12,7 @@
 
 ## 1. Executive Summary
 
-This investigation establishes the baseline scientific foundation for **EO-OBSCURA**, Origin Datum's program dedicated to reconstructing obscured and incomplete satellite Earth observations. By leveraging NVIDIA Earth2Studio in an isolated, zero-cost scientific architecture, we demonstrate genuine end-to-end meteorological forecasting, direct array extraction from multi-dimensional Zarr backends, cryptographic provenance tracing, and spherical cosine-weighted error evaluation.
+This investigation establishes the baseline scientific foundation for **Earth-2 Mission Twin**, dedicated to reconstructing obscured and incomplete satellite Earth observations. By leveraging NVIDIA Earth2Studio in an isolated, zero-cost scientific architecture, we demonstrate genuine end-to-end meteorological forecasting, direct array extraction from multi-dimensional Zarr backends, cryptographic provenance tracing, and spherical cosine-weighted error evaluation.
 
 Key empirical achievements:
 - **Zero-Cost Public Data Integration**: Successfully queried and ingested 0.25-degree GRIB2 analyses directly from the public NOAA Global Forecast System (GFS) AWS Open Data bucket (`s3://noaa-gfs-bdp-pds`).
@@ -65,7 +65,7 @@ The table below summarizes the quantitative verification scores for the 6-hour P
 ### 3.1 Verification Interpretation
 1. **Diurnal Temperature Drift**: The global mean bias of $-0.3313\text{ K}$ and MAE of $1.2635\text{ K}$ accurately reflect solar radiation changes over 6 hours as dawn transitions across the Atlantic and Pacific basins.
 2. **Kinematic Wind Consistency**: Zonal wind bias ($-0.0341\text{ m/s}$) is nearly zero on a global average, consistent with planetary angular momentum conservation.
-3. **Establishing the EO-OBSCURA Baseline**: Neural prognostic architectures (e.g. DLWP, FourCastNet) must demonstrably surpass these persistence error thresholds ($\text{MAE} < 1.26\text{ K}$) to provide positive information gain for satellite optical reconstruction.
+3. **Establishing the Forecasting Baseline**: Neural prognostic architectures (e.g. DLWP, FourCastNet) must demonstrably surpass these persistence error thresholds ($\text{MAE} < 1.26\text{ K}$) to provide positive information gain for satellite optical reconstruction.
 
 ---
 
@@ -86,7 +86,7 @@ Every experiment execution emits a cryptographically sealed provenance record:
 
 ## 5. Automated Verification Test Suite Summary
 
-The Origin Datum research test suite now contains **55 automated unit and regression tests**, all executing cleanly under `pytest` with 100% pass rate:
+The Earth-2 research test suite now contains **55 automated unit and regression tests**, all executing cleanly under `pytest` with 100% pass rate:
 
 - `test_config.py` (3 tests): Default configuration integrity, validation error handling, credential scrubber.
 - `test_provenance.py` (2 tests): Git commit tracking, Manifest v2.0 serialization and structure.
@@ -97,10 +97,10 @@ The Origin Datum research test suite now contains **55 automated unit and regres
 
 ---
 
-## 6. Connection to the EO-OBSCURA Research Mission
+## 6. Connection to the SAR & InSAR Mission Twin
 
 Earth observations from optical sensors (such as Sentinel-2 MSI) are frequently obstructed by heavy cloud decks, aerosol plumes, or orbital observation gaps. Rather than relying on simple spatial interpolation or unconstrained generative hallucination:
 
 1. **Atmospheric Physics Prior**: Earth-2 forecasts provide the deterministic thermodynamic and aerodynamic context (relative humidity, convective available potential energy, boundary layer winds) at the exact timestamp of missing satellite imagery.
-2. **Constrained Information Inversion**: In EO-OBSCURA, these atmospheric vector fields guide synthetic aperture radar (Sentinel-1 SAR) to optical multi-spectral translation, constraining cloud shadow projection, atmospheric refraction, and surface moisture boundaries.
+2. **Constrained Information Inversion**: In this mission twin, these atmospheric vector fields guide synthetic aperture radar (Sentinel-1 SAR) to optical multi-spectral translation, constraining cloud shadow projection, atmospheric refraction, and surface moisture boundaries.
 3. **Reproducible Foundation**: Having proven real data ingestion, genuine persistence baseline scoring, and authenticated cloud API access, the lab is now technically ready to evaluate deep neural prognostic models (DLWP on CPU and FourCastNet via NVIDIA Cloud API).

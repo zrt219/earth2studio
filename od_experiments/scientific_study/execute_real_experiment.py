@@ -257,14 +257,14 @@ def generate_real_run_report(summary: dict[str, Any], logger: logging.Logger) ->
     cycle = summary["cycle"]
     probe = summary["env_probe"]
 
-    content = f"""# ORIGIN DATUM — EO-OBSCURA
+    content = f"""# EARTH-2 SAR & INSAR MISSION TWIN
 # EMPIRICAL VALIDATION REPORT: REAL FORECAST EXPERIMENT & OPERATIONAL VERIFICATION
 
 - **Report Identifier:** `EO-EARTH2-REAL-RUN-001`
-- **Project:** OD-EARTH2-001 / EO-OBSCURA
+- **Project:** Earth-2 X-Band SAR & InSAR Mission Twin
 - **Date:** {summary['timestamp_utc']}
 - **Author:** Zhane Daye
-- **Affiliation:** Origin Datum — Independent Research Initiative
+- **Affiliation:** Zhane Daye — SAR & Earth System Engineering
 - **Target Repository:** NVIDIA Earth2Studio fork (`feat/od-earth2-001`)
 - **Active Git Commit:** `{man['git_commit']}`
 

@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
-# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 # SPDX-License-Identifier: Apache-2.0
 
 """Stage B: Genuine Freeze Stage (Cryptographic Hashing & Provenance Sealing).
@@ -9,7 +9,7 @@ Computes SHA-256 digests for all serialized prediction tensors and initial field
 validates model identity invariants, captures execution environment metadata,
 and seals run_manifest.json before verification retrieval.
 
-Attribution: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Attribution: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca, https://www.linkedin.com/in/zhane-umattr)
 """
 
 from __future__ import annotations
@@ -155,7 +155,7 @@ def freeze_forecast(
     }
 
     manifest = {
-        "$schema": "https://origindatum.space/schemas/weather-run-manifest-v2.json",
+        "$schema": "https://zhanedaye.github.io/schemas/weather-run-manifest-v2.json",
         "manifest_version": "2.0.0",
         "experiment_classification": classification,
         "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),

@@ -1,15 +1,15 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
-# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 # SPDX-License-Identifier: Apache-2.0
 
 """Custom exception hierarchy for anti-leakage and pipeline integrity verification.
 
 Defines the authoritative error types required to enforce temporal separation,
 cryptographic provenance, synthetic substitution prevention, chronological correctness,
-and truthful model attribution under Project OD-EARTH2-001 / EO-OBSCURA.
+and truthful model attribution under Earth-2 X-Band SAR & InSAR Mission Twin.
 
-Attribution: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Attribution: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca, https://www.linkedin.com/in/zhane-umattr)
 """
 
 from __future__ import annotations

@@ -69,7 +69,7 @@ def test_artifact_processor_saves_json_response(tmp_path):
 
 
 def test_calculate_sha256():
-    data = b"origin_datum_verification"
+    data = b"earth2_studio_verification"
     digest = calculate_sha256(data)
     assert len(digest) == 64
     assert digest == calculate_sha256(data)

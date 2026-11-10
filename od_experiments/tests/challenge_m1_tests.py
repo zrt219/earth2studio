@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 # Empirical Challenge Verification Suite for Milestone 1 (EDI, SEDI, Pipeline).
-# Author: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# Author: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 # Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
 
 from __future__ import annotations

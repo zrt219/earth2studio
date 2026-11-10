@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
-# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,8 +17,8 @@
 
 """
 Authentic Model Execution, Anti-Leakage Audit, and Provenance Manifest Generation.
-OD-EARTH2-001 / EO-OBSCURA Research Initiative.
-Attribution: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Earth-2 X-Band SAR & InSAR Mission Twin Research Initiative.
+Attribution: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca, https://www.linkedin.com/in/zhane-umattr)
 Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
 """
 
@@ -238,7 +238,7 @@ def execute_authentic_experiment(output_dir: Path | str = OUTPUT_DIR) -> dict[st
 
     # Construct the cryptographic execution manifest
     execution_manifest = {
-        "$schema": "https://origindatum.space/schemas/weather-run-manifest-v2.json",
+        "$schema": "https://zhanedaye.github.io/schemas/weather-run-manifest-v2.json",
         "manifest_version": "2.0.0",
         "experiment_id": "OD-EARTH2-001-AUTHENTIC-VERIFIED",
         "experiment_classification": "AUTHENTIC_PHYSICAL_BASELINE_AND_BENCHMARK",

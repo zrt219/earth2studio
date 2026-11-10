@@ -1,12 +1,12 @@
-# ORIGIN DATUM — EO-OBSCURA
+# EARTH-2 SAR & INSAR MISSION TWIN
 # SCIENTIFIC VERIFICATION PROTOCOL: DECOUPLED NUMERICAL FORECASTING & INDEPENDENT OPERATIONAL ANALYSIS VALIDATION
 
 - **Protocol Identifier:** `EO-EARTH2-VERIF-PROTO-V2`
-- **Project:** OD-EARTH2-001 / EO-OBSCURA
+- **Project:** Earth-2 X-Band SAR & InSAR Mission Twin
 - **Author:** Zhane Daye
-- **Affiliation:** Origin Datum — Independent Research Initiative
+- **Affiliation:** Zhane Daye — SAR & Earth System Engineering
 - **Location:** Edmonton, Alberta, Canada
-- **Contact:** `contact@origindatum.space` | `https://origindatum.space/`
+- **Contact:** `zhanedaye@umattr.ca` | `https://www.linkedin.com/in/zhane-umattr`
 - **Effective Date:** 2026-10-29
 - **Governing Standard:** WMO Manual on the Global Data-Processing and Forecasting System (GDPFS) & NVIDIA Earth2Studio Validation Guidelines
 
@@ -159,7 +159,7 @@ All frozen forecast stages must produce a `run_manifest.json` conforming to Sche
 
 ```json
 {
-  "$schema": "https://origindatum.space/schemas/weather-run-manifest-v2.json",
+  "$schema": "https://zhanedaye.github.io/schemas/weather-run-manifest-v2.json",
   "manifest_version": "2.0.0",
   "experiment_classification": "BASELINE_PERSISTENCE | REAL_MODEL_FORECAST",
   "timestamp_utc": "ISO-8601 UTC string",

@@ -1,12 +1,12 @@
 # Authoritative Root-Cause Audit: Target Leakage, Model Misrepresentation, and Empirical Validation Failures in OD-EARTH2-001
 
 **Document ID:** `DOC-EO-AUDIT-001`  
-**Project:** `OD-EARTH2-001 / EO-OBSCURA`  
+**Project:** `Earth-2 X-Band SAR & InSAR Mission Twin`  
 **Audited Commit:** `364dba83fa61856d23a3882be46c899ebcfed2a1`  
 **Branch:** `feat/od-earth2-001`  
 **Author:** Zhane Daye  
-**Affiliation:** Origin Datum — Independent Research Initiative  
-**Contact:** `contact@origindatum.space` | [https://origindatum.space/](https://origindatum.space/)  
+**Affiliation:** Zhane Daye — SAR & Earth System Engineering  
+**Contact:** `zhanedaye@umattr.ca` | [https://www.linkedin.com/in/zhane-umattr](https://www.linkedin.com/in/zhane-umattr)  
 **Date:** 2026-10-29  
 **Classification:** `AUTHORITATIVE TECHNICAL AUDIT & REMEDIATION SPECIFICATION`  
 
@@ -38,7 +38,7 @@ This audit provides complete evidence, verbatim source citations, mathematical p
 - **Target Branch:** `feat/od-earth2-001`
 - **Commit Date:** 2026-10-29 03:29:10 UTC
 - **Commit Message:** `test(scientific-study): add unit tests for TAC and fix LaTeX table width formatting`
-- **Commit Author:** `zhane <zhane@origindatum.space>`
+- **Commit Author:** `zhane <zhanedaye@umattr.ca>`
 
 ### 2.2 Historical Commit Progression of the Failure
 Forensic analysis of the git commit graph reveals how the synthetic leakage logic entered and stabilized in the repository:
@@ -135,7 +135,7 @@ $$\text{SS} = 1 - \frac{\text{RMSE}_{\text{model}}}{\text{RMSE}_{\text{pers}}} =
 #### Exact Locations
 1. `od_experiments/earth2_001/forecast.py`: Line 89, Line 216
 2. `od_experiments/scientific_study/generate_all_visuals.py`: Lines 63–64, Lines 195–222
-3. `docs/origin_datum/paper/scientific_study_v2.tex`: Lines 170–172, Lines 193–195
+3. `docs/engineering_reports/paper/scientific_study_v2.tex`: Lines 170–172, Lines 193–195
 
 #### Verbatim Code & Text Citations
 - `od_experiments/earth2_001/forecast.py` line 89:
@@ -147,7 +147,7 @@ $$\text{SS} = 1 - \frac{\text{RMSE}_{\text{model}}}{\text{RMSE}_{\text{pers}}} =
   f_u10m = np.load(EARTH2_OUT / "forecast_u10m.npy")
   f_v10m = np.load(EARTH2_OUT / "forecast_v10m.npy")
   ```
-- `docs/origin_datum/paper/scientific_study_v2.tex` lines 170–172 (Figure 4 Caption):
+- `docs/engineering_reports/paper/scientific_study_v2.tex` lines 170–172 (Figure 4 Caption):
   ```latex
   \caption{\textbf{Global Surface Wind Circulation Fields ($10\,\mathrm{m}$ Elevation).} FourCastNet successfully resolves trade winds, mid-latitude westerly jet streaks, and polar easterlies with sharp velocity gradients across hemispheres.}
   ```
@@ -165,7 +165,7 @@ $$\text{SS} = 1 - \frac{\text{RMSE}_{\text{model}}}{\text{RMSE}_{\text{pers}}} =
 
 #### Exact Locations
 - **File:** `od_experiments/scientific_study/study_runner.py`: Lines 137–148
-- **File:** `docs/origin_datum/paper/scientific_study_v2.tex`: Lines 189–191, Lines 198–203
+- **File:** `docs/engineering_reports/paper/scientific_study_v2.tex`: Lines 189–191, Lines 198–203
 
 #### Verbatim Code Snippet
 ```python
@@ -222,7 +222,7 @@ $$\text{SS} = 1 - \frac{\text{RMSE}_{\text{model}}}{\text{RMSE}_{\text{pers}}} =
 #### Exact Locations
 - **File:** `od_experiments/scientific_study/metrics_engine.py`: Lines 80–129, Lines 169–170
 - **File:** `od_experiments/scientific_study/study_runner.py`: Lines 172–174
-- **File:** `docs/origin_datum/paper/scientific_study_v2.tex`: Lines 80, 140–142, 172–174
+- **File:** `docs/engineering_reports/paper/scientific_study_v2.tex`: Lines 80, 140–142, 172–174
 
 #### Verbatim Code Snippet
 ```python
@@ -286,7 +286,7 @@ $$\text{SS} = 1 - \frac{\text{RMSE}_{\text{model}}}{\text{RMSE}_{\text{pers}}} =
 ### 3.7 Defect 7: Unsubstantiated Scientific Manuscript Claims
 
 #### Exact Location
-- **File:** `docs/origin_datum/paper/scientific_study_v2.tex`
+- **File:** `docs/engineering_reports/paper/scientific_study_v2.tex`
 
 #### Comprehensive Forensic Claim Audit Table
 
@@ -509,7 +509,7 @@ To permanently prevent target leakage by architectural construction, the inferen
 ### 7.1 Cryptographic Run Manifest Schema (`run_manifest.json`)
 ```json
 {
-  "$schema": "https://origindatum.space/schemas/weather-run-manifest-v2.json",
+  "$schema": "https://zhanedaye.github.io/schemas/weather-run-manifest-v2.json",
   "manifest_version": "2.0.0",
   "experiment_classification": "REAL_MODEL_FORECAST",
   "timestamp_utc": "2026-10-29T12:00:00Z",

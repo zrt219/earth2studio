@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
-# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,8 @@
 """
 Operational Multi-Model Prognostic Benchmark Runner.
 Zero-leakage atmospheric evaluation of Persistence, Neural Operators, and Multi-Model Ensembles.
-OD-EARTH2-001 / EO-OBSCURA research initiative.
-Attribution: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Earth-2 X-Band SAR & InSAR Mission Twin research initiative.
+Attribution: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca, https://www.linkedin.com/in/zhane-umattr)
 Compliance: .agents/rules/e2s-009-prognostic-models.mdc, .agents/rules/e2s-014-scientific-integrity.mdc
 """
 

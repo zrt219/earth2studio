@@ -1,1 +1,1 @@
-"""Hosted API client subpackage for Origin Datum Earth-2 integrations."""
+"""Hosted API client subpackage for Earth-2 integrations."""

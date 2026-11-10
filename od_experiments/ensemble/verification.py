@@ -16,8 +16,8 @@
 
 """
 Operational Verification Pipeline for Earth2Studio Ensembles.
-OD-EARTH2-001 / EO-OBSCURA research initiative.
-Attribution: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Earth-2 X-Band SAR & InSAR Mission Twin research initiative.
+Attribution: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca, https://www.linkedin.com/in/zhane-umattr)
 Strict adherence to .agents/rules/e2s-014-scientific-integrity.mdc.
 """
 
@@ -330,7 +330,7 @@ class EnsembleVerificationPipeline:
 
         results: Dict[str, Any] = {
             "pipeline": "EnsembleVerificationPipeline",
-            "attribution": "Zhane Daye, Origin Datum (contact@origindatum.space)",
+            "attribution": "Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)",
             "scientific_integrity_standard": ".agents/rules/e2s-014-scientific-integrity.mdc",
             "ground_truth_source": self.source_name,
             "init_time": str(init_time),

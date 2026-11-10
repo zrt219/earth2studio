@@ -1,5 +1,5 @@
 experiment_id: "OD-EARTH2-001"
-description: "Reproducible baseline weather forecast and scientific verification for EO-OBSCURA."
+description: "Reproducible baseline weather forecast and scientific verification for Earth-2 SAR & InSAR Mission Twin."
 
 model:
   name: "persistence"

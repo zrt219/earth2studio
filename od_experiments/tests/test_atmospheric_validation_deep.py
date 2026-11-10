@@ -82,7 +82,7 @@ class TestAtmosphericValidationAndProvenanceDeep:
 
     def test_sha256_checksum_deterministic(self, tmp_path):
         f = tmp_path / "test_file.bin"
-        f.write_bytes(b"Origin Datum Scientific Determinism 2026")
+        f.write_bytes(b"Zhane Daye Scientific Determinism 2026")
         h1 = compute_sha256(f)
         h2 = compute_sha256(f)
         assert h1 == h2

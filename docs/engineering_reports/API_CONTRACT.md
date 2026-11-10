@@ -32,7 +32,7 @@
 | `Content-Type` | **Yes** | `application/json` | Format of the submitted request body |
 | `Accept` | **Yes** | `application/json` or `application/x-tar` | Desired output response format |
 | `NVCF-POLL-SECONDS` | Optional | Integer $\ge 1$ (e.g., `5`) | Polling configuration hint for backend gateway |
-| `User-Agent` | Optional | `OriginDatum-Earth2/1.0` | Client tracking identifier |
+| `User-Agent` | Optional | `Earth2Studio-SAR-Twin/1.0` | Client tracking identifier |
 
 ### 2.2 JSON Body Parameters
 

@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""OD-EARTH2-001: Origin Datum Earth-2 Research Lab Experiment Package."""
+"""OD-EARTH2-001: Earth-2 X-Band SAR & InSAR Mission Twin Experiment Package."""
 
 from __future__ import annotations
 

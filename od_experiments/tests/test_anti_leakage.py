@@ -5,7 +5,7 @@
 """Authoritative Anti-Leakage Test Suite (Tests A through F).
 
 Implements the mandatory scientific validation suite for Milestone M2 of
-Project OD-EARTH2-001 / EO-OBSCURA. Demonstrates initial RED state on historical
+Earth-2 X-Band SAR & InSAR Mission Twin. Demonstrates initial RED state on historical
 defective logic and certifies GREEN state on the decoupled 3-stage pipeline.
 
 Requirements:

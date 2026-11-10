@@ -2,8 +2,8 @@
 
 > **QUARANTINE NOTICE (`QUARANTINED_DEFECTIVE_SYNTHETIC`):** This historical artifact contains synthetic target leakage (`0.72 * (y_truth - x_0)`) and is permanently quarantined. Do not cite or use as an operational model benchmark.
 
-**Organization:** ORIGIN DATUM  
-**Research Program:** EO-OBSCURA  
+**Organization:** Zhane Daye (SAR & Earth System Engineering)  
+**Research Program:** Earth-2 SAR & InSAR Mission Twin  
 **Quarantine Status:** `QUARANTINED_DEFECTIVE_SYNTHETIC`  
 **Experiment Classification:** `QUARANTINED_DEFECTIVE_SYNTHETIC (TRUTH_CONDITIONED_SYNTHETIC_DIAGNOSTIC)`  
 **Model Architecture:** Spherical Fourier Neural Operator (FourCastNet / SFNO) [SYNTHETIC PROTOTYPE - QUARANTINED]  

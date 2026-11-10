@@ -8,7 +8,7 @@ from od_experiments.earth2_001.security import scrub_dict
 
 DEFAULT_CONFIG: dict[str, Any] = {
     "experiment_id": "OD-EARTH2-001",
-    "description": "Reproducible baseline weather forecast and scientific verification for EO-OBSCURA.",
+    "description": "Reproducible baseline weather forecast and scientific verification for Earth-2 SAR & InSAR Mission Twin.",
     "model": {
         "name": "persistence",
         "checkpoint": None,

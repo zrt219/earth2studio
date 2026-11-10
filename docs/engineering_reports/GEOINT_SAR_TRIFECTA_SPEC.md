@@ -1,8 +1,8 @@
 # GEOINT Mission Architecture: Weather-to-SAR Tip-and-Cue, CATALYST X-Band Tropospheric APS Fringe Correction & Rapid Flood/Landslide Attribution
 
 **Date:** 2026-11-08  
-**Project:** OD-EARTH2-001 / EO-OBSCURA (900-IQ GEOINT Extension)  
-**Author:** Zhane Daye (Origin Datum — Independent Research Initiative)  
+**Project:** Earth-2 X-Band SAR & InSAR Mission Twin (900-IQ GEOINT Extension)  
+**Author:** Zhane Daye (Zhane Daye — SAR & Earth System Engineering)  
 **Target Employers & Technical Alignment:**
 1. **ICEYE** — Autonomous Weather-to-SAR Tip-and-Cue Constellation Tasking, Spotlight/StripMap/ScanSAR Slant-Range Geometry, and Specular Backscatter ($\sigma^0_{\text{VV}} < -16.5\text{ dB}$) Flood Extent Attribution over the Po Valley / Northern Italy.
 2. **Synspective (StriX)** — X-Band Small-SAR Constellation Operations, Typhoon Megi (`WPAC-01`) Slope Coherence-Loss ($\gamma_{\text{CCD}} < 0.32$) Landslide & Subsidence Attribution over Honshu/Tokyo, and Slant-Range Look-Cone Frustums.

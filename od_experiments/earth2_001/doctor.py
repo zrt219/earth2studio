@@ -539,7 +539,7 @@ def render_human_readable_report(report: dict[str, Any]) -> str:
 
     lines = [
         "=" * 80,
-        "            Origin Datum Earth-2 Research Lab: Environment Doctor",
+        "            Earth-2 X-Band SAR & InSAR Mission Twin: Environment Doctor",
         "                            (OD-EARTH2-001 / M1)",
         "=" * 80,
         "",

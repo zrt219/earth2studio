@@ -4,7 +4,7 @@
 """
 Unified multi-source atmospheric data ingestion pipeline.
 Handles GFS, ERA5, ARCO-ERA5 Zarr, and GEFS coordinate harmonization.
-OD-EARTH2-001 / EO-OBSCURA research initiative.
+Earth-2 X-Band SAR & InSAR Mission Twin research initiative.
 """
 
 from typing import Any

@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2024-2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
-# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,10 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Author: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# Author: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 # Compliance: .agents/rules/e2s-000-python-style-guide.mdc, .agents/rules/e2s-014-scientific-integrity.mdc
 
-"""Origin Datum Earth-2 Research Lab CLI (OD-EARTH2-001).
+"""Earth-2 X-Band SAR & InSAR Mission Twin CLI (OD-EARTH2-001).
 
 Provides command-line interfaces for:
 - Environment and GPU diagnostics (doctor)
@@ -44,7 +44,7 @@ import numpy as np
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         prog="python -m od_experiments.earth2_001.cli",
-        description="Origin Datum Earth-2 Research Lab CLI (OD-EARTH2-001)",
+        description="Earth-2 X-Band SAR & InSAR Mission Twin CLI (OD-EARTH2-001)",
     )
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
 
@@ -430,7 +430,7 @@ def main(argv: list[str] | None = None) -> None:
             print("\n" + "=" * 96)
             print("  OPERATIONAL ENSEMBLE VERIFICATION REPORT")
             print(
-                "  Standard: e2s-014 (CRPS, SSR, EDI, SEDI) | Attribution: Zhane Daye, Origin Datum"
+                "  Standard: e2s-014 (CRPS, SSR, EDI, SEDI) | Attribution: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)"
             )
             print("=" * 96)
             print(

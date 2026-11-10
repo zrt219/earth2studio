@@ -30,7 +30,7 @@ def plot_field(
     cbar = fig.colorbar(im, ax=ax, orientation="horizontal", pad=0.15, shrink=0.7)
     cbar.set_label(f"{variable_name.upper()} ({units})")
 
-    ax.set_title(f"ORIGIN DATUM / EO-OBSCURA: {title}", fontsize=11, fontweight="bold")
+    ax.set_title(f"EARTH-2 MISSION TWIN — ZHANE DAYE: {title}", fontsize=11, fontweight="bold")
     ax.set_xlabel("Longitude Index")
     ax.set_ylabel("Latitude Index")
 

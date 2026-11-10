@@ -1,7 +1,7 @@
 # EARTH-2 CANDIDATE MODEL REGISTRY
 
-**Program:** EO-OBSCURA / OD-EARTH2-001
-**Organization:** ORIGIN DATUM
+**Program:** Earth-2 X-Band SAR & InSAR Mission Twin
+**Organization:** Zhane Daye (SAR & Earth System Engineering)
 **Hardware Profile:** AMD Ryzen 5 3600 (CPU inference), AMD Radeon RX 9060 XT (non-CUDA)
 
 ---

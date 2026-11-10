@@ -1,7 +1,7 @@
-# Origin Datum — NVIDIA Hosted FourCastNet API Live Test Report
+# NVIDIA Hosted FourCastNet API Live Test Report — Zhane Daye
 
-**Organization:** ORIGIN DATUM
-**Program:** EO-OBSCURA
+**Organization:** Zhane Daye (SAR & Earth System Engineering)
+**Program:** Earth-2 SAR & InSAR Mission Twin
 **Target API:** `https://climate.api.nvidia.com/v1/nvidia/fourcastnet`
 **Test Mode:** Genuine live API requests (No mock, no synthetic substitutions)
 **Execution Timestamp:** 2026-10-26T11:51:29.323690+00:00

@@ -1,8 +1,8 @@
-# OD-EARTH2-001 / EO-OBSCURA: 3D WebGL Digital Twin Upgrade Implementation Plan
+# Earth-2 X-Band SAR & InSAR Mission Twin: 3D WebGL Digital Twin Upgrade Implementation Plan
 
-**Project:** OD-EARTH2-001 / EO-OBSCURA  
+**Project:** Earth-2 X-Band SAR & InSAR Mission Twin  
 **Author:** Zhane Daye  
-**Affiliation:** Origin Datum — Independent Research Initiative  
+**Affiliation:** Zhane Daye — SAR & Earth System Engineering  
 **Target Application:** `viewer_app/` (Vite + Three.js)  
 **Production URL:** https://viewerapp.vercel.app  
 

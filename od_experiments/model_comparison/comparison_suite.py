@@ -4,7 +4,7 @@
 """
 Multi-model prognostic benchmark suite.
 Fair, zero-leakage evaluation of Persistence, Neural Benchmarks, and Diagnostic baselines.
-OD-EARTH2-001 / EO-OBSCURA research initiative.
+Earth-2 X-Band SAR & InSAR Mission Twin research initiative.
 """
 
 from typing import Any

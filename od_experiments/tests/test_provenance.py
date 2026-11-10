@@ -20,7 +20,7 @@ def test_git_info_structure():
 def test_provenance_manifest_creation(tmp_path):
     config = {"experiment_id": "TEST-EXP", "token": "secret12345"}
     dummy_file = tmp_path / "test.txt"
-    dummy_file.write_text("Hello Origin Datum")
+    dummy_file.write_text("Hello Earth2Studio")
     digest = compute_sha256(dummy_file)
 
     artifacts = [

@@ -4,7 +4,7 @@
 """
 Regional mesoscale downscaling and super-resolution diagnostic engine.
 Topography-conditioned downscaling preserving physical gradients.
-OD-EARTH2-001 / EO-OBSCURA research initiative.
+Earth-2 X-Band SAR & InSAR Mission Twin research initiative.
 """
 
 from typing import Any

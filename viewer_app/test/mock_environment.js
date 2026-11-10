@@ -1,7 +1,7 @@
 /**
  * mock_environment.js
  * Virtual DOM, Three.js headless math, and specification reference oracles
- * for OD-EARTH2-001 / EO-OBSCURA 3D WebGL Digital Twin E2E Testing.
+ * for Earth-2 X-Band SAR & InSAR Mission Twin 3D WebGL Digital Twin E2E Testing.
  */
 
 // 1. DOM Virtualization

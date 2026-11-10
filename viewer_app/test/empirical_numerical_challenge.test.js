@@ -2,7 +2,7 @@
  * empirical_numerical_challenge.test.js
  *
  * EMPIRICAL ADVERSARIAL CHALLENGER SUITE (Challenger 2, Milestone 1)
- * OD-EARTH2-001 / EO-OBSCURA 3D WebGL Digital Twin
+ * Earth-2 X-Band SAR & InSAR Mission Twin 3D WebGL Digital Twin
  *
  * Adversarially challenges:
  * 1. Target leakage error propagation formula & Monte Carlo convergence

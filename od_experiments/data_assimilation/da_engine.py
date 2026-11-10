@@ -4,7 +4,7 @@
 """
 Atmospheric Data Assimilation (DA) increment engine.
 Calculates innovation vectors (y - H(x_b)) and assimilates sparse observational networks.
-OD-EARTH2-001 / EO-OBSCURA research initiative.
+Earth-2 X-Band SAR & InSAR Mission Twin research initiative.
 """
 
 from typing import Any

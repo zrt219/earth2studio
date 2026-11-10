@@ -16,7 +16,7 @@
 
 """Extreme Dependency Index (EDI) and Symmetric Extremal Dependence Index (SEDI).
 
-Author: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Author: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
 References:
     Stephenson, D. B., et al. (2008). Extreme Dependence Index.

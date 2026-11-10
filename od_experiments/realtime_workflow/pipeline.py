@@ -71,7 +71,7 @@ def run_pipeline(
     if init_time is None:
         init_time = get_latest_gfs_time()
 
-    logger.info(f"=== Starting Origin Datum Real-Time Forecast Workflow ===")
+    logger.info(f"=== Starting Real-Time Forecast Workflow — Zhane Daye ===")
     logger.info(f"Target Initial Time : {init_time.isoformat()}")
     logger.info(f"Lead Steps          : {lead_steps} (each step = 6 hours)")
     logger.info(f"Variables           : {variables}")
@@ -161,7 +161,7 @@ def run_pipeline(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Origin Datum Real-Time Live Weather Forecast Workflow")
+    parser = argparse.ArgumentParser(description="Real-Time Live Weather Forecast Workflow — Zhane Daye")
     parser.add_argument("--steps", type=int, default=1, help="Simulation lead steps (1 step = 6 hours)")
     parser.add_argument("--variables", type=str, default="t2m,u10m,v10m,msl", help="Comma-separated variables")
     parser.add_argument("--output-dir", type=str, default="outputs/realtime_workflow", help="Output directory")

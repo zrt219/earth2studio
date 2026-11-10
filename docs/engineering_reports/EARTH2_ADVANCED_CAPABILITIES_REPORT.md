@@ -1,7 +1,7 @@
 # Comprehensive Scientific Report: NVIDIA Earth-2 Studio Advanced Capabilities Suite
-**Project:** OD-EARTH2-001 / EO-OBSCURA  
+**Project:** Earth-2 X-Band SAR & InSAR Mission Twin  
 **Author:** Zhane Daye  
-**Affiliation:** Origin Datum — Independent Research Initiative  
+**Affiliation:** Zhane Daye — SAR & Earth System Engineering  
 **Verification Date:** October 30, 2026  
 **Compliance Standard:** `.agents/rules/e2s-014-scientific-integrity.mdc`
 

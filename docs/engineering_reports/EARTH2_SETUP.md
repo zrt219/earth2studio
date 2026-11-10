@@ -1,6 +1,6 @@
-# Origin Datum Earth-2 Research Setup Guide
+# Earth-2 Research Setup Guide — Zhane Daye
 
-**Project:** OD-EARTH2-001 / EO-OBSCURA
+**Project:** Earth-2 X-Band SAR & InSAR Mission Twin
 **Target Platform:** Windows 10/11 with WSL2 (Ubuntu 24.04 LTS)
 **Budget Standard:** $0 (Free open-source software, public AWS Open Data NOAA GFS)
 
@@ -66,7 +66,7 @@ uv pip install pytest pyyaml matplotlib --python .venv
 
 ---
 
-## 4. Origin Datum Research CLI Usage
+## 4. Earth-2 Mission Twin CLI Usage
 
 The isolated research package `od_experiments.earth2_001` provides four core subcommands:
 

@@ -2,7 +2,7 @@
  * empirical_layers3D_challenge.test.js
  *
  * EMPIRICAL ADVERSARIAL CHALLENGER SUITE (Challenger 2, Milestone 2)
- * OD-EARTH2-001 / EO-OBSCURA 3D WebGL Digital Twin
+ * Earth-2 X-Band SAR & InSAR Mission Twin 3D WebGL Digital Twin
  * Target: viewer_app/layers3D.js
  *
  * Adversarially challenges:

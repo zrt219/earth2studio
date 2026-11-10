@@ -2,7 +2,7 @@
  * m2_challenger_recheck_deep.test.js
  *
  * EMPIRICAL ADVERSARIAL CHALLENGER RECHECK SUITE (Milestone 2)
- * OD-EARTH2-001 / EO-OBSCURA 3D WebGL Digital Twin
+ * Earth-2 X-Band SAR & InSAR Mission Twin 3D WebGL Digital Twin
  *
  * Exhaustive independent re-verification of:
  * 1. Coordinate Transformation Signs & Camera Navigation (Italy, Japan, WPAC, Prime Meridian, Equator, Poles)

@@ -1,6 +1,6 @@
 /**
  * run_e2e_tests.js
- * Master Test Runner for OD-EARTH2-001 / EO-OBSCURA 3D WebGL Digital Twin E2E Testing.
+ * Master Test Runner for Earth-2 X-Band SAR & InSAR Mission Twin 3D WebGL Digital Twin E2E Testing.
  *
  * Usage:
  *   node viewer_app/test/run_e2e_tests.js

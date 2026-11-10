@@ -1,5 +1,5 @@
 {
-  "$schema": "https://origindatum.space/schemas/weather-run-manifest-v2.json",
+  "$schema": "https://zhanedaye.github.io/schemas/weather-run-manifest-v2.json",
   "manifest_version": "2.0.0",
   "experiment_classification": "BASELINE_PERSISTENCE",
   "timestamp_utc": "2026-11-01T08:05:22.180184+00:00",

@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
-# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 # SPDX-License-Identifier: Apache-2.0
 
 """Stage A: Genuine Forecast Stage (Decoupled & Anti-Leakage Protected).
@@ -15,7 +15,7 @@ Enforces runtime & AST anti-leakage guardrails:
 2. AST & Call-Stack Isolation: Forecast callables and active stack frames are
    inspected for forbidden target variables and linear target-shrinkage formulas.
 
-Attribution: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Attribution: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca, https://www.linkedin.com/in/zhane-umattr)
 """
 
 from __future__ import annotations

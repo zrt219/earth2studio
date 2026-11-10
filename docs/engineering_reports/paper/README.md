@@ -1,11 +1,11 @@
 # Empirical Verification and Synoptic Extreme Event Tracking of Spherical Neural Weather Models: A 7-Day Continuous Forecast Skill Benchmark against NOAA GFS Operations (Version 2.0)
 
-**Organization:** Origin Datum Research Collaboration  
-**Program:** EO-OBSCURA Atmospheric Inference Group  
+**Organization:** SAR & Earth System Engineering Group  
+**Program:** Earth-2 SAR & InSAR Mission Twin Atmospheric Inference Group  
 **Date:** October 2026  
 **Target Architecture:** Spherical Fourier Neural Operator (SFNO / FourCastNet)  
 **Verification Baseline:** NOAA GFS Operational Analysis ($0.25^\circ \times 0.25^\circ$)  
-**Source LaTeX Manuscript:** [`docs/origin_datum/paper/scientific_study_v2.tex`](file:///d:/programming/Blockchain%20development/Z-space/earth2studio/docs/origin_datum/paper/scientific_study_v2.tex)
+**Source LaTeX Manuscript:** [`docs/engineering_reports/paper/scientific_study_v2.tex`](file:///d:/programming/Blockchain%20development/Z-space/earth2studio/docs/engineering_reports/paper/scientific_study_v2.tex)
 
 ---
 
@@ -78,7 +78,7 @@ $$\text{SS}_\text{pers} = 1 - \frac{\text{RMSE}_\text{w}(\text{Model})}{\text{RM
 ---
 
 ## 5. Artifacts and Generated Data
-- **LaTeX Paper Manuscript:** [`docs/origin_datum/paper/scientific_study_v2.tex`](file:///d:/programming/Blockchain%20development/Z-space/earth2studio/docs/origin_datum/paper/scientific_study_v2.tex)
+- **LaTeX Paper Manuscript:** [`docs/engineering_reports/paper/scientific_study_v2.tex`](file:///d:/programming/Blockchain%20development/Z-space/earth2studio/docs/engineering_reports/paper/scientific_study_v2.tex)
 - **Verified Metrics JSON:** [`outputs/scientific_study/study_metrics.json`](file:///d:/programming/Blockchain%20development/Z-space/earth2studio/outputs/scientific_study/study_metrics.json)
 - **Error Growth Figures:** `outputs/scientific_study/figures/error_growth_curve.png`
 - **Regional Tracking Figures:** `outputs/scientific_study/figures/italy_extreme_tracking.png`, `outputs/scientific_study/figures/japan_extreme_tracking.png`

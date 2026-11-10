@@ -1,7 +1,7 @@
 /**
  * test_framework.js
  * Lightweight, zero-dependency test runner and assertion library
- * Designed for OD-EARTH2-001 / EO-OBSCURA 3D WebGL Digital Twin E2E Testing.
+ * Designed for Earth-2 X-Band SAR & InSAR Mission Twin 3D WebGL Digital Twin E2E Testing.
  */
 
 // ANSI Color Codes
@@ -278,7 +278,7 @@ class TestRunner {
   async run() {
     this.stats.startTime = performance.now();
     console.log(`\n${ANSI.bold}${ANSI.blue}═══════════════════════════════════════════════════════════════════════${ANSI.reset}`);
-    console.log(`${ANSI.bold}  OD-EARTH2-001 / EO-OBSCURA 3D Digital Twin E2E Test Suite${ANSI.reset}`);
+    console.log(`${ANSI.bold}  Earth-2 X-Band SAR & InSAR Mission Twin E2E Test Suite${ANSI.reset}`);
     console.log(`${ANSI.bold}${ANSI.blue}═══════════════════════════════════════════════════════════════════════${ANSI.reset}\n`);
 
     for (const suite of this.suites) {

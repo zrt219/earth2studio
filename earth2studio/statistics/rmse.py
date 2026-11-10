@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Author: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# Author: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 # Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
 
 """Root mean squared error and ensemble spread-skill metrics."""

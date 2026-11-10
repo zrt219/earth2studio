@@ -16,7 +16,7 @@
 
 """Continuous Ranked Probability Score (CRPS).
 
-Author: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Author: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
 """
 

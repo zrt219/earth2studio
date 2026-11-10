@@ -180,7 +180,7 @@ class FourCastNetHostedClient:
         headers = {
             "Content-Type": "application/json",
             "Accept": req.accept_format,
-            "User-Agent": "OriginDatum-Earth2/1.0",
+            "User-Agent": "Earth2Studio-SAR-Twin/1.0",
         }
         if not bypass_auth_for_testing and self._api_key:
             headers["Authorization"] = f"Bearer {self._api_key}"

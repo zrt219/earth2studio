@@ -906,7 +906,7 @@ All nine mandatory acceptance gates defined in the project specification were sy
 \midrule
 \textbf{5. Metrics} & Correct units, masks, area weights and baseline & Latitude-cosine weights $w_i$, $1,038,240$ valid points, authentic Persistence $\mathrm{RMSE}_\mathrm{w} = 2.1290\,\si{\kelvin}$, $\mathrm{MAE}_\mathrm{w} = 1.0369\,\si{\kelvin}$, unweighted grid bias $-0.0000\,\si{\kelvin}$, weighted bias $-0.0207\,\si{\kelvin}$, TAC vs ACC separated. & \textbf{\texttt{PASS}} \\
 \midrule
-\textbf{6. Figures} & Every plot traces to compatible source artifacts & 34 publication figures traced to verified disk artifacts in \path{docs/origin_datum/figures/}; zero synthetic noise; 100\% SHA-256 digest match against Table~\ref{tab:hashes_34}. & \textbf{\texttt{PASS}} \\
+\textbf{6. Figures} & Every plot traces to compatible source artifacts & 34 publication figures traced to verified disk artifacts in \path{docs/engineering_reports/figures/}; zero synthetic noise; 100\% SHA-256 digest match against Table~\ref{tab:hashes_34}. & \textbf{\texttt{PASS}} \\
 \midrule
 \textbf{7. Reproducibility} & Exact code, configuration, inputs, hashes and logs & Deterministic reproduction via \texttt{execute\_real\_experiment.py} and \texttt{run\_all\_advanced\_capabilities.py}; Git commit \texttt{b48ca98...}, dependencies, seeds, and execution logs sealed in manifests. & \textbf{\texttt{PASS}} \\
 \midrule
@@ -955,7 +955,7 @@ All code, manifests, and run artifacts are version-controlled under branch \text
 \begin{table*}[t]
 \centering
 \small
-\caption{\textbf{Authoritative Cryptographic SHA-256 Manifest of All 34 Visual Assets in \texttt{docs/origin\_datum/figures/}.}}
+\caption{\textbf{Authoritative Cryptographic SHA-256 Manifest of All 34 Visual Assets in \texttt{docs/engineering\_reports/figures/}.}}
 \label{tab:hashes_34}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lccc}

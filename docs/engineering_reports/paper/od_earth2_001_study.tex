@@ -18,24 +18,24 @@
 
 \begin{document}
 
-\title{Deterministic Atmospheric Baselines and Cryptographic Provenance in AI Weather Forecasting: The OD-EARTH2-001 Study for EO-OBSCURA}
+\title{Deterministic Atmospheric Baselines and Cryptographic Provenance in AI Weather Forecasting: The OD-EARTH2-001 Study}
 
 \author{Zhane Daye\\
-Origin Datum (\href{https://datum.space}{datum.space})\\
-GitHub: \href{https://github.com/zrt219}{github.com/zrt219}\\
-Program on Incomplete-Information Earth Observation (EO-OBSCURA)\\
+SAR \& Earth System Engineering $|$ Edmonton, AB, Canada\\
+Email: \texttt{zhanedaye@umattr.ca} \quad $|$ \quad LinkedIn: \href{https://www.linkedin.com/in/zhane-umattr}{linkedin.com/in/zhane-umattr} \quad $|$ \quad GitHub: \href{https://github.com/zrt219/earth2studio}{github.com/zrt219/earth2studio}\\
+Live 3D Mission Twin: \url{https://earth2-sar-insar.vercel.app}\\
 Technical Report OD-EARTH2-001-REV2}
 
-\markboth{Origin Datum Technical Reports, Vol. 1, No. 1, October 2026}%
-{Zhane Daye (Origin Datum): Deterministic Atmospheric Baselines in Earth2Studio}
+\markboth{Earth-2 SAR \& InSAR Mission Twin Technical Reports, Vol. 1, No. 1, October 2026}%
+{Zhane Daye: Deterministic Atmospheric Baselines in Earth2Studio}
 
 \IEEEtitleabstractindextext{%
 \begin{abstract}
-Deep learning atmospheric emulators require rigorous empirical baselines, mathematically sound spatial error metrics, and verifiable cryptographic data provenance. In this paper, we present the architecture and experimental validation of the OD-EARTH2-001 research foundation within NVIDIA's Earth2Studio framework. Operating under strict zero-cost constraints on commodity CPU hardware, we establish an end-to-end meteorological pipeline ingesting real-world 0.25-degree Global Forecast System (GFS) observations from public AWS Open Data. Atmospheric predictions are generated via a deterministic Persistence baseline model, stored in multidimensional Zarr array hierarchies, and evaluated against subsequent GFS analysis states at a 6-hour lead time. We formulate area-weighted spherical error metrics that eliminate polar grid convergence singularities and demonstrate that a 6-hour persistence forecast achieves global latitude-weighted Mean Absolute Errors of \SI{1.2635}{\kelvin} for 2-metre temperature, \SI{1.4975}{\metre\per\second} for zonal wind, and \SI{1.6118}{\metre\per\second} for meridional wind. Furthermore, we develop an isolated, secret-scrubbed client for remote NVIDIA Cloud Functions, verifying authenticated access to the FourCastNet service. All execution parameters, array tensors, and validation reports are cryptographically anchored using SHA-256 manifests. This work establishes the thermodynamic and kinematic baseline for the EO-OBSCURA program, constraining multimodal satellite imagery reconstruction through deterministic meteorological priors.
+Deep learning atmospheric emulators require rigorous empirical baselines, mathematically sound spatial error metrics, and verifiable cryptographic data provenance. In this paper, we present the architecture and experimental validation of the OD-EARTH2-001 research foundation within NVIDIA's Earth2Studio framework. Operating under strict zero-cost constraints on commodity CPU hardware, we establish an end-to-end meteorological pipeline ingesting real-world 0.25-degree Global Forecast System (GFS) observations from public AWS Open Data. Atmospheric predictions are generated via a deterministic Persistence baseline model, stored in multidimensional Zarr array hierarchies, and evaluated against subsequent GFS analysis states at a 6-hour lead time. We formulate area-weighted spherical error metrics that eliminate polar grid convergence singularities and demonstrate that a 6-hour persistence forecast achieves global latitude-weighted Mean Absolute Errors of \SI{1.2635}{\kelvin} for 2-metre temperature, \SI{1.4975}{\metre\per\second} for zonal wind, and \SI{1.6118}{\metre\per\second} for meridional wind. Furthermore, we develop an isolated, secret-scrubbed client for remote NVIDIA Cloud Functions, verifying authenticated access to the FourCastNet service. All execution parameters, array tensors, and validation reports are cryptographically anchored using SHA-256 manifests. This work establishes the thermodynamic and kinematic baseline for operational SAR and Earth observation analytics, constraining multimodal satellite imagery reconstruction through deterministic meteorological priors.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Atmospheric modeling, Earth2Studio, Global Forecast System, spherical error metrics, cryptographic provenance, EO-OBSCURA, weather forecasting.
+Atmospheric modeling, Earth2Studio, Global Forecast System, spherical error metrics, cryptographic provenance, SAR, weather forecasting.
 \end{IEEEkeywords}}
 
 \maketitle
@@ -52,7 +52,7 @@ However, the rapid adoption of AI weather modeling has exposed recurring enginee
     \item \textbf{Synthetic vs. Empirical Conflation}: Pipeline smoke tests utilizing synthetic random noise are frequently confused with meteorologically verified forecasts.
 \end{enumerate}
 
-The \textbf{EO-OBSCURA} program at Origin Datum addresses incomplete, cloud-obscured, and sparse satellite observations by reconstructing multi-spectral surface information using physical atmospheric priors. Before coupling high-capacity neural emulators into the reconstruction pipeline, a deterministic, verifiable, and mathematically sound baseline must be established.
+The \textbf{Earth-2 SAR \& InSAR Mission Twin} addresses incomplete, cloud-obscured, and sparse satellite observations by conditioning remote sensing models on physical atmospheric priors. Before coupling high-capacity neural emulators into the pipeline, a deterministic, verifiable, and mathematically sound baseline must be established.
 
 This paper reports the implementation and empirical validation of \textbf{OD-EARTH2-001}, an open-source, zero-cost atmospheric forecasting and verification architecture built upon NVIDIA Earth2Studio~\cite{earth2studio2024}.
 
@@ -181,7 +181,7 @@ Artifact & SHA-256 Checksum & Size \\
 \section{Conclusion and Future Work}
 The OD-EARTH2-001 project has successfully established a scientifically sound, reproducible research environment for AI weather forecasting within NVIDIA Earth2Studio. By enforcing spherical area-weighted error calculations, isolating credentials, and executing genuine public data workflows, we have eliminated synthetic verification artifacts and proven operational stability on zero-cost commodity hardware.
 
-This foundation enables immediate progression toward the primary objectives of the **EO-OBSCURA** program:
+This foundation enables immediate progression toward the primary objectives of the \textbf{Earth-2 SAR \& InSAR Mission Twin} program:
 \begin{enumerate}
     \item Deploying local DLWP inference on CPU to benchmark neural error suppression against the persistence baseline.
     \item Integrating authenticated FourCastNet remote inference via the verified NVCF client.

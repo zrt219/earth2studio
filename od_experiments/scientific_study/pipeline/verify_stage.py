@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES.
 # SPDX-FileCopyrightText: All rights reserved.
-# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+# SPDX-FileCopyrightText: Copyright (c) 2026 Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca)
 # SPDX-License-Identifier: Apache-2.0
 
 """Stage C: Genuine Verify Stage (Independent Verification & Anti-Leakage Guards).
@@ -12,7 +12,7 @@ enforces statistical residual & correlation anomaly detection, validates
 cryptographic execution_manifest.json sealing, and calculates latitude-weighted
 verification metrics.
 
-Attribution: Zhane Daye, Origin Datum (https://origindatum.space, contact@origindatum.space)
+Attribution: Zhane Daye (SAR & Earth System Engineering; zhanedaye@umattr.ca, https://www.linkedin.com/in/zhane-umattr)
 """
 
 from __future__ import annotations
@@ -408,7 +408,7 @@ def seal_execution_manifest(
     )
 
     manifest: dict[str, Any] = {
-        "$schema": "https://origindatum.space/schemas/weather-run-manifest-v2.json",
+        "$schema": "https://zhanedaye.github.io/schemas/weather-run-manifest-v2.json",
         "manifest_version": "2.0.0",
         "experiment_id": "OD-EARTH2-001-AUTHENTIC-VERIFIED",
         "experiment_classification": "AUTHENTIC_PHYSICAL_BASELINE_AND_BENCHMARK",
