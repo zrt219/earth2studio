@@ -127,10 +127,10 @@ export function updateLegend(typeOrVersion = 'V3') {
     if (legendMin) legendMin.innerText = '0.0 K';
     if (legendMax) legendMax.innerText = '1.5 K';
   } else if (key === 'sat' || key === 'satellite') {
-    legendTitle.innerText = '4K Physical Satellite Earth + ETOPO Relief (m)';
-    legendBar.style.background = 'linear-gradient(to right, #061838, #14406b, #3a6b40, #9b8c5c, #e5e7eb)';
+    legendTitle.innerText = '8K NASA PBR Earth + 4K Normal/ETOPO & VIIRS Cities';
+    legendBar.style.background = 'linear-gradient(to right, #061838, #14406b, #3a6b40, #9b8c5c, #f59e0b)';
     if (legendMin) legendMin.innerText = 'Ocean';
-    if (legendMax) legendMax.innerText = '4,808 m Peaks';
+    if (legendMax) legendMax.innerText = 'Peaks / Cities';
   } else if (key === 't2m' || key === 'surface') {
     legendTitle.innerText = 'Surface Temperature (°C)';
     legendBar.style.background = 'linear-gradient(to right, #30123b, #4686fb, #1ae4b6, #a2fc3c, #fbb41a, #e4460a, #7a0403)';
@@ -943,7 +943,13 @@ export function initUI(globe, camera, renderer, layers3D) {
           btnRelief.classList.toggle('active-btn', isReliefActiveState);
         }
         if (activeGlobe && activeGlobe.material) {
-          activeGlobe.material.bumpScale = isReliefActiveState ? 0.14 : 0.0;
+          activeGlobe.material.bumpScale = isReliefActiveState ? 0.12 : 0.0;
+          if (activeGlobe.material.normalScale) {
+            activeGlobe.material.normalScale.set(
+              isReliefActiveState ? 1.35 : 0.0,
+              isReliefActiveState ? 1.35 : 0.0
+            );
+          }
           activeGlobe.material.needsUpdate = true;
         }
       } else if (layerId === 'rotation') {

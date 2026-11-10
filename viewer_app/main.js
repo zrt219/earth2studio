@@ -48,13 +48,16 @@ let scene = null;
 let camera = null;
 let renderer = null;
 let globe = null;
+let cloudMesh = null;
 let atmosMesh = null;
 let starField = null;
 
 let isSpinning = true;
 let isReliefActive = true;
-let bumpScaleValue = 0.14;
-let currentTextureName = 'earth_satellite_4k.jpg';
+let isCloudsVisible = true;
+let bumpScaleValue = 0.12;
+let normalScaleValue = 1.35;
+let currentTextureName = 'earth_satellite_8k.jpg';
 
 // Pointer interaction tracking
 let isDragging = false;
@@ -73,22 +76,25 @@ let targetGlobeRot = null;
 // Clock for time-based animation updates
 const clock = new THREE.Clock();
 
-// Texture Assets (4K [-180, +180] Geospatially Aligned)
+// Texture Assets (8K/4K [-180, +180] Geospatially Aligned Multi-Map PBR)
 const textureLoader = new THREE.TextureLoader();
-const satTex = textureLoader.load('/textures/earth_satellite_4k.jpg');
+const satTex = textureLoader.load('/textures/earth_satellite_8k.jpg');
+const normalTex = textureLoader.load('/textures/earth_normal_4k.jpg');
+const cityTex = textureLoader.load('/textures/earth_citylights_4k.jpg');
+const cloudTex = textureLoader.load('/textures/earth_clouds_4k.jpg');
 const t2mTex = textureLoader.load('/textures/earth_t2m.jpg');
 const tendTex = textureLoader.load('/textures/earth_tendency.jpg');
 const bumpTex = textureLoader.load('/textures/earth_elevation.jpg');
 const roughTex = textureLoader.load('/textures/earth_roughness.jpg');
 
 // Ensure textures wrap, generate mipmaps, and use proper color spaces
-[satTex, t2mTex, tendTex].forEach(tex => {
+[satTex, t2mTex, tendTex, cityTex].forEach(tex => {
   if (tex) {
     tex.colorSpace = THREE.SRGBColorSpace;
   }
 });
 
-[satTex, t2mTex, tendTex, bumpTex, roughTex].forEach(tex => {
+[satTex, normalTex, cityTex, cloudTex, t2mTex, tendTex, bumpTex, roughTex].forEach(tex => {
   if (tex) {
     tex.wrapS = THREE.RepeatWrapping;
     tex.wrapT = THREE.ClampToEdgeWrapping;
@@ -131,33 +137,54 @@ export function init() {
   container.appendChild(renderer.domElement);
 
   const maxAniso = Math.min(8, renderer.capabilities?.getMaxAnisotropy?.() || 4);
-  [satTex, t2mTex, tendTex, bumpTex, roughTex].forEach(tex => {
+  [satTex, normalTex, cityTex, cloudTex, t2mTex, tendTex, bumpTex, roughTex].forEach(tex => {
     if (tex) tex.anisotropy = maxAniso;
   });
 
   // 4. Illumination
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.92);
   scene.add(ambientLight);
 
-  const sunLight = new THREE.DirectionalLight(0xffffff, 1.25);
+  const sunLight = new THREE.DirectionalLight(0xffffff, 1.35);
   sunLight.position.set(12, 10, 15);
   scene.add(sunLight);
 
   // 5. Procedural Starfield Background
   createStarfield();
 
-  // 6. Base Earth Sphere Mesh (R = 5.000)
-  const geometry = new THREE.SphereGeometry(layers3D.RADIAL_SHELLS.BASE_GLOBE, 128, 128);
+  // 6. Base Earth Sphere Mesh (R = 5.000, 256x128 high-density mesh + multi-map PBR)
+  const geometry = new THREE.SphereGeometry(layers3D.RADIAL_SHELLS.BASE_GLOBE, 256, 128);
   const material = new THREE.MeshStandardMaterial({
     map: satTex,
+    normalMap: normalTex,
+    normalScale: new THREE.Vector2(normalScaleValue, normalScaleValue),
     bumpMap: bumpTex,
     bumpScale: bumpScaleValue,
     roughnessMap: roughTex,
-    roughness: 0.92,
-    metalness: 0.08
+    roughness: 0.90,
+    metalness: 0.08,
+    emissiveMap: cityTex,
+    emissive: new THREE.Color(0xffb84d),
+    emissiveIntensity: 0.55
   });
   globe = new THREE.Mesh(geometry, material);
   scene.add(globe);
+
+  // 6b. 3D Optical Cloud Cover Shell (R = 5.012, safely below Spread 5.020 & SAR Swath 5.040)
+  const cloudGeom = new THREE.SphereGeometry(layers3D.RADIAL_SHELLS.BASE_GLOBE + 0.012, 128, 64);
+  const cloudMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    alphaMap: cloudTex,
+    transparent: true,
+    opacity: 0.42,
+    depthWrite: false,
+    roughness: 0.95,
+    metalness: 0.0
+  });
+  cloudMesh = new THREE.Mesh(cloudGeom, cloudMat);
+  cloudMesh.name = 'optical_cloud_shell';
+  cloudMesh.visible = isCloudsVisible;
+  globe.add(cloudMesh);
 
   // 7. Atmospheric Glow Shell (R = 5.150)
   const atmosGeom = new THREE.SphereGeometry(layers3D.RADIAL_SHELLS.ATMOSPHERE_GLOW, 64, 64);
@@ -209,6 +236,12 @@ export function init() {
       isReliefActive = Boolean(visible);
       if (globe && globe.material) {
         globe.material.bumpScale = isReliefActive ? bumpScaleValue : 0.0;
+        if (globe.material.normalScale) {
+          globe.material.normalScale.set(
+            isReliefActive ? normalScaleValue : 0.0,
+            isReliefActive ? normalScaleValue : 0.0
+          );
+        }
         globe.material.needsUpdate = true;
       }
     } else if (layerId === 'rotation') {
@@ -553,6 +586,12 @@ export function setReliefState(active) {
   isReliefActive = Boolean(active);
   if (globe && globe.material) {
     globe.material.bumpScale = isReliefActive ? bumpScaleValue : 0.0;
+    if (globe.material.normalScale) {
+      globe.material.normalScale.set(
+        isReliefActive ? normalScaleValue : 0.0,
+        isReliefActive ? normalScaleValue : 0.0
+      );
+    }
     globe.material.needsUpdate = true;
   }
   if (uiController?.setReliefState && uiController.getReliefState() !== isReliefActive) {
@@ -582,6 +621,7 @@ export function getSpinState() {
 export function setBaseTexture(mode) {
   const norm = String(mode || 'sat').toLowerCase();
   let nextTex = satTex;
+  const isSat = norm === 'sat' || norm === 'satellite';
   if (norm === 't2m') {
     currentTextureName = 'earth_t2m.jpg';
     nextTex = t2mTex;
@@ -589,15 +629,22 @@ export function setBaseTexture(mode) {
     currentTextureName = 'earth_tendency.jpg';
     nextTex = tendTex;
   } else {
-    currentTextureName = 'earth_satellite_4k.jpg';
+    currentTextureName = 'earth_satellite_8k.jpg';
     nextTex = satTex;
   }
 
   if (globe && globe.material) {
     globe.material.map = nextTex;
-    // Preserve bumpScale across texture swaps per Item 1 & T3.5
+    // Preserve bumpScale & normalScale across texture swaps per Item 1 & T3.5
     const reliefActive = getReliefState();
     globe.material.bumpScale = reliefActive ? bumpScaleValue : 0.0;
+    if (globe.material.normalScale) {
+      globe.material.normalScale.set(
+        reliefActive ? normalScaleValue : 0.0,
+        reliefActive ? normalScaleValue : 0.0
+      );
+    }
+    globe.material.emissiveIntensity = isSat ? 0.55 : 0.0;
     globe.material.needsUpdate = true;
   }
 
@@ -627,6 +674,16 @@ function setupAtmosphereLayerButtons() {
 
   if (btnTend) {
     btnTend.addEventListener('click', () => setBaseTexture('tend'));
+  }
+
+  const btnClouds = document.getElementById('layer-clouds');
+  if (btnClouds) {
+    btnClouds.addEventListener('click', () => {
+      isCloudsVisible = btnClouds.classList.toggle('active-btn');
+      if (cloudMesh) {
+        cloudMesh.visible = isCloudsVisible;
+      }
+    });
   }
 }
 
@@ -826,9 +883,12 @@ function animate() {
     camera.lookAt(cameraTarget.x, cameraTarget.y, cameraTarget.z);
   }
 
-  // 2. Earth Constant Auto-Rotation (F13.3)
+  // 2. Earth Constant Auto-Rotation (F13.3) & Gentle Optical Cloud Drift
   if (isSpinning && globe && !isDragging && !isFlying) {
     globe.rotation.y += 0.0018;
+  }
+  if (cloudMesh && isCloudsVisible) {
+    cloudMesh.rotation.y += 0.00018;
   }
 
   // 3. Update 3D Scientific Layers (Pulsing Beacons, Plasma Shaders)
