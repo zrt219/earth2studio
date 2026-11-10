@@ -39,6 +39,7 @@ import windParticles from './windParticles.js';
 import hazardAlerts from './hazardAlerts.js';
 import sarTasking from './sarTasking.js';
 import tutorialTour from './tutorialTour.js';
+import tiledEarth from './tiledEarth.js';
 
 // =============================================================================
 // 1. APPLICATION STATE & CONTEXT
@@ -200,10 +201,11 @@ export function init() {
   // 8. Initialize 3D Scientific Layers Engine
   layers3D.initLayers(globe, camera, renderer);
 
-  // 8b. Initialize Animated Atmospheric Wind Particles, Global Hazard Alerts & GEOINT SAR Tasking
+  // 8b. Initialize Animated Atmospheric Wind Particles, Global Hazard Alerts, GEOINT SAR & 16K-131K Tiled Earth
   windParticles.initWindParticles(globe, 3500);
   hazardAlerts.initHazardAlerts(globe);
   sarTasking.initSarTasking(globe);
+  tiledEarth.initTiledEarth(globe, renderer);
 
   // 9. Initialize UI Controller & Glassmorphic HUD
   uiController.initUI(globe, camera, renderer, layers3D);
@@ -647,6 +649,7 @@ export function setBaseTexture(mode) {
     globe.material.emissiveIntensity = isSat ? 0.55 : 0.0;
     globe.material.needsUpdate = true;
   }
+  tiledEarth.setSatelliteModeActive(isSat);
 
   if (typeof document !== 'undefined') {
     const btnSat = document.getElementById('layer-sat');
@@ -683,6 +686,14 @@ function setupAtmosphereLayerButtons() {
       if (cloudMesh) {
         cloudMesh.visible = isCloudsVisible;
       }
+    });
+  }
+
+  const btnSentinelLod = document.getElementById('layer-sentinel-lod');
+  if (btnSentinelLod) {
+    btnSentinelLod.addEventListener('click', () => {
+      const enabled = btnSentinelLod.classList.toggle('active-btn');
+      tiledEarth.setTiledEarthEnabled(enabled);
     });
   }
 }
@@ -894,10 +905,11 @@ function animate() {
   // 3. Update 3D Scientific Layers (Pulsing Beacons, Plasma Shaders)
   layers3D.updateLayers(elapsedTime, camera);
 
-  // 3b. Update Wind Particles Advection, Hazard Alert Pulses & GEOINT SAR Orbits
+  // 3b. Update Wind Particles Advection, Hazard Alert Pulses, GEOINT SAR Orbits & 16K-131K Tiled LOD
   windParticles.updateWindParticles(0.016);
   hazardAlerts.updateHazardAlerts(elapsedTime);
   sarTasking.updateSarTasking(elapsedTime);
+  tiledEarth.updateTiledEarth(camera, globe, renderer);
 
   // 4. Render Scene
   if (renderer && scene && camera) {

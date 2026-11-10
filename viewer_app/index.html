@@ -664,9 +664,13 @@
     </div>
 
     <!-- Base Globe & Atmospheric Data Layer -->
-    <div class="control-label">Base Globe &amp; Atmospheric Layer (8K PBR)</div>
+    <div class="control-label">
+      <span>Base Globe &amp; Surface LOD</span>
+      <span id="lod-res-badge" style="color:#10b981; font-size:0.62rem; font-weight:700;">16K Global Octants</span>
+    </div>
     <div class="btn-group">
       <button id="layer-sat" class="active-btn">🛰 Satellite 8K PBR</button>
+      <button id="layer-sentinel-lod" class="active-btn">🧩 16K–131K Sentinel-2 LOD</button>
       <button id="layer-t2m">Surface Temp (T2m)</button>
       <button id="layer-tend">24h Tendency (ΔT)</button>
     </div>

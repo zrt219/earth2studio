@@ -15,6 +15,7 @@ import * as THREE from 'three';
 import studyData from '../studyData.js';
 import sarTasking from '../sarTasking.js';
 import tutorialTour from '../tutorialTour.js';
+import tiledEarth from '../tiledEarth.js';
 
 let passed = 0;
 let failed = 0;
@@ -388,6 +389,53 @@ runTest('4.1 initMissionTutorial() binds tour controls and walks all 6 steps upd
   assert.equal(els.get('mission-tour-card').classList.contains('hidden'), true);
 
   sarTasking.disposeSarTasking();
+  delete globalThis.document;
+  delete globalThis.window;
+});
+
+console.log('\n--- Suite 5: tiledEarth.js 16K Global Octants & 131K Sentinel-2 LOD Engine ---');
+
+runTest('5.1 TILED_SHELLS strictly preserve monotonic non-intersecting radial hierarchy (5.002 < 5.003 < 5.005 < 5.012 < 5.040)', () => {
+  const { TILED_16K_OCTANTS, SENTINEL2_LIVE_TILES, SENTINEL2_REGION_INSETS } = tiledEarth.TILED_SHELLS;
+  assert.ok(TILED_16K_OCTANTS > 5.000 && TILED_16K_OCTANTS < SENTINEL2_LIVE_TILES);
+  assert.ok(SENTINEL2_LIVE_TILES < SENTINEL2_REGION_INSETS);
+  assert.ok(SENTINEL2_REGION_INSETS < 5.012);
+  assert.ok(5.012 < sarTasking.SAR_SHELLS.SAR_FOOTPRINT);
+});
+
+runTest('5.2 getCameraBoresightLatLon() recovers accurate geographic coordinates from boresightRotation', () => {
+  const testGlobe = new THREE.Mesh(new THREE.SphereGeometry(5, 16, 16), new THREE.MeshBasicMaterial());
+  const cam = new THREE.PerspectiveCamera(45, 1.77, 0.1, 1000);
+  cam.position.set(0, 0, 8.2);
+
+  // Rotate globe so Greenwich Equator (0, 0) faces +Z camera
+  const rotEq = layers3D.boresightRotation(0, 0);
+  testGlobe.rotation.set(rotEq.rotX, rotEq.rotY, 0);
+  testGlobe.updateMatrixWorld();
+  const resEq = tiledEarth.getCameraBoresightLatLon(cam, testGlobe);
+  assert.ok(Math.abs(resEq.lat) < 0.5 && Math.abs(resEq.lon) < 0.5, `Expected ~(0,0), got (${resEq.lat},${resEq.lon})`);
+  assert.ok(Math.abs(resEq.dist - 8.2) < 0.01);
+});
+
+runTest('5.3 initTiledEarth() and LOD/thermal toggles manage visibility and resolution badge cleanly', () => {
+  const els = createMockDOM();
+  const root = tiledEarth.initTiledEarth(globe);
+  assert.equal(root.visible, true);
+  assert.equal(tiledEarth.getActiveResolutionLabel(), '16K Global Octants');
+
+  tiledEarth.setSatelliteModeActive(false);
+  assert.equal(root.visible, false);
+  assert.equal(tiledEarth.getActiveResolutionLabel(), '4K GFS Thermal');
+
+  tiledEarth.setSatelliteModeActive(true);
+  assert.equal(root.visible, true);
+
+  tiledEarth.setTiledEarthEnabled(false);
+  assert.equal(root.visible, false);
+  assert.equal(tiledEarth.getActiveResolutionLabel(), '8K NASA PBR');
+
+  tiledEarth.setTiledEarthEnabled(true);
+  tiledEarth.disposeTiledEarth();
   delete globalThis.document;
   delete globalThis.window;
 });

@@ -33,7 +33,11 @@ Compliance: .agents/rules/e2s-014-scientific-integrity.mdc
 
 from __future__ import annotations
 
+import argparse
+import io
+import math
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -294,5 +298,169 @@ def build_detailed_textures(
     return results
 
 
+S2_WGS84_URL = "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021/default/WGS84/{z}/{row}/{col}.jpg"
+
+
+def _download_tile_batch(
+    tasks: list[tuple[int, int, int]], max_workers: int = 16
+) -> dict[tuple[int, int], Image.Image]:
+    """Download a batch of EOX Sentinel-2 Cloudless WGS84 tiles concurrently."""
+    out_tiles: dict[tuple[int, int], Image.Image] = {}
+    limits = httpx.Limits(max_connections=max_workers, max_keepalive_connections=max_workers)
+    with httpx.Client(
+        headers={"User-Agent": "Earth2-SAR-Twin/2.0"},
+        limits=limits,
+        follow_redirects=True,
+        timeout=20.0,
+    ) as client:
+
+        def _fetch_one(z: int, row: int, col: int) -> tuple[int, int, Image.Image | None]:
+            url = S2_WGS84_URL.format(z=z, row=row, col=col)
+            for _attempt in range(3):
+                try:
+                    r = client.get(url)
+                    if r.status_code == 200:
+                        return row, col, Image.open(io.BytesIO(r.content)).convert("RGB")
+                except (httpx.HTTPError, OSError) as exc:
+                    logger.debug(f"Tile retry ({z}/{row}/{col}): {exc}")
+            return row, col, None
+
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            futs = [pool.submit(_fetch_one, z, r, c) for z, r, c in tasks]
+            for fut in as_completed(futs):
+                row, col, img = fut.result()
+                if img is not None:
+                    out_tiles[(row, col)] = img
+    return out_tiles
+
+
+def _stitch_sentinel2_region(
+    min_lat: float,
+    max_lat: float,
+    min_lon: float,
+    max_lon: float,
+    zoom_level: int = 8,
+    target_size: int = 4096,
+) -> Image.Image:
+    """Stitch exact WGS84 Sentinel-2 Cloudless crop at target zoom (z=8 -> 131K global density)."""
+    n_cols = 1 << (zoom_level + 1)
+    n_rows = 1 << zoom_level
+    deg_per_tile = 360.0 / n_cols
+
+    c_min = max(0, int(math.floor((min_lon + 180.0) / deg_per_tile)))
+    c_max = min(n_cols - 1, int(math.floor((max_lon + 180.0 - 1e-6) / deg_per_tile)))
+    r_min = max(0, int(math.floor((90.0 - max_lat) / deg_per_tile)))
+    r_max = min(n_rows - 1, int(math.floor((90.0 - min_lat - 1e-6) / deg_per_tile)))
+
+    tasks = [
+        (zoom_level, r, c)
+        for r in range(r_min, r_max + 1)
+        for c in range(c_min, c_max + 1)
+    ]
+    logger.info(
+        f"Downloading {len(tasks)} Sentinel-2 z={zoom_level} tiles for "
+        f"[{min_lat},{max_lat}]x[{min_lon},{max_lon}]..."
+    )
+    tiles = _download_tile_batch(tasks, max_workers=16)
+
+    canvas_w = (c_max - c_min + 1) * 256
+    canvas_h = (r_max - r_min + 1) * 256
+    canvas = Image.new("RGB", (canvas_w, canvas_h), (8, 22, 48))
+    for (r, c), img in tiles.items():
+        canvas.paste(img, ((c - c_min) * 256, (r - r_min) * 256))
+
+    # Exact sub-tile crop matching [min_lon, max_lon] x [min_lat, max_lat]
+    west_bound = -180.0 + c_min * deg_per_tile
+    east_bound = -180.0 + (c_max + 1) * deg_per_tile
+    north_bound = 90.0 - r_min * deg_per_tile
+    south_bound = 90.0 - (r_max + 1) * deg_per_tile
+
+    x0 = (min_lon - west_bound) / (east_bound - west_bound) * canvas_w
+    x1 = (max_lon - west_bound) / (east_bound - west_bound) * canvas_w
+    y0 = (north_bound - max_lat) / (north_bound - south_bound) * canvas_h
+    y1 = (north_bound - min_lat) / (north_bound - south_bound) * canvas_h
+
+    cropped = canvas.crop((x0, y0, x1, y1))
+    return cropped.resize((target_size, target_size), Image.Resampling.LANCZOS)
+
+
+def build_tiled_16k_and_sentinel2_regions(
+    output_dir: Path | str = "viewer_app/public/textures/tiles",
+    base_textures_dir: Path | str = "viewer_app/public/textures",
+) -> dict[str, str]:
+    """Generate 16K (16384x8192) 4x2 spherical octants and 131K-density Sentinel-2 regional crops."""
+    tiles_dir = Path(output_dir)
+    tiles_dir.mkdir(parents=True, exist_ok=True)
+    base_dir = Path(base_textures_dir)
+
+    sat_8k_path = base_dir / "earth_satellite_8k.jpg"
+    water_path = base_dir / "earth_roughness.jpg"
+    sat_8k = Image.open(sat_8k_path).convert("RGB") if sat_8k_path.exists() else None
+    water_img = Image.open(water_path).convert("L") if water_path.exists() else None
+
+    generated: dict[str, str] = {}
+
+    # 1. Tier 1: 16K (16384x8192) Global 4x2 Octants (each 4096x4096) from Sentinel-2 z=5
+    logger.info("Building Tier 1: 16K (16384x8192) 4x2 Sentinel-2 + Bathymetry Octant Tiles...")
+    for r_oct in range(2):
+        for c_oct in range(4):
+            r0, r1 = r_oct * 16, (r_oct + 1) * 16
+            c0, c1 = c_oct * 16, (c_oct + 1) * 16
+            tasks = [(5, r, c) for r in range(r0, r1) for c in range(c0, c1)]
+            tile_map = _download_tile_batch(tasks, max_workers=16)
+
+            oct_img = Image.new("RGB", (4096, 4096), (7, 22, 52))
+            for (r, c), img in tile_map.items():
+                oct_img.paste(img, ((c - c0) * 256, (r - r0) * 256))
+
+            # Blend NASA 8K ocean bathymetry cleanly over open-ocean regions (preserving Sentinel-2 land/coasts)
+            if sat_8k is not None and water_img is not None:
+                # 8K crop corresponding to octant (8192/4 = 2048px wide, 4096/2 = 2048px tall)
+                bx0, by0 = c_oct * 2048, r_oct * 2048
+                bathy_crop = sat_8k.crop((bx0, by0, bx0 + 2048, by0 + 2048)).resize(
+                    (4096, 4096), Image.Resampling.BICUBIC
+                )
+                # 4K roughness crop (4096/4 = 1024px wide, 2048/2 = 1024px tall): ocean ~ 56, land ~ 224
+                rx0, ry0 = c_oct * 1024, r_oct * 1024
+                r_crop = water_img.crop((rx0, ry0, rx0 + 1024, ry0 + 1024)).resize(
+                    (4096, 4096), Image.Resampling.BILINEAR
+                )
+                rough_arr = np.asarray(r_crop, dtype=np.float32) / 255.0
+                # ocean_blend = 1.0 in deep ocean (rough < 0.4), 0.0 on land (rough > 0.65)
+                ocean_blend = np.clip((0.65 - rough_arr) / 0.30, 0.0, 0.88)[..., None]
+                s2_arr = np.asarray(oct_img, dtype=np.float32) / 255.0
+                bathy_arr = np.asarray(bathy_crop, dtype=np.float32) / 255.0
+                blended = s2_arr * (1.0 - ocean_blend) + bathy_arr * ocean_blend
+                oct_img = Image.fromarray((np.clip(blended, 0.0, 1.0) * 255.0).astype(np.uint8))
+
+            oct_key = f"octant_r{r_oct}_c{c_oct}"
+            oct_path = tiles_dir / f"{oct_key}.jpg"
+            oct_img.save(oct_path, quality=87, optimize=True)
+            generated[oct_key] = str(oct_path)
+
+    # 2. Tier 2: 131K-Equivalent Regional Sentinel-2 z=8 Crops (Italy & Japan)
+    italy_img = _stitch_sentinel2_region(38.0, 48.0, 6.0, 18.0, zoom_level=8, target_size=4096)
+    italy_path = tiles_dir / "sentinel2_italy_4k.jpg"
+    italy_img.save(italy_path, quality=90, optimize=True)
+    generated["sentinel2_italy_4k"] = str(italy_path)
+
+    japan_img = _stitch_sentinel2_region(30.0, 42.0, 128.0, 145.0, zoom_level=8, target_size=4096)
+    japan_path = tiles_dir / "sentinel2_japan_4k.jpg"
+    japan_img.save(japan_path, quality=90, optimize=True)
+    generated["sentinel2_japan_4k"] = str(japan_path)
+
+    logger.info(f"Generated 16K octants and 131K Sentinel-2 regional tiles: {len(generated)} files")
+    return generated
+
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Build 8K/16K/131K Earth & SAR textures.")
+    parser.add_argument(
+        "--with-tiles",
+        action="store_true",
+        help="Also build 16K global octant tiles and 131K-density Sentinel-2 regional crops.",
+    )
+    args = parser.parse_args()
     build_detailed_textures()
+    if args.with_tiles:
+        build_tiled_16k_and_sentinel2_regions()
