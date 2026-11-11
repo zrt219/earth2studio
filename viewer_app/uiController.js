@@ -903,20 +903,24 @@ function initTooltipSystem() {
       if (tooltipTargetEl === target) {
         positionAndShow(target);
       }
-    }, 60);
+    }, 40);
   };
 
   const handlePointerEnter = (e) => {
     if (e.pointerType === 'touch') return;
     const target = typeof e.target?.closest === 'function' ? e.target.closest('[data-tooltip]') : null;
-    if (target && target !== tooltipTargetEl) {
-      scheduleTooltip(target, true);
+    if (target) {
+      if (tooltipTargetEl !== target || tooltipEl.style.display !== 'block') {
+        scheduleTooltip(target, true);
+      }
     }
   };
 
   const handlePointerLeave = (e) => {
     const related = typeof e.relatedTarget?.closest === 'function' ? e.relatedTarget.closest('[data-tooltip]') : null;
-    if (!related || related !== tooltipTargetEl) {
+    if (related && related === tooltipTargetEl) return;
+    const current = typeof e.target?.closest === 'function' ? e.target.closest('[data-tooltip]') : null;
+    if (current && current === tooltipTargetEl) {
       hideTooltip();
     }
   };
@@ -924,6 +928,7 @@ function initTooltipSystem() {
   document.addEventListener('mouseover', handlePointerEnter, true);
   document.addEventListener('pointerenter', handlePointerEnter, true);
   document.addEventListener('pointerover', handlePointerEnter, true);
+  document.addEventListener('mousemove', handlePointerEnter, true);
   document.addEventListener('mouseout', handlePointerLeave, true);
   document.addEventListener('pointerleave', handlePointerLeave, true);
 

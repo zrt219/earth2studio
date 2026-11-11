@@ -71,14 +71,29 @@
     .hud-panel.hud-collapsed > :not(.project-header) {
       display: none !important;
     }
+    .hud-panel.hud-collapsed .project-header {
+      margin-bottom: 0;
+    }
+    .hud-panel.hud-collapsed .project-meta-row {
+      display: none !important;
+    }
     .hud-collapse-btn {
-      padding: 2px 7px;
-      font-size: 0.66rem;
+      padding: 3px 9px;
+      font-size: 0.68rem;
+      font-weight: 600;
       border-radius: 9999px;
       background: rgba(30, 41, 59, 0.9);
       border: 1px solid rgba(56, 189, 248, 0.4);
       color: #cbd5e1;
       flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .hud-collapse-btn:hover {
+      background: rgba(2, 132, 199, 0.4);
+      border-color: #38bdf8;
+      color: #ffffff;
     }
     .preset-strip {
       display: flex;
@@ -110,19 +125,36 @@
 
     .project-header {
       display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+
+    .project-title-row {
+      display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 4px;
+      gap: 8px;
+    }
+
+    .project-meta-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
     }
 
     h1 {
-      font-size: 1.15rem;
+      font-size: clamp(0.98rem, 2vw, 1.15rem);
       font-weight: 700;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
       color: #38bdf8;
       display: flex;
       align-items: center;
-      gap: 8px;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .badge-live {
@@ -131,9 +163,14 @@
       background: rgba(56, 189, 248, 0.15);
       border: 1px solid #38bdf8;
       color: #38bdf8;
-      padding: 2px 7px;
+      padding: 2px 8px;
       border-radius: 9999px;
       letter-spacing: 0.06em;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      line-height: 1.25;
+      flex-shrink: 0;
     }
 
     .subhead {
@@ -953,12 +990,16 @@
       color: #34d399;
       background: rgba(16, 185, 129, 0.12);
       border: 1px solid rgba(16, 185, 129, 0.35);
-      padding: 2px 7px;
+      padding: 2px 8px;
       border-radius: 9999px;
       cursor: pointer;
       user-select: none;
       transition: background 0.2s, border-color 0.2s;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      line-height: 1.25;
+      flex-shrink: 0;
     }
 
     .perf-badge:hover {
@@ -1069,11 +1110,13 @@
   <!-- Glassmorphic HUD Panel -->
   <div class="hud-panel glass-card">
     <div class="project-header">
-      <h1>Earth-2 SAR &amp; InSAR Twin</h1>
-      <div style="display:flex; align-items:center; gap:6px;">
-        <div id="perf-telemetry-badge" class="perf-badge" aria-label="WebGL Engine Performance Telemetry" data-tooltip="Live Three.js rendering diagnostics: 60 FPS, GPU VRAM usage, draw calls, and -81% memory savings.">⚡ <span id="perf-fps">60</span> FPS · <span id="perf-vram">248</span> MB VRAM</div>
-        <span class="badge-live">X-BAND 9.65 GHz</span>
+      <div class="project-title-row">
+        <h1>Earth-2 SAR &amp; InSAR Twin</h1>
         <button id="btn-hud-collapse" class="hud-collapse-btn" aria-label="Collapse or expand control panel" aria-expanded="true" data-tooltip="Collapse or expand the left HUD panel for an unobstructed globe view.">▴ Collapse</button>
+      </div>
+      <div class="project-meta-row">
+        <span class="badge-live">X-BAND 9.65 GHz</span>
+        <div id="perf-telemetry-badge" class="perf-badge" aria-label="WebGL Engine Performance Telemetry" data-tooltip="Live Three.js rendering diagnostics: 60 FPS, GPU VRAM usage, draw calls, and -81% memory savings.">⚡ <span id="perf-fps">60</span> FPS · <span id="perf-vram">248</span> MB VRAM</div>
       </div>
     </div>
     <div class="subhead">Zhane Daye — SAR &amp; Earth System Engineering | ICEYE · Synspective StriX · CATALYST APS</div>
