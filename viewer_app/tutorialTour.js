@@ -29,11 +29,11 @@ export const TOUR_STEPS = Object.freeze([
   {
     id: 'step-1-global',
     badge: 'STEP 1 / 6 · MISSION OVERVIEW',
-    title: '4K Earth-2 Twin & Anti-Leakage Architecture',
+    title: 'Executive Briefing: Audited Weather AI + X-Band SAR ROI',
     targetLabel: 'CATALYST · ICEYE · Synspective',
     body:
-      'Welcome to the Earth-2 X-Band (9.65 GHz) SAR & InSAR Mission Twin. Built on verified NOAA GFS 0.25° global analyses (Forecast → Freeze → Verify), this 4K physical globe aligns ETOPO mountain relief, ocean roughness, and atmospheric state with 3D LEO SAR constellations.',
-    equation: 'λ_X = c / 9.65 GHz = 3.1067 cm  |  4096×2048 [-180°, +180°] Aligned',
+      'Bottom Line: Turns air-gapped NOAA GFS weather triggers into autonomous ICEYE-X38 flood masks (735.3 km²) and StriX-3 landslide alerts (550.7 km²), removing -98.8% of atmospheric phase noise with zero synthetic data leakage.',
+    equation: 'λ_X = c / 9.65 GHz = 3.1067 cm  |  8K Global + 16K–131K Sentinel-2 LOD',
     action: ctx => {
       studyData.setActiveVersion('V3');
       ctx.setBaseTexture?.('sat');
@@ -152,10 +152,14 @@ function syncHudControlsAfterStep() {
   const mode = sarTasking.getSarDisplayMode();
   const visible = sarTasking.getSarTaskingVisibility();
 
-  if (sarBtn) sarBtn.classList.toggle('active-btn', visible);
+  if (sarBtn) {
+    sarBtn.classList.toggle('active-btn', visible);
+    sarBtn.setAttribute('aria-pressed', String(visible));
+  }
   if (apsBtn) {
     apsBtn.classList.toggle('active-btn', isCorrected);
-    apsBtn.innerText = isCorrected ? '🌈 CATALYST APS Fix: ON' : '🌈 CATALYST APS Fix: OFF';
+    apsBtn.setAttribute('aria-pressed', String(isCorrected));
+    apsBtn.innerText = isCorrected ? '🌈 Atmospheric Noise Fix (APS): ON' : '🌈 Atmospheric Noise Fix (APS): OFF';
   }
   if (apsStatus) {
     apsStatus.style.color = isCorrected ? '#10b981' : '#fbbf24';
@@ -165,9 +169,11 @@ function syncHudControlsAfterStep() {
   }
   if (modeBtn) {
     modeBtn.classList.toggle('active-btn', mode === 'flood_coherence');
+    modeBtn.setAttribute('aria-pressed', String(mode === 'flood_coherence'));
     modeBtn.innerText =
       mode === 'flood_coherence' ? '🌊 Mode: Flood σ⁰ / γ CCD' : '🌊 Mode: InSAR Fringes';
   }
+  tourContext.onStepSync?.();
 }
 
 function renderStep(index) {

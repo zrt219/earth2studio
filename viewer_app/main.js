@@ -80,32 +80,56 @@ let targetGlobeRot = null;
 const clock = new THREE.Clock();
 
 // Texture Assets (8K/4K [-180, +180] Geospatially Aligned Multi-Map PBR)
-const textureLoader = new THREE.TextureLoader();
-const satTex = textureLoader.load('/textures/earth_satellite_8k.jpg');
-const normalTex = textureLoader.load('/textures/earth_normal_4k.jpg');
-const cityTex = textureLoader.load('/textures/earth_citylights_4k.jpg');
-const cloudTex = textureLoader.load('/textures/earth_clouds_4k.jpg');
-const t2mTex = textureLoader.load('/textures/earth_t2m.jpg');
-const tendTex = textureLoader.load('/textures/earth_tendency.jpg');
-const bumpTex = textureLoader.load('/textures/earth_elevation.jpg');
-const roughTex = textureLoader.load('/textures/earth_roughness.jpg');
+// Thermal maps (earth_t2m.jpg, earth_tendency.jpg) are deferred until requested via setBaseTexture().
+const textureLoader = typeof document !== 'undefined' ? new THREE.TextureLoader() : null;
 
-// Ensure textures wrap, generate mipmaps, and use proper color spaces
-[satTex, t2mTex, tendTex, cityTex].forEach(tex => {
-  if (tex) {
+function configureTexture(tex, { isColor = false, anisotropy = 1 } = {}) {
+  if (!tex) return null;
+  if (isColor) {
     tex.colorSpace = THREE.SRGBColorSpace;
   }
-});
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.generateMipmaps = true;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.anisotropy = anisotropy;
+  return tex;
+}
 
-[satTex, normalTex, cityTex, cloudTex, t2mTex, tendTex, bumpTex, roughTex].forEach(tex => {
-  if (tex) {
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.ClampToEdgeWrapping;
-    tex.generateMipmaps = true;
-    tex.minFilter = THREE.LinearMipmapLinearFilter;
-    tex.magFilter = THREE.LinearFilter;
+let satTex = null;
+let normalTex = null;
+let cityTex = null;
+let cloudTex = null;
+let bumpTex = null;
+let roughTex = null;
+let t2mTex = null;
+let tendTex = null;
+let currentPixelRatio = 0;
+
+function ensureStartupTextures() {
+  if (!textureLoader || satTex) return;
+  satTex = configureTexture(textureLoader.load('/textures/earth_satellite_8k.jpg'), { isColor: true, anisotropy: 4 });
+  normalTex = configureTexture(textureLoader.load('/textures/earth_normal_4k.jpg'), { isColor: false, anisotropy: 4 });
+  cityTex = configureTexture(textureLoader.load('/textures/earth_citylights_4k.jpg'), { isColor: true, anisotropy: 4 });
+  cloudTex = configureTexture(textureLoader.load('/textures/earth_clouds_4k.jpg'), { isColor: false, anisotropy: 1 });
+  bumpTex = configureTexture(textureLoader.load('/textures/earth_elevation.jpg'), { isColor: false, anisotropy: 1 });
+  roughTex = configureTexture(textureLoader.load('/textures/earth_roughness.jpg'), { isColor: false, anisotropy: 1 });
+}
+
+function getTargetPixelRatio(isInteracting = false) {
+  const base = Math.min((typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1, 2);
+  return isInteracting ? Math.min(base, 1.25) : base;
+}
+
+function applyRendererPixelRatio(isInteracting = false) {
+  if (!renderer || typeof renderer.setPixelRatio !== 'function') return;
+  const nextDpr = getTargetPixelRatio(isInteracting);
+  if (nextDpr !== currentPixelRatio) {
+    currentPixelRatio = nextDpr;
+    renderer.setPixelRatio(nextDpr);
   }
-});
+}
 
 // =============================================================================
 // 2. SCENE INITIALIZATION
@@ -114,6 +138,7 @@ const roughTex = textureLoader.load('/textures/earth_roughness.jpg');
 export function init() {
   const container = document.getElementById('canvas-container');
   if (!container) return;
+  ensureStartupTextures();
 
   // 1. Create Scene
   scene = new THREE.Scene();
@@ -132,16 +157,20 @@ export function init() {
     alpha: false,
     powerPreference: 'high-performance'
   });
+  applyRendererPixelRatio(false);
   renderer.setSize(width, height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
   container.innerHTML = '';
   container.appendChild(renderer.domElement);
 
-  const maxAniso = Math.min(8, renderer.capabilities?.getMaxAnisotropy?.() || 4);
-  [satTex, normalTex, cityTex, cloudTex, t2mTex, tendTex, bumpTex, roughTex].forEach(tex => {
-    if (tex) tex.anisotropy = maxAniso;
+  const maxAniso = renderer.capabilities?.getMaxAnisotropy?.() || 4;
+  const colorAniso = Math.min(4, maxAniso);
+  [satTex, normalTex, cityTex].forEach(tex => {
+    if (tex) tex.anisotropy = colorAniso;
+  });
+  [cloudTex, bumpTex, roughTex].forEach(tex => {
+    if (tex) tex.anisotropy = 1;
   });
 
   // 4. Illumination
@@ -155,8 +184,8 @@ export function init() {
   // 5. Procedural Starfield Background
   createStarfield();
 
-  // 6. Base Earth Sphere Mesh (R = 5.000, 256x128 high-density mesh + multi-map PBR)
-  const geometry = new THREE.SphereGeometry(layers3D.RADIAL_SHELLS.BASE_GLOBE, 256, 128);
+  // 6. Base Earth Sphere Mesh (R = 5.000, 128x64 mesh + multi-map PBR)
+  const geometry = new THREE.SphereGeometry(layers3D.RADIAL_SHELLS.BASE_GLOBE, 128, 64);
   const material = new THREE.MeshStandardMaterial({
     map: satTex,
     normalMap: normalTex,
@@ -211,13 +240,26 @@ export function init() {
 
   // 9. Initialize UI Controller & Glassmorphic HUD
   uiController.initUI(globe, camera, renderer, layers3D);
+  uiController.setSceneCallbacks?.({
+    setCloudsVisibility,
+    setBaseTexture,
+    setLodEnabled: (enabled) => {
+      tiledEarth.setTiledEarthEnabled(enabled);
+      const btn = document.getElementById('layer-sentinel-lod');
+      if (btn) {
+        btn.classList.toggle('active-btn', Boolean(enabled));
+        btn.setAttribute('aria-pressed', String(Boolean(enabled)));
+      }
+    }
+  });
 
   // 9b. Initialize Interactive 6-Step Guided Mission Tutorial
   tutorialTour.initMissionTutorial({
     setBaseTexture,
     flyToLatLon,
     flyTo,
-    setSpinState
+    setSpinState,
+    onStepSync: () => uiController.updateActiveOverlayBadge?.()
   });
 
   // 9c. Initialize Italy & Japan City Target Picker + 3D Surface Beacons
@@ -225,7 +267,8 @@ export function init() {
     flyToLatLon,
     setSpinState,
     showPopup: uiController.showPopup,
-    getCamera: () => camera
+    getCamera: () => camera,
+    onVisibilityChange: () => uiController.updateActiveOverlayBadge?.()
   };
   citySelector.initCitySelector(globe, cityNavCallbacks);
 
@@ -273,14 +316,14 @@ export function init() {
     if (uiController?.stopForecastAnimation) {
       uiController.stopForecastAnimation(true);
     }
-    if (sarTasking?.setSarTaskingVisibility) {
-      sarTasking.setSarTaskingVisibility(versionId === 'V3');
-    }
     if (versionId === 'V1') {
       // V1 defaults to global synoptic perspective
       flyTo(0, 0, 14);
     }
   });
+
+  // Apply clean-boot preset (all 8 beacon/clutter overlays OFF, Sat + LOD + Relief + Clouds ON)
+  uiController.applyCleanBootDefaults?.();
 
   // Start Animation Loop
   animate();
@@ -368,7 +411,110 @@ export function recenterCameraTarget() {
   isFlying = true;
 }
 
+const _pickRaycaster = new THREE.Raycaster();
+const _pickNdc = new THREE.Vector2();
+const _globeCenter = new THREE.Vector3(0, 0, 0);
+
+function isObjectHierarchyVisible(obj) {
+  let cur = obj;
+  while (cur) {
+    if (cur.visible === false) return false;
+    if (cur === globe) break;
+    cur = cur.parent;
+  }
+  return true;
+}
+
+function formatHoverLabel(payload) {
+  if (!payload) return '';
+  if (payload.isTargetCity || payload.type === 'target_city') {
+    return `📍 ${payload.name || 'City'} (${payload.sarSatelliteId || 'SAR'})`;
+  }
+  if (payload.isSarSatellite || payload.isSarSwath || payload.operator === 'ICEYE' || payload.operator === 'Synspective') {
+    const kind = payload.isSarSatellite ? 'Orbit' : 'Swath';
+    return `🛰️ ${payload.name || payload.id || 'SAR'} (${kind})`;
+  }
+  if (payload.isHazardAlert || payload.type === 'hazard_alert' || payload.severity) {
+    return `⚠️ ${payload.name || payload.id || 'Hazard Alert'}`;
+  }
+  if (payload.increment !== undefined || payload.wmoId) {
+    return `📡 ${payload.name || payload.id} (+${payload.increment} K)`;
+  }
+  return `🌀 ${payload.id || 'WP'}: ${payload.mslp || 998} hPa`;
+}
+
+export function pick3DTarget({ clientX, clientY } = {}) {
+  if (!camera || !Number.isFinite(clientX) || !Number.isFinite(clientY)) return null;
+  const w = (typeof window !== 'undefined' && window.innerWidth) ? window.innerWidth : 1920;
+  const h = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 1080;
+  if (w <= 0 || h <= 0) return null;
+
+  _pickNdc.set((clientX / w) * 2 - 1, -(clientY / h) * 2 + 1);
+  _pickRaycaster.setFromCamera(_pickNdc, camera);
+  if (globe?.position) {
+    _globeCenter.copy(globe.position);
+  } else {
+    _globeCenter.set(0, 0, 0);
+  }
+
+  const candidateLists = [
+    layers3D?.getInteractiveObjects?.() || [],
+    citySelector?.getInteractiveCityObjects?.({ visibleOnly: true }) || [],
+    sarTasking?.getSarPickableObjects?.({ visibleOnly: true }) || [],
+    hazardAlerts?.getHazardPickableObjects?.({ visibleOnly: true }) || []
+  ];
+
+  for (const list of candidateLists) {
+    if (!list || list.length === 0) continue;
+    const hits = _pickRaycaster.intersectObjects(list, true);
+    for (const cand of hits) {
+      if (!isObjectHierarchyVisible(cand.object)) continue;
+      const worldPt = cand.point;
+      if (layers3D?.isFrontFacing && !layers3D.isFrontFacing(worldPt, _globeCenter, camera.position)) {
+        continue;
+      }
+      let obj = cand.object;
+      while (obj && (!obj.userData || !obj.userData.type) && obj !== globe) {
+        obj = obj.parent;
+      }
+      if (obj && obj.userData && obj.userData.type) {
+        const payload = obj.userData.data ? { ...obj.userData.data, type: obj.userData.type } : obj.userData;
+        return {
+          object: obj,
+          point: worldPt,
+          data: payload,
+          screenPos: { x: clientX, y: clientY },
+          hoverLabel: formatHoverLabel(payload)
+        };
+      }
+    }
+  }
+  return null;
+}
+
+function updateHoverPill(hit, clientX, clientY) {
+  if (typeof document === 'undefined') return;
+  const pill = document.getElementById('globe-hover-pill');
+  if (!pill) return;
+  if (!hit || !hit.hoverLabel) {
+    pill.style.display = 'none';
+    return;
+  }
+  pill.textContent = hit.hoverLabel;
+  pill.style.display = 'block';
+  const vpW = window.innerWidth || 1920;
+  const vpH = window.innerHeight || 1080;
+  const rect = pill.getBoundingClientRect();
+  const pw = rect.width || 160;
+  const ph = rect.height || 26;
+  const left = Math.max(10, Math.min(vpW - pw - 10, clientX + 14));
+  const top = Math.max(10, Math.min(vpH - ph - 10, clientY - ph - 10));
+  pill.style.left = `${Math.round(left)}px`;
+  pill.style.top = `${Math.round(top)}px`;
+}
+
 function setupPointerEvents(canvas) {
+  canvas.style.cursor = 'grab';
   canvas.addEventListener('contextmenu', (e) => {
     e.preventDefault();
   });
@@ -376,12 +522,17 @@ function setupPointerEvents(canvas) {
   const activePointers = new Map();
   let pinchStartDist = 0;
   let pinchStartCenter = { x: 0, y: 0 };
+  let lastHoverCheckMs = 0;
 
   canvas.addEventListener('pointerdown', (e) => {
     const ptrId = typeof e.pointerId !== 'undefined' ? e.pointerId : 0;
     activePointers.set(ptrId, { x: e.clientX, y: e.clientY });
 
     isDragging = true;
+    canvas.style.cursor = 'grabbing';
+    updateHoverPill(null, 0, 0);
+    applyRendererPixelRatio(true);
+
     pointerButton = typeof e.button === 'number' ? e.button : 0;
     pointerDownPos = { x: e.clientX, y: e.clientY };
     previousPointerPos = { x: e.clientX, y: e.clientY };
@@ -400,8 +551,26 @@ function setupPointerEvents(canvas) {
     isFlying = false;
   });
 
+  canvas.addEventListener('pointerleave', () => {
+    if (!isDragging) {
+      canvas.style.cursor = 'grab';
+      updateHoverPill(null, 0, 0);
+    }
+  });
+
   window.addEventListener('pointermove', (e) => {
-    if (!isDragging || !globe || !camera) return;
+    if (!globe || !camera) return;
+
+    if (!isDragging) {
+      if (e.target !== canvas || e.pointerType === 'touch') return;
+      const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      if (now - lastHoverCheckMs < 50) return;
+      lastHoverCheckMs = now;
+      const hoverHit = pick3DTarget({ clientX: e.clientX, clientY: e.clientY });
+      canvas.style.cursor = hoverHit ? 'pointer' : 'grab';
+      updateHoverPill(hoverHit, e.clientX, e.clientY);
+      return;
+    }
 
     const ptrId = typeof e.pointerId !== 'undefined' ? e.pointerId : 0;
     if (activePointers.has(ptrId)) {
@@ -447,105 +616,14 @@ function setupPointerEvents(canvas) {
 
     if (activePointers.size === 0) {
       isDragging = false;
+      canvas.style.cursor = 'grab';
+      applyRendererPixelRatio(false);
       const deltaDist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
 
       // Click threshold (<=5px) on left click or touch tap without shift: execute raycast POI selection
       const isLeftOrTouch = pointerButton === 0 || e.pointerType === 'touch' || e.pointerType === 'pen';
       if (deltaDist <= 5 && isLeftOrTouch && !e.shiftKey) {
-        let hit = layers3D.handleRaycast(e, camera, window.innerWidth, window.innerHeight);
-        if (!hit && citySelector?.getInteractiveCityObjects && citySelector.getCityMarkersVisibility?.()) {
-          const cityPickables = citySelector.getInteractiveCityObjects();
-          if (cityPickables.length > 0 && camera) {
-            const w = window.innerWidth || 1;
-            const h = window.innerHeight || 1;
-            const ndc = new THREE.Vector2((e.clientX / w) * 2 - 1, -(e.clientY / h) * 2 + 1);
-            const raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera(ndc, camera);
-            const hits = raycaster.intersectObjects(cityPickables, true);
-            for (const cand of hits) {
-              const worldPt = cand.point;
-              if (layers3D?.isFrontFacing && !layers3D.isFrontFacing(worldPt, new THREE.Vector3(0, 0, 0), camera.position)) {
-                continue;
-              }
-              let obj = cand.object;
-              while (obj && (!obj.userData || !obj.userData.type)) {
-                obj = obj.parent;
-              }
-              if (obj && obj.userData) {
-                const payload = obj.userData.data ? { ...obj.userData.data, type: obj.userData.type } : obj.userData;
-                hit = {
-                  object: obj,
-                  point: worldPt,
-                  data: payload,
-                  screenPos: { x: e.clientX, y: e.clientY }
-                };
-                break;
-              }
-            }
-          }
-        }
-        if (!hit && sarTasking?.getSarPickableObjects && sarTasking.getSarTaskingVisibility()) {
-          const sarPickables = sarTasking.getSarPickableObjects();
-          if (sarPickables.length > 0 && camera) {
-            const w = window.innerWidth || 1;
-            const h = window.innerHeight || 1;
-            const ndc = new THREE.Vector2((e.clientX / w) * 2 - 1, -(e.clientY / h) * 2 + 1);
-            const raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera(ndc, camera);
-            const hits = raycaster.intersectObjects(sarPickables, true);
-            for (const cand of hits) {
-              const worldPt = cand.point;
-              if (layers3D?.isFrontFacing && !layers3D.isFrontFacing(worldPt, new THREE.Vector3(0, 0, 0), camera.position)) {
-                continue;
-              }
-              let obj = cand.object;
-              while (obj && (!obj.userData || !obj.userData.type)) {
-                obj = obj.parent;
-              }
-              if (obj && obj.userData) {
-                const payload = obj.userData.data ? { ...obj.userData.data, type: obj.userData.type } : obj.userData;
-                hit = {
-                  object: obj,
-                  point: worldPt,
-                  data: payload,
-                  screenPos: { x: e.clientX, y: e.clientY }
-                };
-                break;
-              }
-            }
-          }
-        }
-        if (!hit && hazardAlerts?.getHazardPickableObjects && hazardAlerts.getHazardAlertsVisibility?.()) {
-          const hazardPickables = hazardAlerts.getHazardPickableObjects();
-          if (hazardPickables.length > 0 && camera) {
-            const w = window.innerWidth || 1;
-            const h = window.innerHeight || 1;
-            const ndc = new THREE.Vector2((e.clientX / w) * 2 - 1, -(e.clientY / h) * 2 + 1);
-            const raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera(ndc, camera);
-            const hits = raycaster.intersectObjects(hazardPickables, true);
-            for (const cand of hits) {
-              const worldPt = cand.point;
-              if (layers3D?.isFrontFacing && !layers3D.isFrontFacing(worldPt, new THREE.Vector3(0, 0, 0), camera.position)) {
-                continue;
-              }
-              let obj = cand.object;
-              while (obj && (!obj.userData || !obj.userData.type)) {
-                obj = obj.parent;
-              }
-              if (obj && obj.userData) {
-                const payload = obj.userData.data ? { ...obj.userData.data, type: obj.userData.type } : obj.userData;
-                hit = {
-                  object: obj,
-                  point: worldPt,
-                  data: payload,
-                  screenPos: { x: e.clientX, y: e.clientY }
-                };
-                break;
-              }
-            }
-          }
-        }
+        const hit = pick3DTarget({ clientX: e.clientX, clientY: e.clientY });
         if (hit && hit.data) {
           uiController.showPopup(hit.data, hit.screenPos);
           isSpinning = false;
@@ -701,15 +779,41 @@ export function getSpinState() {
     : isSpinning;
 }
 
+export function setCloudsVisibility(visible) {
+  isCloudsVisible = Boolean(visible);
+  if (cloudMesh) {
+    cloudMesh.visible = isCloudsVisible;
+  }
+  if (typeof document !== 'undefined') {
+    const btnClouds = document.getElementById('layer-clouds');
+    if (btnClouds) {
+      btnClouds.classList.toggle('active-btn', isCloudsVisible);
+      btnClouds.setAttribute('aria-pressed', String(isCloudsVisible));
+    }
+    const tbClouds = document.getElementById('btn-toolbar-clouds');
+    if (tbClouds) {
+      tbClouds.classList.toggle('active-btn', isCloudsVisible);
+      tbClouds.setAttribute('aria-pressed', String(isCloudsVisible));
+    }
+  }
+  return isCloudsVisible;
+}
+
 export function setBaseTexture(mode) {
   const norm = String(mode || 'sat').toLowerCase();
   let nextTex = satTex;
   const isSat = norm === 'sat' || norm === 'satellite';
   if (norm === 't2m') {
     currentTextureName = 'earth_t2m.jpg';
+    if (!t2mTex && textureLoader) {
+      t2mTex = configureTexture(textureLoader.load('/textures/earth_t2m.jpg'), { isColor: true, anisotropy: 1 });
+    }
     nextTex = t2mTex;
   } else if (norm === 'tend' || norm === 'tendency') {
     currentTextureName = 'earth_tendency.jpg';
+    if (!tendTex && textureLoader) {
+      tendTex = configureTexture(textureLoader.load('/textures/earth_tendency.jpg'), { isColor: true, anisotropy: 1 });
+    }
     nextTex = tendTex;
   } else {
     currentTextureName = 'earth_satellite_8k.jpg';
@@ -736,9 +840,21 @@ export function setBaseTexture(mode) {
     const btnSat = document.getElementById('layer-sat');
     const btnT2m = document.getElementById('layer-t2m');
     const btnTend = document.getElementById('layer-tend');
-    if (btnSat) btnSat.classList.toggle('active-btn', norm === 'sat' || norm === 'satellite');
-    if (btnT2m) btnT2m.classList.toggle('active-btn', norm === 't2m');
-    if (btnTend) btnTend.classList.toggle('active-btn', norm === 'tend' || norm === 'tendency');
+    const satOn = norm === 'sat' || norm === 'satellite';
+    const t2mOn = norm === 't2m';
+    const tendOn = norm === 'tend' || norm === 'tendency';
+    if (btnSat) {
+      btnSat.classList.toggle('active-btn', satOn);
+      btnSat.setAttribute('aria-pressed', String(satOn));
+    }
+    if (btnT2m) {
+      btnT2m.classList.toggle('active-btn', t2mOn);
+      btnT2m.setAttribute('aria-pressed', String(t2mOn));
+    }
+    if (btnTend) {
+      btnTend.classList.toggle('active-btn', tendOn);
+      btnTend.setAttribute('aria-pressed', String(tendOn));
+    }
   }
   uiController?.updateLegend?.(norm === 'sat' ? 'sat' : (norm === 't2m' ? 't2m' : 'tendency'));
 }
@@ -763,10 +879,7 @@ function setupAtmosphereLayerButtons() {
   const btnClouds = document.getElementById('layer-clouds');
   if (btnClouds) {
     btnClouds.addEventListener('click', () => {
-      isCloudsVisible = btnClouds.classList.toggle('active-btn');
-      if (cloudMesh) {
-        cloudMesh.visible = isCloudsVisible;
-      }
+      setCloudsVisibility(!isCloudsVisible);
     });
   }
 
@@ -774,6 +887,7 @@ function setupAtmosphereLayerButtons() {
   if (btnSentinelLod) {
     btnSentinelLod.addEventListener('click', () => {
       const enabled = btnSentinelLod.classList.toggle('active-btn');
+      btnSentinelLod.setAttribute('aria-pressed', String(enabled));
       tiledEarth.setTiledEarthEnabled(enabled);
     });
   }
@@ -921,6 +1035,7 @@ export function onWindowResize() {
   const h = (typeof window !== 'undefined' ? window.innerHeight : 1080) || 1;
   camera.aspect = (w > 0 && h > 0) ? (w / h) : 1.0;
   camera.updateProjectionMatrix();
+  applyRendererPixelRatio(isDragging);
   renderer.setSize(Math.max(1, w), Math.max(1, h));
   if (uiController?.updatePopupPosition) {
     uiController.updatePopupPosition(camera, w, h);
@@ -930,7 +1045,7 @@ export function onWindowResize() {
 function animate() {
   requestAnimationFrame(animate);
 
-  const delta = clock.getDelta();
+  const delta = Math.min(clock.getDelta(), 0.05);
   const elapsedTime = clock.getElapsedTime();
 
   // 1. Smooth Camera & Globe Navigation Interpolation
@@ -989,12 +1104,12 @@ function animate() {
   layers3D.updateLayers(elapsedTime, camera);
 
   // 3b. Update Wind Particles Advection, Hazard Alert Pulses, City Beacons, GEOINT SAR Orbits & 16K-131K Tiled LOD
-  windParticles.updateWindParticles(0.016);
+  windParticles.updateWindParticles(delta);
   hazardAlerts.updateHazardAlerts(elapsedTime);
   citySelector.updateCityMarkers(elapsedTime);
   sarTasking.updateSarTasking(elapsedTime);
   tiledEarth.updateTiledEarth(camera, globe, renderer);
-  uiController.updatePopupPosition?.(camera, globe, window.innerWidth, window.innerHeight);
+  uiController.updatePopupPosition?.(camera, window.innerWidth, window.innerHeight);
 
   // 4. Render Scene
   if (renderer && scene && camera) {
@@ -1027,5 +1142,8 @@ export default {
   getReliefState,
   setSpinState,
   getSpinState,
+  setCloudsVisibility,
+  setBaseTexture,
+  pick3DTarget,
   onWindowResize
 };

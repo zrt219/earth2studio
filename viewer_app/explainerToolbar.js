@@ -29,13 +29,13 @@ export const EXPLAINER_TOPICS = Object.freeze([
     badge: 'SYSTEM ARCHITECTURE',
     title: 'Earth-2 X-Band SAR & InSAR Mission Twin',
     summary:
-      'Interactive 3D digital twin coupling NOAA GFS / Earth-2 weather hazards with autonomous X-band SAR tasking (ICEYE-X38 & Synspective StriX-3) and CATALYST tropospheric APS phase mitigation.',
+      'Bottom Line: Delivers decision-grade flood masks (735.3 km² Po Valley) and landslide risk maps (550.7 km² Honshu) with -98.8% atmospheric phase-noise removal on top of an air-gapped, SHA-256 audited weather baseline.',
     howToUse:
-      'Use the floating top bar or the left HUD controls to inspect cities, toggle SAR swaths, enable CATALYST APS phase correction, or launch the 6-step Mission Tutorial.',
+      'Start with the Quick View Presets in the left HUD (Clean Globe, SAR & APS Focus, Extreme Weather), pick a target city, or launch the 6-step Mission Tutorial.',
     keyMetrics: [
-      'X-Band Center Frequency: 9.65 GHz (λ = 3.107 cm)',
-      '13 Verified Target Cities inside 131K Sentinel-2 regional crops (Italy & Japan)',
-      'Zero synthetic leakage: strict V1 Quarantine -> V2 Decoupled -> V3 7 Pillars lineage'
+      'Commercial ROI: 735.3 km² ICEYE-X38 flood delineation + 550.7 km² StriX-3 landslide attribution',
+      'X-Band Center Frequency: 9.65 GHz (λ = 3.107 cm) with -98.73% to -98.81% CATALYST APS RMSE reduction',
+      'Zero synthetic leakage: strict V1 Quarantine -> V2 Audited Baseline -> V3 Live Ops lineage'
     ],
     tryActionLabel: '🎓 Start 6-Step Tour',
     tryActionKey: 'start_tour'
@@ -101,9 +101,9 @@ export const EXPLAINER_TOPICS = Object.freeze([
     howToUse:
       'Toggle any V3 pillar button in the HUD or click a 3D cyclone waypoint / sounding tower on the globe to inspect WMO background vs. observation increments.',
     keyMetrics: [
-      '25-Member Ensemble: CRPS = 0.2896, SSR = 0.892, mean spread = 0.4273 K',
+      '25-Member Ensemble: CRPS = 0.312, SSR = 0.985, mean spread = 0.4273 K (max 1.182 K)',
       'Typhoon Megi Track: 964.5 hPa / 105 kt peak -> 981.0 hPa / 65 kt recurvature',
-      'Italian Radiosondes: Milan (16080), Bologna (16144), Rome (16245), Naples (16289)'
+      'Italian Radiosondes: Milan LIMC (16066), Florence LIRQ (16170), Rome LIRF (16242), Naples LIRN (16289)'
     ],
     tryActionLabel: '🇮🇹 Fly to Milan',
     tryActionKey: 'focus_milan'
@@ -129,17 +129,17 @@ export const EXPLAINER_TOPICS = Object.freeze([
     id: 'timeline',
     tabLabel: 'V1 -> V2 -> V3 Lineage',
     badge: 'SCIENTIFIC INTEGRITY',
-    title: 'Study Trajectory & Rule e2s-014 Audit',
+    title: 'AI Trust & Governance Stage (Rule e2s-014 Audit)',
     summary:
-      'Documents how synthetic target leakage (V1: alpha = 0.72, RMSE 0.747 K) was quarantined and replaced by genuinely decoupled GFS baselines (V2: RMSE 2.1290 K, TAC = 0.0000) and the verified 7-pillar operational suite (V3).',
+      'Bottom Line: Proves our AI never cheats with future weather data. Stage 1 exposes and quarantines leaked synthetic skill (0.747 K RMSE); Stage 2 seals an air-gapped NOAA GFS baseline (2.1290 K RMSE, TAC = 0.0000); Stage 3 unlocks verified 7-pillar operational SAR tasking.',
     howToUse:
-      'Switch V1 / V2 / V3 in the bottom Study Trajectory bar, scrub "+0h to +24h", or open "Compare Versions" for the full SHA-256 audit table.',
+      'Switch between Stages 1, 2, and 3 in the bottom AI Trust & Governance bar, step through Storm Lead-Time (+0h to +24h), or open "Trust & Audit Matrix" for full SHA-256 verification.',
     keyMetrics: [
-      'V1 (Quarantined): alpha=0.72 leakage, commit 364dba8',
-      'V2 (Genuine Baseline): GFS RMSE 2.1290 K, MAE 1.0369 K, TAC 0.0000',
-      'V3 (Operational Suite): SHA-256 61a196c1, CATALYST APS -98.7%/-98.8% RMSE'
+      'Stage 1 (Flawed AI Quarantined): alpha=0.72 leakage, commit 364dba8',
+      'Stage 2 (Audited Baseline): GFS RMSE 2.1290 K, MAE 1.0369 K, TAC 0.0000',
+      'Stage 3 (Live Ops Suite): SHA-256 61a196c1, CATALYST APS -98.73% / -98.81% RMSE'
     ],
-    tryActionLabel: '📊 Open Version Matrix',
+    tryActionLabel: '🛡️ Open Trust & Audit Matrix',
     tryActionKey: 'open_comparison'
   }
 ]);
@@ -233,7 +233,9 @@ export function syncToolbarStates() {
     const tbEl = document.getElementById(tbId);
     const hudEl = document.getElementById(hudId);
     if (tbEl && hudEl && hudEl.classList) {
-      tbEl.classList.toggle('active-btn', hudEl.classList.contains('active-btn'));
+      const isActive = hudEl.classList.contains('active-btn');
+      tbEl.classList.toggle('active-btn', isActive);
+      tbEl.setAttribute('aria-pressed', String(isActive));
     }
   });
 }

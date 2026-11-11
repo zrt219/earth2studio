@@ -64,6 +64,49 @@
       background: rgba(255, 255, 255, 0.2);
       border-radius: 2px;
     }
+    .hud-panel.hud-collapsed {
+      padding: 10px 14px;
+      overflow: hidden;
+    }
+    .hud-panel.hud-collapsed > :not(.project-header) {
+      display: none !important;
+    }
+    .hud-collapse-btn {
+      padding: 2px 7px;
+      font-size: 0.66rem;
+      border-radius: 9999px;
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #cbd5e1;
+      flex-shrink: 0;
+    }
+    .preset-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 8px;
+      padding: 6px 8px;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      border-radius: 8px;
+    }
+    .preset-btn {
+      padding: 4px 8px;
+      font-size: 0.68rem;
+      border-radius: 9999px;
+    }
+    #active-layers-badge {
+      font-size: 0.64rem;
+      font-weight: 700;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 9999px;
+      padding: 2px 7px;
+      margin-left: auto;
+      white-space: nowrap;
+    }
 
     .project-header {
       display: flex;
@@ -160,11 +203,40 @@
       left: 50%;
       transform: translateX(-50%);
       z-index: 10;
-      padding: 10px 20px;
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+      width: min(92vw, 740px);
+    }
+
+    .timeline-top-row {
       display: flex;
       align-items: center;
-      gap: 16px;
-      width: min(92vw, 680px);
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .timeline-stage-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #trajectory-callout {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 0.68rem;
+      line-height: 1.35;
+      padding: 5px 9px;
+      border-radius: 7px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: rgba(15, 23, 42, 0.72);
     }
 
     .timeline-title {
@@ -473,6 +545,92 @@
       color: #94a3b8;
     }
 
+    #btn-mobile-cam-toggle {
+      display: none;
+    }
+
+    #ui-tooltip {
+      position: fixed;
+      z-index: 200;
+      pointer-events: none;
+      display: none;
+      max-width: min(280px, calc(100vw - 20px));
+      background: rgba(15, 23, 42, 0.96);
+      color: #f8fafc;
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 0.71rem;
+      line-height: 1.4;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+    }
+
+    #globe-hover-pill {
+      position: fixed;
+      z-index: 30;
+      pointer-events: none;
+      display: none;
+      max-width: calc(100vw - 20px);
+      background: rgba(13, 19, 33, 0.92);
+      color: #f8fafc;
+      border: 1px solid rgba(56, 189, 248, 0.55);
+      border-radius: 9999px;
+      padding: 4px 10px;
+      font-size: 0.70rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Prevent desktop #quick-toolbar overlap below 1360px */
+    @media (min-width: 769px) and (max-width: 1120px) {
+      .hud-panel {
+        max-width: 340px;
+      }
+      .camera-widget {
+        width: 185px;
+      }
+      #quick-toolbar {
+        left: 374px;
+        right: 218px;
+        transform: none;
+        max-width: none;
+        justify-content: flex-start;
+      }
+      .timeline-bar {
+        bottom: 34px;
+        width: min(92vw, 620px);
+      }
+      .hud-footer {
+        bottom: 6px;
+        right: 12px;
+        padding: 4px 10px;
+        font-size: 0.64rem;
+      }
+    }
+
+    @media (min-width: 1121px) and (max-width: 1360px) {
+      #quick-toolbar {
+        left: 444px;
+        right: 244px;
+        transform: none;
+        max-width: none;
+        justify-content: flex-start;
+      }
+      .timeline-bar {
+        bottom: 34px;
+        width: min(92vw, 680px);
+      }
+      .hud-footer {
+        bottom: 6px;
+        right: 12px;
+        padding: 4px 10px;
+        font-size: 0.64rem;
+      }
+    }
+
     /* Responsive Mobile & Narrow Viewport Layout (< 768px) */
     @media (max-width: 768px) {
       #comparison-grid > div {
@@ -486,26 +644,42 @@
       }
 
       .hud-panel {
-        top: 10px;
+        top: 52px;
         left: 10px;
         right: 10px;
         width: auto;
         max-width: calc(100vw - 20px);
-        max-height: 44vh;
-        padding: 12px 14px;
+        max-height: 36vh;
+        padding: 10px 12px;
       }
 
-      /* Dock camera widget cleanly to bottom-right, avoiding collision with HUD panel */
+      #btn-mobile-cam-toggle {
+        display: inline-flex;
+        position: fixed;
+        right: 10px;
+        bottom: 142px;
+        z-index: 16;
+        padding: 5px 10px;
+        font-size: 0.70rem;
+        border-radius: 9999px;
+      }
+
+      /* Dock camera widget behind mobile Cam drawer toggle */
       .camera-widget {
+        display: none;
         top: auto;
-        bottom: 86px;
+        bottom: 176px;
         right: 10px;
         left: auto;
         width: 175px;
         padding: 8px 10px;
         gap: 4px;
-        max-height: 38vh;
+        max-height: 32vh;
         overflow-y: auto;
+      }
+
+      .camera-widget.cam-drawer-open {
+        display: flex;
       }
 
       .camera-widget .camera-hint-text {
@@ -513,10 +687,15 @@
       }
 
       .timeline-bar {
-        bottom: 12px;
+        bottom: 10px;
         width: calc(100vw - 20px);
-        padding: 8px 12px;
-        gap: 8px;
+        padding: 7px 10px;
+        gap: 5px;
+      }
+
+      .timeline-stage-row {
+        flex-wrap: wrap;
+        gap: 6px;
       }
 
       .hud-footer {
@@ -533,25 +712,24 @@
         gap: 4px;
         overflow-x: auto;
       }
-
-      .hud-panel {
-        top: 52px;
-        max-height: 36vh;
-      }
     }
 
     @media (max-width: 480px) {
       .hud-panel {
-        top: 50px;
+        top: 48px;
         max-height: 34vh;
-        padding: 10px 12px;
+        padding: 8px 10px;
+      }
+
+      #btn-mobile-cam-toggle {
+        bottom: 174px;
       }
 
       .camera-widget {
-        bottom: 120px;
+        bottom: 208px;
         width: 155px;
         padding: 6px 8px;
-        max-height: 35vh;
+        max-height: 28vh;
       }
 
       .cam-btn-row {
@@ -570,9 +748,12 @@
       }
 
       .timeline-bar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
+        gap: 5px;
+      }
+
+      .timeline-tabs button {
+        font-size: 0.64rem;
+        padding: 4px 5px;
       }
 
       .timeline-slider-wrapper {
@@ -789,26 +970,42 @@
 
   <!-- Floating Quick-Action Toolbar -->
   <div id="quick-toolbar" class="glass-card" role="toolbar" aria-label="Mission Quick Toolbar">
-    <button id="btn-toolbar-cities" class="toolbar-btn">📍 Cities</button>
-    <button id="btn-toolbar-tour" class="toolbar-btn">🎓 Tour</button>
-    <button id="btn-toolbar-sar" class="toolbar-btn active-btn">🛰 SAR</button>
-    <button id="btn-toolbar-aps" class="toolbar-btn">🌈 APS</button>
-    <button id="btn-toolbar-clouds" class="toolbar-btn active-btn">☁️ Clouds</button>
-    <button id="btn-toolbar-help" class="toolbar-btn">❓ Help</button>
+    <button id="btn-toolbar-cities" class="toolbar-btn" aria-label="Target Cities" aria-pressed="false" data-tooltip="Focus Italy/Japan target cities inside the 131K Sentinel-2 regional crops.">📍 Cities</button>
+    <button id="btn-toolbar-tour" class="toolbar-btn" aria-label="Launch 6-Step Executive Tour" data-tooltip="Start the 6-step guided tour of flood masks, slope risk, and CATALYST APS noise removal.">🎓 Tour</button>
+    <button id="btn-toolbar-sar" class="toolbar-btn" aria-label="Toggle SAR Orbits & Swaths" aria-pressed="false" data-tooltip="Show or hide ICEYE-X38 & Synspective StriX-3 X-band orbits, look-cones, and ground swaths.">🛰 SAR</button>
+    <button id="btn-toolbar-aps" class="toolbar-btn" aria-label="Toggle Atmospheric Noise Fix (APS)" aria-pressed="false" data-tooltip="Toggle CATALYST tropospheric water-vapor phase correction (-98.8% InSAR RMSE).">🌈 APS</button>
+    <button id="btn-toolbar-clouds" class="toolbar-btn active-btn" aria-label="Toggle Optical Clouds" aria-pressed="true" data-tooltip="Toggle translucent 3D optical cloud cover shell (R=5.012).">☁️ Clouds</button>
+    <button id="btn-toolbar-help" class="toolbar-btn" aria-label="Open Mission Explainer" data-tooltip="Open plain-English mission architecture, metrics, and governance explainer.">❓ Help</button>
   </div>
 
   <!-- Glassmorphic HUD Panel -->
   <div class="hud-panel glass-card">
     <div class="project-header">
       <h1>Earth-2 SAR &amp; InSAR Twin</h1>
-      <span class="badge-live">X-BAND 9.65 GHz</span>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span class="badge-live">X-BAND 9.65 GHz</span>
+        <button id="btn-hud-collapse" class="hud-collapse-btn" aria-label="Collapse or expand control panel" aria-expanded="true" data-tooltip="Collapse or expand the left HUD panel for an unobstructed globe view.">▴ Collapse</button>
+      </div>
     </div>
     <div class="subhead">Zhane Daye — SAR &amp; Earth System Engineering | ICEYE · Synspective StriX · CATALYST APS</div>
-    <div class="btn-group" style="margin-bottom: 10px;">
-      <button id="btn-mission-tutorial" style="background:rgba(16,185,129,0.22); border:1px solid #10b981; color:#ecfdf5; padding:5px 9px; border-radius:6px; font-size:0.71rem; font-weight:700;">🎓 Mission Tutorial</button>
+    <div class="btn-group" style="margin-bottom: 8px;">
+      <button id="btn-mission-tutorial" aria-label="Start 6-Step Mission Tutorial" data-tooltip="Walk through 6 curated checkpoints covering flood attribution, APS correction, and STAC export." style="background:rgba(16,185,129,0.22); border:1px solid #10b981; color:#ecfdf5; padding:5px 9px; border-radius:6px; font-size:0.71rem; font-weight:700;">🎓 Mission Tutorial</button>
       <a href="/reports/EARTH2_X_BAND_SAR_INSAR_ENGINEERING_REPORT.pdf" target="_blank" rel="noopener noreferrer" style="text-decoration:none; background:rgba(2,132,199,0.28); border:1px solid #38bdf8; color:#f0f9ff; padding:5px 9px; border-radius:6px; font-size:0.71rem; font-weight:600; display:inline-flex; align-items:center; gap:4px;">📄 Engineering Report PDF</a>
       <a href="https://github.com/zrt219/earth2studio" target="_blank" rel="noopener noreferrer" style="text-decoration:none; background:rgba(30,41,59,0.85); border:1px solid rgba(255,255,255,0.18); color:#e2e8f0; padding:5px 9px; border-radius:6px; font-size:0.71rem; font-weight:600; display:inline-flex; align-items:center; gap:4px;">💻 GitHub Repo</a>
       <a href="https://www.linkedin.com/in/zhane-umattr" target="_blank" rel="noopener noreferrer" style="text-decoration:none; background:rgba(30,41,59,0.85); border:1px solid rgba(255,255,255,0.18); color:#e2e8f0; padding:5px 9px; border-radius:6px; font-size:0.71rem; font-weight:600; display:inline-flex; align-items:center; gap:4px;">🔗 LinkedIn</a>
+    </div>
+
+    <!-- Quick View Presets & Clutter Filter Bar -->
+    <div class="control-label" style="margin-top:6px;">
+      <span>Quick View Presets</span>
+      <span id="active-layers-badge">Active: 0/8 overlays</span>
+    </div>
+    <div class="preset-strip" role="group" aria-label="Quick View Presets">
+      <button id="preset-clean" class="preset-btn active-btn" aria-label="Clean Globe Preset" aria-pressed="true" data-tooltip="Clean 8K/16K–131K Earth with soft optical clouds and zero beacon clutter.">🌐 Clean Globe</button>
+      <button id="preset-sar" class="preset-btn" aria-label="SAR and APS Focus Preset" aria-pressed="false" data-tooltip="Isolates ICEYE-X38 & StriX-3 SAR orbits/swaths and target city beacons.">🛰️ SAR &amp; APS Focus</button>
+      <button id="preset-weather" class="preset-btn" aria-label="Extreme Weather Preset" aria-pressed="false" data-tooltip="Shows Typhoon track, extreme hazard alerts, wind streamlines, and optical clouds.">⛈️ Extreme Weather</button>
+      <button id="preset-all" class="preset-btn" aria-label="All Telemetry Preset" aria-pressed="false" data-tooltip="Enables all 8 scientific, weather, city, and SAR overlays simultaneously.">📍 All Telemetry</button>
+      <button id="btn-clear-layers" class="preset-btn" aria-label="Clear All Overlays" data-tooltip="Strips all 8 overlays and optical clouds off for pure base surface inspection.">🧹 Clear All</button>
     </div>
 
     <!-- Base Globe & Atmospheric Data Layer -->
@@ -817,27 +1014,27 @@
       <span id="lod-res-badge" style="color:#10b981; font-size:0.62rem; font-weight:700;">16K Global Octants</span>
     </div>
     <div class="btn-group">
-      <button id="layer-sat" class="active-btn">🛰 Satellite 8K PBR</button>
-      <button id="layer-sentinel-lod" class="active-btn">🧩 16K–131K Sentinel-2 LOD</button>
-      <button id="layer-t2m">Surface Temp (T2m)</button>
-      <button id="layer-tend">24h Tendency (ΔT)</button>
+      <button id="layer-sat" class="active-btn" aria-label="Satellite 8K PBR Base Map" aria-pressed="true" data-tooltip="8K NASA satellite albedo with 4K normal, roughness, elevation, and night city lights.">🛰 Satellite 8K PBR</button>
+      <button id="layer-sentinel-lod" class="active-btn" aria-label="16K to 131K Sentinel-2 Regional LOD" aria-pressed="true" data-tooltip="Streams 16K global octants and 131K Sentinel-2 cloudless regional crops as you zoom in.">🧩 16K–131K Sentinel-2 LOD</button>
+      <button id="layer-t2m" aria-label="Surface Temperature T2m Map" aria-pressed="false" data-tooltip="Lazy-loads 4K NOAA GFS 2-meter air temperature global analysis texture.">Surface Temp (T2m)</button>
+      <button id="layer-tend" aria-label="24h Temperature Tendency Map" aria-pressed="false" data-tooltip="Lazy-loads 4K 24-hour temperature change (ΔT) synoptic diagnostic texture.">24h Tendency (ΔT)</button>
     </div>
 
     <!-- 3D Advanced Capability Pillars Toggles -->
     <div class="control-label"><span>3D Advanced Pillars (V3) <button class="help-chip" data-help-topic="pillars" title="Explain 3D Capability Pillars">?</button></span></div>
     <div class="btn-group">
-      <button id="layer-cyclone" class="active-btn">🌀 Cyclone Trajectory</button>
-      <button id="layer-da" class="active-btn">📍 DA Stations</button>
-      <button id="layer-mesoscale" class="active-btn">🏔 Mesoscale Inset</button>
-      <button id="layer-spread">🔮 Ensemble Spread</button>
+      <button id="layer-cyclone" aria-label="Cyclone Trajectory Layer" aria-pressed="false" data-tooltip="WPAC Typhoon Megi 5-waypoint forecast track (964.5–981.0 hPa) with clickable nodes.">🌀 Cyclone Trajectory</button>
+      <button id="layer-da" aria-label="Ground Truth Stations (DA)" aria-pressed="false" data-tooltip="4 Italian WMO weather stations calibrating model bias (+2.94 to +7.45 K) prior to SAR APS modeling.">📍 Ground Truth Stations (DA)</button>
+      <button id="layer-mesoscale" aria-label="Mesoscale Inset Layer" aria-pressed="false" data-tooltip="8x lapse-rate super-resolution terrain downscaling domains over the Alps & Japan.">🏔 Mesoscale Inset</button>
+      <button id="layer-spread" aria-label="Ensemble Spread Layer" aria-pressed="false" data-tooltip="25-member ensemble temperature spread shell (CRPS 0.312, SSR 0.985).">🔮 Ensemble Spread</button>
     </div>
 
     <!-- Cinematic Atmospheric Layers -->
     <div class="control-label"><span>Cinematic Dynamics <button class="help-chip" data-help-topic="cinematic" title="Explain Clouds, Wind &amp; Hazards">?</button></span></div>
     <div class="btn-group">
-      <button id="layer-clouds" class="active-btn">☁️ Optical Clouds</button>
-      <button id="layer-wind" class="active-btn">💨 Wind Streamlines</button>
-      <button id="layer-hazards" class="active-btn">⚠️ Extreme Hazards</button>
+      <button id="layer-clouds" class="active-btn" aria-label="Optical Clouds Layer" aria-pressed="true" data-tooltip="Translucent 3D global optical cloud shell at R=5.012.">☁️ Optical Clouds</button>
+      <button id="layer-wind" aria-label="Wind Streamlines Layer" aria-pressed="false" data-tooltip="3,500 advected atmospheric jetstream wind tracers.">💨 Wind Streamlines</button>
+      <button id="layer-hazards" aria-label="Extreme Hazards Layer" aria-pressed="false" data-tooltip="Clickable extreme weather warning cones and rings (Typhoon, Alpine Cold Wave, Heat Dome).">⚠️ Extreme Hazards</button>
     </div>
 
     <!-- GEOINT SAR Tip-and-Cue & CATALYST X-Band APS Suite -->
@@ -846,10 +1043,10 @@
       <span style="color:#38bdf8; font-size:0.62rem;">X-BAND 9.65 GHz</span>
     </div>
     <div class="btn-group">
-      <button id="layer-sar-tasking" class="active-btn">🛰️ SAR Orbits &amp; Swaths</button>
-      <button id="toggle-catalyst-aps">🌈 CATALYST APS Fix: OFF</button>
-      <button id="toggle-sar-mode">🌊 Mode: InSAR Fringes</button>
-      <button id="btn-export-stac" style="background:rgba(16,185,129,0.2); border-color:#10b981; color:#10b981;">📥 Export STAC Order</button>
+      <button id="layer-sar-tasking" aria-label="SAR Orbits and Swaths" aria-pressed="false" data-tooltip="ICEYE-X38 (Po Valley) & Synspective StriX-3 (Honshu) orbits, look-cones, and ground swaths.">🛰️ SAR Orbits &amp; Swaths</button>
+      <button id="toggle-catalyst-aps" aria-label="Atmospheric Noise Fix (APS)" aria-pressed="false" data-tooltip="Subtracts NWP water-vapor delay (ZTD) to remove 9–12 false weather fringes (-98.7%/-98.8% RMSE).">🌈 Atmospheric Noise Fix (APS): OFF</button>
+      <button id="toggle-sar-mode" aria-label="Switch SAR Product Mode" aria-pressed="false" data-tooltip="Switch between wrapped InSAR deformation fringes and σ⁰ Flood / γ Slope Coherence risk.">🌊 Mode: InSAR Fringes</button>
+      <button id="btn-export-stac" aria-label="Export STAC v1.0.0 Tasking Order" data-tooltip="Downloads an OGC STAC v1.0.0 GeoJSON tasking order for ICEYE-X38 & StriX-3 with APS metadata." style="background:rgba(16,185,129,0.2); border-color:#10b981; color:#10b981;">📥 Export STAC Order</button>
     </div>
     <div id="sar-telemetry-drawer" style="margin-top: 7px; padding: 8px 10px; background: rgba(15, 23, 42, 0.78); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 6px; font-size: 0.68rem; line-height: 1.4; color: #cbd5e1;">
       <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
@@ -868,28 +1065,28 @@
     <!-- Spread Opacity Slider Control -->
     <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 0.70rem; color: #94a3b8;">
       <span>Spread Layer Opacity:</span>
-      <input type="range" id="spread-opacity-slider" min="0.0" max="1.0" step="0.05" value="0.65" style="width: 160px;" />
+      <input type="range" id="spread-opacity-slider" min="0.0" max="1.0" step="0.05" value="0.65" aria-label="Ensemble Spread Opacity" data-tooltip="Adjust transparency of the 25-member ensemble spread plasma shell." style="width: 160px;" />
     </div>
 
     <!-- Synoptic Regions & Camera Navigation -->
     <div class="control-label">Synoptic Regions</div>
     <div class="btn-group">
-      <button id="fly-global">🌍 Global</button>
-      <button id="fly-italy">🇮🇹 Italy (Med.)</button>
-      <button id="fly-japan">🇯🇵 Japan (Pac.)</button>
-      <button id="fly-americas">🌎 Americas</button>
-      <button id="fly-arctic">❄️ Arctic</button>
-      <button id="fly-antarctic">🇦🇶 Antarctic</button>
+      <button id="fly-global" aria-label="Fly to Global View" data-tooltip="Reset camera to full planetary overview (0°N, 0°E).">🌍 Global</button>
+      <button id="fly-italy" aria-label="Fly to Italy Domain" data-tooltip="Center boresight over Italy & Po Valley ICEYE-X38 flood corridor.">🇮🇹 Italy (Med.)</button>
+      <button id="fly-japan" aria-label="Fly to Japan Domain" data-tooltip="Center boresight over Japan & Honshu StriX-3 typhoon corridor.">🇯🇵 Japan (Pac.)</button>
+      <button id="fly-americas" aria-label="Fly to Americas" data-tooltip="Center boresight over North America synoptic domain.">🌎 Americas</button>
+      <button id="fly-arctic" aria-label="Fly to Arctic" data-tooltip="Inspect North Polar atmospheric circulation.">❄️ Arctic</button>
+      <button id="fly-antarctic" aria-label="Fly to Antarctic" data-tooltip="Inspect South Polar atmospheric circulation.">🇦🇶 Antarctic</button>
     </div>
 
     <!-- Interactive Italy & Japan City Target Picker -->
     <div class="control-label">
       <span>Target Cities (Italy &amp; Japan) <button class="help-chip" data-help-topic="cities" title="Explain Precision City Beacons">?</button></span>
-      <button id="layer-cities" class="active-btn" style="padding:2px 7px; font-size:0.65rem;">📍 Beacons</button>
+      <button id="layer-cities" aria-label="Toggle City Beacons" aria-pressed="false" data-tooltip="Show or hide 13 clickable 3D city target beacons across Italy and Japan." style="padding:2px 7px; font-size:0.65rem;">📍 Beacons</button>
     </div>
     <div id="city-picker-group">
       <div class="city-picker-row">
-        <select id="city-select-italy" class="city-select" aria-label="Select Italy City">
+        <select id="city-select-italy" class="city-select" aria-label="Select Italy City" data-tooltip="Fly directly to any of 7 verified Italian cities inside the 131K Sentinel-2 crop.">
           <option value="">🇮🇹 Italy Cities...</option>
           <option value="it_milan">Milan (Lombardy)</option>
           <option value="it_turin">Turin (Piedmont)</option>
@@ -899,7 +1096,7 @@
           <option value="it_rome">Rome (Lazio)</option>
           <option value="it_naples">Naples / Vesuvius</option>
         </select>
-        <select id="city-select-japan" class="city-select" aria-label="Select Japan City">
+        <select id="city-select-japan" class="city-select" aria-label="Select Japan City" data-tooltip="Fly directly to any of 6 verified Japanese cities inside the 131K Sentinel-2 crop.">
           <option value="">🇯🇵 Japan Cities...</option>
           <option value="jp_tokyo">Tokyo / Tokyo Bay</option>
           <option value="jp_fuji">Mount Fuji / Chubu</option>
@@ -910,22 +1107,22 @@
         </select>
       </div>
       <div class="btn-group">
-        <button class="city-quick-chip" data-city-id="it_milan">Milan</button>
-        <button class="city-quick-chip" data-city-id="it_venice">Venice</button>
-        <button class="city-quick-chip" data-city-id="it_rome">Rome</button>
-        <button class="city-quick-chip" data-city-id="jp_tokyo">Tokyo</button>
-        <button class="city-quick-chip" data-city-id="jp_fuji">Mt. Fuji</button>
-        <button class="city-quick-chip" data-city-id="jp_osaka">Osaka</button>
+        <button class="city-quick-chip" data-city-id="it_milan" aria-label="Focus Milan" data-tooltip="Fly to Milan (Po Valley flood & ICEYE-X38 SAR corridor).">Milan</button>
+        <button class="city-quick-chip" data-city-id="it_venice" aria-label="Focus Venice" data-tooltip="Fly to Venice Lagoon coastal subsidence & sentinel crop.">Venice</button>
+        <button class="city-quick-chip" data-city-id="it_rome" aria-label="Focus Rome" data-tooltip="Fly to Rome (LIRF 16242 radiosonde & urban deformation).">Rome</button>
+        <button class="city-quick-chip" data-city-id="jp_tokyo" aria-label="Focus Tokyo" data-tooltip="Fly to Tokyo Bay coastal reclamation & APS reference.">Tokyo</button>
+        <button class="city-quick-chip" data-city-id="jp_fuji" aria-label="Focus Mount Fuji" data-tooltip="Fly to Mount Fuji / Chubu volcanic InSAR monitoring target.">Mt. Fuji</button>
+        <button class="city-quick-chip" data-city-id="jp_osaka" aria-label="Focus Osaka" data-tooltip="Fly to Osaka / Kansai typhoon storm-tide backscatter corridor.">Osaka</button>
       </div>
     </div>
 
     <!-- Scene Controls & Comparison Trigger -->
-    <div class="control-label">Scene & Study Controls</div>
+    <div class="control-label">Scene &amp; Study Controls</div>
     <div class="btn-group">
-      <button id="toggle-spin">⏸ Pause Rotation</button>
-      <button id="toggle-relief" class="active-btn">⛰ Topo Relief</button>
-      <button id="btn-camera-reset-hud">🎯 Recenter View</button>
-      <button id="open-comparison" style="background:#0284c7; border-color:#38bdf8; color:#fff;">📊 Compare Versions</button>
+      <button id="toggle-spin" aria-label="Toggle Earth Auto-Rotation" aria-pressed="true" data-tooltip="Pause or resume continuous planetary rotation.">⏸ Pause Rotation</button>
+      <button id="toggle-relief" class="active-btn" aria-label="Toggle Topographic Relief" aria-pressed="true" data-tooltip="Toggle ETOPO mountain relief bump and normal map exaggeration.">⛰ Topo Relief</button>
+      <button id="btn-camera-reset-hud" aria-label="Recenter Camera View" data-tooltip="Smoothly reset camera position and globe orientation.">🎯 Recenter View</button>
+      <button id="open-comparison" aria-label="Open Trust and Audit Matrix" data-tooltip="Compare V1 (Quarantined), V2 (Audited Baseline), and V3 (Live Ops) metrics & SHA-256 seals." style="background:#0284c7; border-color:#38bdf8; color:#fff;">🛡️ Trust &amp; Audit Matrix</button>
     </div>
 
     <!-- Dynamic Colormap Legend -->
@@ -939,6 +1136,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Mobile (<768px) Camera Drawer Toggle -->
+  <button id="btn-mobile-cam-toggle" class="glass-card" aria-label="Toggle Camera Controls Drawer" aria-pressed="false">🎥 Cam</button>
 
   <!-- Floating Glassmorphic Camera Controls Widget -->
   <div id="camera-controls-widget" class="glass-card camera-widget">
@@ -960,7 +1160,7 @@
     </div>
 
     <!-- Zoom & Rotation -->
-    <div class="camera-control-sublabel">Zoom & Rotate</div>
+    <div class="camera-control-sublabel">Zoom &amp; Rotate</div>
     <div class="cam-btn-row">
       <button id="cam-zoom-in" class="cam-btn" title="Zoom In (+ / E)">🔍 +</button>
       <button id="cam-zoom-out" class="cam-btn" title="Zoom Out (- / Q)">🔍 −</button>
@@ -987,22 +1187,26 @@
 
   <!-- Segmented Timeline Navigation Bar -->
   <div class="timeline-bar glass-card">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-      <div class="timeline-title" style="margin-bottom: 0;">Study Trajectory: <button class="help-chip" data-help-topic="timeline" title="Explain V1 to V3 Integrity Lineage">?</button></div>
-      <!-- Forecast Lead Time Animation Scrubber -->
-      <div id="forecast-scrubber-box" style="display: flex; align-items: center; gap: 8px; font-size: 0.72rem; color: #38bdf8;">
-        <button id="btn-play-forecast" style="padding: 2px 8px; font-size: 0.68rem; background: #0284c7; border: 1px solid #38bdf8; border-radius: 4px; color: #fff; cursor: pointer;">▶ Play 24h</button>
+    <div class="timeline-top-row">
+      <div class="timeline-title" style="margin-bottom: 0;">AI Trust &amp; Governance Stage: <button class="help-chip" data-help-topic="timeline" title="Explain V1 to V3 Integrity Lineage">?</button></div>
+      <!-- Forecast Lead Time Animation Scrubber (Separated from Audit Stage) -->
+      <div id="forecast-scrubber-box" style="display: flex; align-items: center; gap: 6px; font-size: 0.70rem; color: #38bdf8; border-left: 1px solid rgba(56,189,248,0.28); padding-left: 8px;">
+        <span style="color:#94a3b8; font-weight:700; text-transform:uppercase; font-size:0.64rem;">Storm Lead-Time:</span>
+        <button id="btn-play-forecast" aria-label="Play 24h Storm Lead-Time Animation" data-tooltip="Animate cyclone waypoints from +0h to +24h in 6-hour steps." style="padding: 2px 8px; font-size: 0.68rem; background: #0284c7; border: 1px solid #38bdf8; border-radius: 4px; color: #fff; cursor: pointer;">▶ Play 24h</button>
         <span id="forecast-time-label" style="font-weight: 600; font-family: monospace;">Valid: +0h (T0)</span>
       </div>
     </div>
-    <div class="timeline-tabs">
-      <button id="tab-v1">V1: Synthetic Audit</button>
-      <button id="tab-v2">V2: Real Decoupled</button>
-      <button id="tab-v3" class="active-tab">V3: 7 Pillars</button>
+    <div class="timeline-stage-row">
+      <div class="timeline-tabs">
+        <button id="tab-v1" aria-label="Stage 1: Flawed AI Quarantined" aria-pressed="false" data-tooltip="Quarantined case study: shows how leaking future weather data faked +64.9% AI skill (0.747 K RMSE). Ops layers locked for safety.">1. Flawed AI (Quarantined)</button>
+        <button id="tab-v2" aria-label="Stage 2: Audited Baseline GFS" aria-pressed="false" data-tooltip="Air-gapped NOAA GFS baseline (2.129 K RMSE, SHA-256 sealed). Proves zero future-data leakage before running AI or SAR.">2. Audited Baseline (GFS)</button>
+        <button id="tab-v3" class="active-tab" aria-label="Stage 3: Live Ops 7 Pillars and SAR" aria-pressed="true" data-tooltip="Operational suite: calibrated weather triggers + 8x terrain + ICEYE/Synspective SAR tasking + -98.8% CATALYST APS noise removal.">3. Live Ops (7 Pillars + SAR)</button>
+      </div>
+      <div class="timeline-slider-wrapper">
+        <input type="range" id="timeline-slider" min="0" max="2" step="1" value="2" aria-label="AI Trust Stage Slider" data-tooltip="Scrub between Stage 1 (Quarantined), Stage 2 (Baseline), and Stage 3 (Live Ops)." />
+      </div>
     </div>
-    <div class="timeline-slider-wrapper">
-      <input type="range" id="timeline-slider" min="0" max="2" step="1" value="2" />
-    </div>
+    <div id="trajectory-callout"></div>
   </div>
 
   <!-- Screen-Space Pinned POI Popup Card -->
@@ -1071,6 +1275,10 @@
       </div>
     </div>
   </div>
+
+  <!-- Floating Hover Target Label & Global Tooltip -->
+  <div id="globe-hover-pill" aria-hidden="true"></div>
+  <div id="ui-tooltip" role="tooltip"></div>
 
   <!-- Footer Attribution -->
   <div class="hud-footer glass-card">

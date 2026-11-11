@@ -182,6 +182,13 @@ export function setHazardAlertsVisibility(visible) {
   if (alertGroup) {
     alertGroup.visible = isVisible;
   }
+  if (typeof document !== 'undefined') {
+    const btn = document.getElementById('layer-hazards');
+    if (btn) {
+      btn.classList.toggle('active-btn', isVisible);
+      btn.setAttribute('aria-pressed', String(isVisible));
+    }
+  }
 }
 
 export function getHazardAlertsVisibility() {
@@ -198,7 +205,10 @@ export function getActiveHazards() {
 /**
  * Return pickable hazard alert meshes for raycasting.
  */
-export function getHazardPickableObjects() {
+export function getHazardPickableObjects({ visibleOnly = false } = {}) {
+  if (visibleOnly) {
+    return isVisible ? interactiveHazardObjects : [];
+  }
   return interactiveHazardObjects;
 }
 

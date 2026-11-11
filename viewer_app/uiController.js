@@ -34,6 +34,7 @@ import studyData from './studyData.js';
 import windParticles from './windParticles.js';
 import hazardAlerts from './hazardAlerts.js';
 import sarTasking from './sarTasking.js';
+import citySelector from './citySelector.js';
 import explainerToolbar from './explainerToolbar.js';
 
 // =============================================================================
@@ -89,6 +90,86 @@ let activePopupPOI = null;
 let isPlayingForecast = false;
 let forecastStep = 0;
 let forecastInterval = null;
+let externalCallbacks = {};
+let activePresetId = 'clean_globe';
+let tooltipShowTimer = null;
+let tooltipTargetEl = null;
+
+const OVERLAY_KEYS = [
+  'city_markers',
+  'da_stations',
+  'hazards',
+  'cyclone',
+  'mesoscale_insets',
+  'ensemble_spread',
+  'wind',
+  'sar_tasking'
+];
+
+const OVERLAY_PRESETS = {
+  clean_globe: {
+    city_markers: false,
+    da_stations: false,
+    hazards: false,
+    cyclone: false,
+    mesoscale_insets: false,
+    ensemble_spread: false,
+    wind: false,
+    sar_tasking: false,
+    clouds: true,
+    baseTexture: 'sat',
+    lod: true,
+    relief: true
+  },
+  sar_focus: {
+    city_markers: true,
+    da_stations: false,
+    hazards: false,
+    cyclone: false,
+    mesoscale_insets: false,
+    ensemble_spread: false,
+    wind: false,
+    sar_tasking: true,
+    clouds: false
+  },
+  extreme_weather: {
+    city_markers: false,
+    da_stations: false,
+    hazards: true,
+    cyclone: true,
+    mesoscale_insets: false,
+    ensemble_spread: false,
+    wind: true,
+    sar_tasking: false,
+    clouds: true
+  },
+  all_telemetry: {
+    city_markers: true,
+    da_stations: true,
+    hazards: true,
+    cyclone: true,
+    mesoscale_insets: true,
+    ensemble_spread: true,
+    wind: true,
+    sar_tasking: true,
+    clouds: true
+  },
+  clear_all: {
+    city_markers: false,
+    da_stations: false,
+    hazards: false,
+    cyclone: false,
+    mesoscale_insets: false,
+    ensemble_spread: false,
+    wind: false,
+    sar_tasking: false,
+    clouds: false
+  }
+};
+
+export function setSceneCallbacks(callbacks = {}) {
+  externalCallbacks = { ...externalCallbacks, ...callbacks };
+}
 
 // =============================================================================
 // 2. DYNAMIC COLORMAP LEGENDS
@@ -246,11 +327,16 @@ export function showPopup(rawPoiData, screenPos) {
     if (bodyEl) {
       const inc = poiData.increment !== undefined ? poiData.increment : (poiData.obsVal - poiData.bgVal).toFixed(1);
       const elev = poiData.elevM !== undefined ? `${poiData.elevM}m` : (poiData.elevFt ? `${poiData.elevFt}ft` : 'N/A');
+      const formatKelvin = (val) => {
+        if (val === undefined || val === null || Number.isNaN(Number(val))) return 'N/A';
+        const num = Number(val);
+        return `${(num - 273.15).toFixed(1)} °C (${val} K)`;
+      };
       bodyEl.innerHTML = `
         <div style="font-size:0.75rem; line-height:1.45; color:#cbd5e1;">
           <div style="margin-bottom:4px;"><strong>Location:</strong> ${latVal}°N, ${lonVal}°E (${elev})</div>
-          <div style="margin-bottom:4px;"><strong>Background (T2m):</strong> ${poiData.bgVal !== undefined ? poiData.bgVal + ' °C' : 'N/A'}</div>
-          <div style="margin-bottom:4px;"><strong>Observation:</strong> ${poiData.obsVal !== undefined ? poiData.obsVal + ' °C' : 'N/A'}</div>
+          <div style="margin-bottom:4px;"><strong>Background (T2m):</strong> ${formatKelvin(poiData.bgVal)}</div>
+          <div style="margin-bottom:4px;"><strong>Observation:</strong> ${formatKelvin(poiData.obsVal)}</div>
           <div style="margin-bottom:4px;"><strong>Innovation:</strong> ${poiData.innovation !== undefined ? poiData.innovation + ' K' : ((poiData.obsVal - poiData.bgVal).toFixed(1) + ' K')}</div>
           <div style="margin-bottom:4px;"><strong>DA Increment:</strong> <span style="color:#f43f5e; font-weight:700;">+${inc} K</span></div>
           <div><strong>QC Status:</strong> <span style="background:rgba(16,185,129,0.2); color:#10b981; padding:2px 6px; border-radius:4px; font-weight:700; font-size:0.7rem;">${sanitizeHTML(poiData.qc || 'PASS')}</span></div>
@@ -307,7 +393,8 @@ export function showPopup(rawPoiData, screenPos) {
     const popupWidth = Math.min(320, vpW - 32);
     const maxLeft = Math.max(16, vpW - popupWidth - 16);
     const clampedX = Math.max(16, Math.min(maxLeft, posX + 16));
-    const maxTop = Math.max(16, vpH - 240);
+    const bottomReserve = vpH <= 640 ? 250 : 240;
+    const maxTop = Math.max(16, vpH - bottomReserve);
     const clampedY = Math.max(16, Math.min(maxTop, posY - 40));
 
     popup.style.left = `${clampedX}px`;
@@ -367,77 +454,391 @@ export function closeComparisonModal() {
 }
 
 /**
- * Renders the 3-column comparison grid with metrics, architecture, and badges
+ * Renders the 3-step Executive Governance Summary Strip, 3-column version cards,
+ * and full COMPARISON_MATRIX directly from studyData.js (Single Source of Truth).
  */
 function renderComparisonGrid() {
   const grid = document.getElementById('comparison-grid');
   if (!grid) return;
 
-  const versions = studyData.getStudyVersions ? studyData.getStudyVersions() : null;
-  const v1 = versions?.V1 || {};
-  const v2 = versions?.V2 || {};
-  const v3 = versions?.V3 || {};
+  const versions = studyData.getStudyVersions ? studyData.getStudyVersions() : {};
+  const matrix = studyData.getComparisonMatrix ? studyData.getComparisonMatrix() : [];
+  const ensemble = studyData.getEnsembleMetadata ? studyData.getEnsembleMetadata() : {};
+  const waypoints = studyData.getCycloneWaypoints ? studyData.getCycloneWaypoints() : [];
+  const benchmark = studyData.getPrognosticBenchmark ? studyData.getPrognosticBenchmark() : {};
+  const daStations = studyData.getDAStations ? studyData.getDAStations() : [];
+  const domains = studyData.getMesoscaleDomains ? studyData.getMesoscaleDomains() : [];
+  const sarMeta = studyData.getSarTaskingMetadata ? studyData.getSarTaskingMetadata() : {};
+
+  const v1 = versions.V1 || {};
+  const v2 = versions.V2 || {};
+  const v3 = versions.V3 || {};
 
   const b1 = getBadge('V1');
   const b2 = getBadge('V2');
   const b3 = getBadge('V3');
 
+  const v1Metrics = v1.metrics || {};
+  const v2Metrics = v2.metrics || {};
+  const v2Cycle = v2.cycle || {};
+
+  const minMslp = waypoints.length ? Math.min(...waypoints.map(w => w.mslp)).toFixed(1) : '964.5';
+  const maxMslp = waypoints.length ? Math.max(...waypoints.map(w => w.mslp)).toFixed(1) : '981.0';
+  const modelNames = Array.isArray(benchmark.models)
+    ? benchmark.models.slice(0, 4).map(m => m.name || m.id).join(', ')
+    : 'Persistence, FourCastNet (AFNO), SFNO, GraphCast';
+  const alpsDomain = domains.find(d => d.id === 'alps_superres') || domains[0] || {};
+  const minDaInc = daStations.length ? Math.min(...daStations.map(s => s.increment)).toFixed(2) : '2.94';
+  const maxDaInc = daStations.length ? Math.max(...daStations.map(s => s.increment)).toFixed(2) : '7.45';
+  const iceye = (sarMeta.acquisitions || []).find(a => a.operator === 'ICEYE') || {};
+  const strix = (sarMeta.acquisitions || []).find(a => a.operator === 'Synspective') || {};
+
+  const matrixRowsHtml = matrix.map((row) => `
+    <tr style="border-top:1px solid rgba(255,255,255,0.08);">
+      <td style="padding:7px 8px; color:#94a3b8; font-weight:600; vertical-align:top;">${sanitizeHTML(row.dimension)}</td>
+      <td style="padding:7px 8px; color:#fca5a5; vertical-align:top;">${sanitizeHTML(row.v1)}</td>
+      <td style="padding:7px 8px; color:#86efac; vertical-align:top;">${sanitizeHTML(row.v2)}</td>
+      <td style="padding:7px 8px; color:#bae6fd; vertical-align:top;">${sanitizeHTML(row.v3)}</td>
+    </tr>
+  `).join('');
+
   grid.innerHTML = `
+    <!-- Executive Governance Summary Strip -->
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; width:100%; margin-bottom:14px;">
+      <div style="background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.35); border-radius:8px; padding:10px 12px; font-size:0.72rem; line-height:1.4;">
+        <div style="font-weight:800; color:#f87171; margin-bottom:3px;">1. Caught Fake Skill (Stage 1)</div>
+        <div style="color:#e2e8f0;">Detected target leakage (<code>${sanitizeHTML(v1.leakageFormula || 'y_hat = x0 + 0.72*delta + eps')}</code>) inflating RMSE to ${v1Metrics.rmseWeightedK ?? 0.747} K. Quarantined.</div>
+      </div>
+      <div style="background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.35); border-radius:8px; padding:10px 12px; font-size:0.72rem; line-height:1.4;">
+        <div style="font-weight:800; color:#34d399; margin-bottom:3px;">2. Proved Air-Gap Integrity (Stage 2)</div>
+        <div style="color:#e2e8f0;">NOAA GFS 0.25° baseline (${Number(v2Metrics.rmseWeightedK ?? 2.129).toFixed(3)} K RMSE, TAC=${Number(v2Metrics.tac ?? 0).toFixed(3)}, ACC=null) SHA-256 sealed.</div>
+      </div>
+      <div style="background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); border-radius:8px; padding:10px 12px; font-size:0.72rem; line-height:1.4;">
+        <div style="font-weight:800; color:#38bdf8; margin-bottom:3px;">3. Live SAR &amp; -98.8% APS Value (Stage 3)</div>
+        <div style="color:#e2e8f0;">${iceye.attributionMetrics?.inundatedAreaKm2 ?? 735.27} km² ICEYE flood + ${strix.attributionMetrics?.highRiskSlopeAreaKm2 ?? 550.73} km² StriX slope risk with -98.7%/-98.8% APS noise removal.</div>
+      </div>
+    </div>
+
     <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; width:100%;">
       <!-- Column V1 -->
       <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); border-radius:10px; padding:16px;">
-        <div style="display:inline-block; font-size:0.65rem; font-weight:800; padding:2px 8px; border-radius:4px; background:#ef4444; color:#fff; margin-bottom:8px;">${b1.label}</div>
-        <h3 style="font-size:0.95rem; color:#ef4444; margin-bottom:6px;">V1: Quarantined Synthetic Audit</h3>
-        <p style="font-size:0.75rem; color:#94a3b8; line-height:1.4; margin-bottom:12px;">Historical benchmark with target leakage (ŷ = x₀ + 0.72Δ + ε). Illustrative diagnostic only.</p>
-        
+        <div style="display:inline-block; font-size:0.65rem; font-weight:800; padding:2px 8px; border-radius:4px; background:#ef4444; color:#fff; margin-bottom:8px;">${sanitizeHTML(b1.label)}</div>
+        <h3 style="font-size:0.95rem; color:#ef4444; margin-bottom:6px;">${sanitizeHTML(v1.title || 'V1: Quarantined Synthetic Audit')}</h3>
+        <p style="font-size:0.75rem; color:#94a3b8; line-height:1.4; margin-bottom:12px;">${sanitizeHTML(v1.summary || '')}</p>
         <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:10px; font-size:0.73rem; line-height:1.6;">
-          <div><strong>RMSE (T2m):</strong> <span style="color:#ef4444;">0.747 K</span> (Illusory)</div>
-          <div><strong>MAE:</strong> 0.582 K</div>
-          <div><strong>TAC:</strong> 0.892 (Claimed)</div>
-          <div><strong>ACC:</strong> 0.941 (Misattributed)</div>
-          <div><strong>Cadence:</strong> 7-day cycles</div>
-          <div><strong>Status:</strong> Quarantined</div>
+          <div><strong>RMSE (T2m):</strong> <span style="color:#ef4444;">${v1Metrics.rmseWeightedK ?? 0.747} K</span> (+${v1Metrics.skillScorePct ?? 64.9}% illusory)</div>
+          <div><strong>Mean Bias:</strong> +${v1Metrics.meanBiasK ?? 0.0156} K</div>
+          <div><strong>TAC (Reported):</strong> ${v1Metrics.tacReported ?? 0.9593}</div>
+          <div><strong>ACC (Claimed):</strong> ${sanitizeHTML(v1Metrics.accReported || '0.959 (Misattributed TAC)')}</div>
+          <div><strong>Cadence:</strong> ${v1Metrics.cyclesEvaluated ?? 7} daily cycles (${sanitizeHTML(v1.historicalCommitShort || '364dba8')})</div>
+          <div><strong>Audit Status:</strong> ${sanitizeHTML(v1.auditStatus || 'STATUS: QUARANTINED_DEFECTIVE_SYNTHETIC')}</div>
         </div>
       </div>
 
       <!-- Column V2 -->
       <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:16px;">
-        <div style="display:inline-block; font-size:0.65rem; font-weight:800; padding:2px 8px; border-radius:4px; background:#10b981; color:#fff; margin-bottom:8px;">${b2.label}</div>
-        <h3 style="font-size:0.95rem; color:#10b981; margin-bottom:6px;">V2: Decoupled 3-Stage Baseline</h3>
-        <p style="font-size:0.75rem; color:#94a3b8; line-height:1.4; margin-bottom:12px;">Operational NOAA GFS 0.25° run across strict Forecast → Freeze → Verify pipeline with SHA-256 seal.</p>
-        
+        <div style="display:inline-block; font-size:0.65rem; font-weight:800; padding:2px 8px; border-radius:4px; background:#10b981; color:#fff; margin-bottom:8px;">${sanitizeHTML(b2.label)}</div>
+        <h3 style="font-size:0.95rem; color:#10b981; margin-bottom:6px;">${sanitizeHTML(v2.title || 'V2: Decoupled 3-Stage Baseline')}</h3>
+        <p style="font-size:0.75rem; color:#94a3b8; line-height:1.4; margin-bottom:12px;">${sanitizeHTML(v2.summary || '')}</p>
         <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:10px; font-size:0.73rem; line-height:1.6;">
-          <div><strong>RMSE (T2m):</strong> <span style="color:#10b981;">2.129 K</span> (Authentic)</div>
-          <div><strong>MAE:</strong> 1.037 K</div>
-          <div><strong>TAC:</strong> 0.000 (Exact persistence)</div>
-          <div><strong>ACC:</strong> <span style="color:#94a3b8;">null</span> (Rule e2s-014)</div>
-          <div><strong>Pipeline:</strong> Forecast → Freeze → Verify</div>
-          <div><strong>Hardware:</strong> AMD GPU Blocked</div>
+          <div><strong>RMSE (T2m):</strong> <span style="color:#10b981;">${Number(v2Metrics.rmseWeightedK ?? 2.129).toFixed(4)} K</span> (Authentic)</div>
+          <div><strong>Weighted MAE:</strong> ${Number(v2Metrics.maeWeightedK ?? 1.0369).toFixed(4)} K</div>
+          <div><strong>TAC:</strong> ${Number(v2Metrics.tac ?? 0).toFixed(4)} (Exact persistence)</div>
+          <div><strong>ACC:</strong> <span style="color:#94a3b8;">${v2Metrics.acc === null ? 'null' : sanitizeHTML(v2Metrics.acc)}</span> (Rule e2s-014)</div>
+          <div><strong>Hardware:</strong> ${sanitizeHTML(v2Cycle.neuralStatus || 'NOT VERIFIED (HARDWARE BLOCKER)')}</div>
+          <div><strong>Audit Status:</strong> ${sanitizeHTML(v2.auditStatus || 'STATUS: VERIFIED_GENUINE_BASELINE')}</div>
         </div>
       </div>
 
       <!-- Column V3 -->
       <div style="background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.3); border-radius:10px; padding:16px;">
-        <div style="display:inline-block; font-size:0.65rem; font-weight:800; padding:2px 8px; border-radius:4px; background:#0284c7; color:#fff; margin-bottom:8px;">${b3.label}</div>
-        <h3 style="font-size:0.95rem; color:#38bdf8; margin-bottom:6px;">V3: 7 Advanced Capability Pillars</h3>
-        <p style="font-size:0.75rem; color:#94a3b8; line-height:1.4; margin-bottom:12px;">Massive Ensembles (N=25), Typhoon Tracking, Multi-Source Data, Neural Benchmarks, Alpine Downscaling, DA Pins & 3D Twin.</p>
-        
+        <div style="display:inline-block; font-size:0.65rem; font-weight:800; padding:2px 8px; border-radius:4px; background:#0284c7; color:#fff; margin-bottom:8px;">${sanitizeHTML(b3.label)}</div>
+        <h3 style="font-size:0.95rem; color:#38bdf8; margin-bottom:6px;">${sanitizeHTML(v3.title || 'V3: 7 Advanced Capability Pillars')}</h3>
+        <p style="font-size:0.75rem; color:#94a3b8; line-height:1.4; margin-bottom:12px;">${sanitizeHTML(v3.summary || '')}</p>
         <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:10px; font-size:0.73rem; line-height:1.6;">
-          <div><strong>Ensemble N=25:</strong> Mean 0.427K | Max 1.182K</div>
-          <div><strong>Cyclone WPAC:</strong> 5 Waypoints (935-998 hPa)</div>
-          <div><strong>AI Models:</strong> FourCastNet, SFNO, DLWP, ClimaX</div>
-          <div><strong>DA Network:</strong> 4 Soundings (+3K to +8K)</div>
-          <div><strong>Downscaling:</strong> 8x Alpine Inset (128x128)</div>
-          <div><strong>Twin:</strong> 3D Concentric Shells</div>
+          <div><strong>Ensemble N=${ensemble.members ?? 25}:</strong> CRPS ${ensemble.crps ?? 0.312} | SSR ${ensemble.ssr ?? 0.985} | Mean ${ensemble.meanSpreadK ?? 0.4273} K</div>
+          <div><strong>Cyclone WPAC:</strong> ${waypoints.length || 5} Waypoints (${minMslp}–${maxMslp} hPa)</div>
+          <div><strong>AI Models:</strong> ${sanitizeHTML(modelNames)}</div>
+          <div><strong>DA Network:</strong> ${daStations.length || 4} Soundings (+${minDaInc} to +${maxDaInc} K)</div>
+          <div><strong>Downscaling:</strong> ${alpsDomain.scaleFactor ?? 8}x Alpine (${alpsDomain.lapseRateKPerKm ?? 6.5} K/km)</div>
+          <div><strong>SAR + APS:</strong> ${iceye.id || 'ICEYE-X38'} &amp; ${strix.id || 'StriX-3'} (-98.8% RMSE)</div>
         </div>
       </div>
     </div>
+
+    ${matrixRowsHtml ? `
+    <div style="margin-top:16px; background:rgba(15,23,42,0.72); border:1px solid rgba(255,255,255,0.1); border-radius:10px; overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:0.71rem; text-align:left;">
+        <thead>
+          <tr style="background:rgba(30,41,59,0.9); color:#38bdf8;">
+            <th style="padding:8px;">Dimension</th>
+            <th style="padding:8px;">Stage 1 (V1 Quarantined)</th>
+            <th style="padding:8px;">Stage 2 (V2 Baseline)</th>
+            <th style="padding:8px;">Stage 3 (V3 Live Ops)</th>
+          </tr>
+        </thead>
+        <tbody>${matrixRowsHtml}</tbody>
+      </table>
+    </div>` : ''}
   `;
 }
 
 // =============================================================================
-// 5. TIMELINE & STATE SYNCHRONIZATION
+// 5. TIMELINE, PRESETS, TOOLTIPS & STATE SYNCHRONIZATION
 // =============================================================================
+
+function setButtonState(el, active) {
+  if (!el) return;
+  if (el.classList && typeof el.classList.toggle === 'function') {
+    el.classList.toggle('active-btn', Boolean(active));
+  }
+  if (typeof el.setAttribute === 'function') {
+    el.setAttribute('aria-pressed', String(Boolean(active)));
+  }
+}
+
+export function updateActiveOverlayBadge() {
+  if (typeof document === 'undefined') return 0;
+
+  const states = {
+    city_markers: Boolean(citySelector?.getCityMarkersVisibility?.()),
+    da_stations: Boolean(studyData?.getState?.()?.activeLayers?.da_stations),
+    hazards: Boolean(hazardAlerts?.getHazardAlertsVisibility?.()),
+    cyclone: Boolean(studyData?.getState?.()?.activeLayers?.cyclone),
+    mesoscale_insets: Boolean(studyData?.getState?.()?.activeLayers?.mesoscale_insets),
+    ensemble_spread: Boolean(studyData?.getState?.()?.activeLayers?.ensemble_spread),
+    wind: Boolean(document.getElementById('layer-wind')?.classList?.contains('active-btn')),
+    sar_tasking: Boolean(sarTasking?.getSarTaskingVisibility?.())
+  };
+
+  const activeCount = OVERLAY_KEYS.reduce((acc, k) => acc + (states[k] ? 1 : 0), 0);
+  const badgeEl = document.getElementById('active-layers-badge');
+  if (badgeEl) {
+    badgeEl.innerText = `Active: ${activeCount}/${OVERLAY_KEYS.length} overlays`;
+  }
+
+  const presetMap = {
+    clean_globe: document.getElementById('preset-clean'),
+    sar_focus: document.getElementById('preset-sar'),
+    extreme_weather: document.getElementById('preset-weather'),
+    all_telemetry: document.getElementById('preset-all')
+  };
+  Object.entries(presetMap).forEach(([pid, btn]) => {
+    setButtonState(btn, activePresetId === pid);
+  });
+
+  explainerToolbar?.syncToolbarStates?.();
+  return activeCount;
+}
+
+function applyOverlayConfig(cfg) {
+  if (!cfg) return;
+
+  if (cfg.baseTexture && externalCallbacks.setBaseTexture) {
+    externalCallbacks.setBaseTexture(cfg.baseTexture);
+  }
+  if (typeof cfg.lod === 'boolean' && externalCallbacks.setLodEnabled) {
+    externalCallbacks.setLodEnabled(cfg.lod);
+  }
+  if (typeof cfg.relief === 'boolean') {
+    setReliefState(cfg.relief);
+  }
+  if (typeof cfg.clouds === 'boolean') {
+    if (externalCallbacks.setCloudsVisibility) {
+      externalCallbacks.setCloudsVisibility(cfg.clouds);
+    } else if (typeof document !== 'undefined') {
+      setButtonState(document.getElementById('layer-clouds'), cfg.clouds);
+    }
+  }
+
+  if (citySelector?.setCityMarkersVisibility) {
+    citySelector.setCityMarkersVisibility(Boolean(cfg.city_markers));
+  }
+  if (studyData?.setLayerVisibility) {
+    studyData.setLayerVisibility('da_stations', Boolean(cfg.da_stations));
+    studyData.setLayerVisibility('cyclone', Boolean(cfg.cyclone));
+    studyData.setLayerVisibility('mesoscale_insets', Boolean(cfg.mesoscale_insets));
+    studyData.setLayerVisibility('ensemble_spread', Boolean(cfg.ensemble_spread));
+  }
+  if (activeLayers3D?.setLayerVisibility) {
+    activeLayers3D.setLayerVisibility('da_stations', Boolean(cfg.da_stations));
+    activeLayers3D.setLayerVisibility('cyclone', Boolean(cfg.cyclone));
+    activeLayers3D.setLayerVisibility('mesoscale_insets', Boolean(cfg.mesoscale_insets));
+    activeLayers3D.setLayerVisibility('ensemble_spread', Boolean(cfg.ensemble_spread));
+  }
+  if (hazardAlerts?.setHazardAlertsVisibility) {
+    hazardAlerts.setHazardAlertsVisibility(Boolean(cfg.hazards));
+  }
+  if (windParticles?.setWindParticlesVisibility) {
+    windParticles.setWindParticlesVisibility(Boolean(cfg.wind));
+  }
+  if (sarTasking?.setSarTaskingVisibility) {
+    sarTasking.setSarTaskingVisibility(Boolean(cfg.sar_tasking));
+  }
+
+  if (typeof document !== 'undefined') {
+    setButtonState(document.getElementById('layer-cities'), Boolean(cfg.city_markers));
+    setButtonState(document.getElementById('layer-da'), Boolean(cfg.da_stations));
+    setButtonState(document.getElementById('layer-hazards'), Boolean(cfg.hazards));
+    setButtonState(document.getElementById('layer-cyclone'), Boolean(cfg.cyclone));
+    setButtonState(document.getElementById('layer-mesoscale'), Boolean(cfg.mesoscale_insets));
+    setButtonState(document.getElementById('layer-spread'), Boolean(cfg.ensemble_spread));
+    setButtonState(document.getElementById('layer-wind'), Boolean(cfg.wind));
+    setButtonState(document.getElementById('layer-sar-tasking'), Boolean(cfg.sar_tasking));
+  }
+
+  if (cfg.sar_tasking) {
+    const mode = sarTasking?.getSarDisplayMode?.() === 'flood_coherence' ? 'sar_flood' : 'sar';
+    updateLegend(mode);
+  } else if (cfg.ensemble_spread) {
+    updateLegend('spread');
+  } else {
+    updateLegend('sat');
+  }
+
+  updateActiveOverlayBadge();
+}
+
+export function applyLayerPreset(presetId) {
+  const cfg = OVERLAY_PRESETS[presetId];
+  if (!cfg) return false;
+
+  const needsV3 = Boolean(
+    cfg.da_stations || cfg.cyclone || cfg.mesoscale_insets || cfg.ensemble_spread || cfg.sar_tasking
+  );
+  if (needsV3 && studyData?.getActiveVersionId?.() !== 'V3') {
+    setStudyVersion('V3');
+  }
+
+  activePresetId = presetId;
+  applyOverlayConfig(cfg);
+  return true;
+}
+
+export function applyCleanBootDefaults() {
+  if (studyData?.getActiveVersionId?.() !== 'V3') {
+    setStudyVersion('V3');
+  }
+  activePresetId = 'clean_globe';
+  applyOverlayConfig(OVERLAY_PRESETS.clean_globe);
+}
+
+export function updateTrajectoryCallout(versionId) {
+  if (typeof document === 'undefined') return;
+  const callout = document.getElementById('trajectory-callout');
+  if (!callout) return;
+
+  const norm = String(versionId || 'V3').toUpperCase();
+  if (norm === 'V1') {
+    callout.style.borderColor = 'rgba(239,68,68,0.45)';
+    callout.style.background = 'rgba(239,68,68,0.12)';
+    callout.innerHTML = `
+      <span style="color:#fca5a5;"><strong>Stage 1 Quarantined:</strong> Fake +64.9% skill used future-data leakage (ŷ = x₀ + 0.72Δ + ε). Live ops locked for safety.</span>
+      <span style="display:inline-flex; gap:6px; flex-shrink:0;">
+        <button id="btn-callout-switch-v3" type="button" style="padding:2px 8px; font-size:0.68rem; background:#0284c7; border-color:#38bdf8; color:#fff;">Switch to Live Ops (Stage 3)</button>
+        <button id="btn-callout-open-matrix" type="button" style="padding:2px 8px; font-size:0.68rem;">🛡️ Trust Matrix</button>
+      </span>
+    `;
+  } else if (norm === 'V2') {
+    callout.style.borderColor = 'rgba(16,185,129,0.45)';
+    callout.style.background = 'rgba(16,185,129,0.12)';
+    callout.innerHTML = `
+      <span style="color:#86efac;"><strong>Stage 2 Air-Gapped Baseline:</strong> SHA-256 sealed NOAA GFS 0.25° (2.129 K RMSE, TAC=0.000). Proves zero leakage before ops.</span>
+      <span style="display:inline-flex; gap:6px; flex-shrink:0;">
+        <button id="btn-callout-switch-v3" type="button" style="padding:2px 8px; font-size:0.68rem; background:#0284c7; border-color:#38bdf8; color:#fff;">Activate Live Ops (Stage 3)</button>
+        <button id="btn-callout-open-matrix" type="button" style="padding:2px 8px; font-size:0.68rem;">🛡️ Trust Matrix</button>
+      </span>
+    `;
+  } else {
+    callout.style.borderColor = 'rgba(56,189,248,0.35)';
+    callout.style.background = 'rgba(15,23,42,0.72)';
+    callout.innerHTML = `
+      <span style="color:#bae6fd;"><strong>Stage 3 Live Ops:</strong> Audited 7 Pillars + ICEYE/StriX SAR + -98.8% CATALYST APS noise removal unlocked.</span>
+      <button id="btn-callout-open-matrix" type="button" style="padding:2px 8px; font-size:0.68rem; flex-shrink:0;">🛡️ Trust &amp; Audit Matrix</button>
+    `;
+  }
+
+  const switchBtn = document.getElementById('btn-callout-switch-v3');
+  if (switchBtn && typeof switchBtn.addEventListener === 'function') {
+    switchBtn.addEventListener('click', () => setStudyVersion('V3'));
+  }
+  const matrixBtn = document.getElementById('btn-callout-open-matrix');
+  if (matrixBtn && typeof matrixBtn.addEventListener === 'function') {
+    matrixBtn.addEventListener('click', openComparisonModal);
+  }
+}
+
+function initTooltipSystem() {
+  if (typeof document === 'undefined' || !document.body) return;
+  let tooltipEl = document.getElementById('ui-tooltip');
+  if (!tooltipEl) {
+    tooltipEl = document.createElement('div');
+    tooltipEl.id = 'ui-tooltip';
+    tooltipEl.setAttribute('role', 'tooltip');
+    tooltipEl.style.display = 'none';
+    document.body.appendChild(tooltipEl);
+  }
+
+  const hideTooltip = () => {
+    if (tooltipShowTimer) {
+      clearTimeout(tooltipShowTimer);
+      tooltipShowTimer = null;
+    }
+    tooltipTargetEl = null;
+    tooltipEl.style.display = 'none';
+  };
+
+  const positionAndShow = (target) => {
+    const text = target?.getAttribute?.('data-tooltip');
+    if (!text) return;
+    tooltipEl.textContent = text;
+    tooltipEl.style.display = 'block';
+    const rect = target.getBoundingClientRect();
+    const tipRect = tooltipEl.getBoundingClientRect();
+    const vpW = window.innerWidth || 1920;
+    const vpH = window.innerHeight || 1080;
+    const tipW = tipRect.width || 240;
+    const tipH = tipRect.height || 40;
+    const left = Math.max(8, Math.min(vpW - tipW - 8, rect.left + (rect.width - tipW) / 2));
+    const preferTop = rect.top - tipH - 8;
+    const top = preferTop >= 8 ? preferTop : Math.min(vpH - tipH - 8, rect.bottom + 8);
+    tooltipEl.style.left = `${Math.round(left)}px`;
+    tooltipEl.style.top = `${Math.round(top)}px`;
+  };
+
+  const scheduleTooltip = (target, isPointer) => {
+    if (!target || typeof target.getAttribute !== 'function') return;
+    if (isPointer && typeof window?.matchMedia === 'function' && !window.matchMedia('(hover: hover)').matches) {
+      return;
+    }
+    if (tooltipShowTimer) clearTimeout(tooltipShowTimer);
+    tooltipTargetEl = target;
+    tooltipShowTimer = setTimeout(() => {
+      if (tooltipTargetEl === target) {
+        positionAndShow(target);
+      }
+    }, 120);
+  };
+
+  document.addEventListener('pointerenter', (e) => {
+    if (e.pointerType === 'touch') return;
+    const target = typeof e.target?.closest === 'function' ? e.target.closest('[data-tooltip]') : null;
+    if (target) scheduleTooltip(target, true);
+  }, true);
+
+  document.addEventListener('pointerleave', (e) => {
+    const target = typeof e.target?.closest === 'function' ? e.target.closest('[data-tooltip]') : null;
+    if (target && target === tooltipTargetEl) hideTooltip();
+  }, true);
+
+  document.addEventListener('focusin', (e) => {
+    const target = typeof e.target?.closest === 'function' ? e.target.closest('[data-tooltip]') : null;
+    if (target) scheduleTooltip(target, false);
+  });
+
+  document.addEventListener('focusout', hideTooltip);
+  document.addEventListener('pointerdown', hideTooltip, true);
+}
 
 /**
  * Transitions active study version across UI controls
@@ -460,10 +861,10 @@ export function setStudyVersion(versionId) {
   ['v1', 'v2', 'v3'].forEach(id => {
     const tab = document.getElementById(`tab-${id}`);
     if (tab) {
-      if (id === norm.toLowerCase()) {
-        tab.classList.add('active-tab');
-      } else {
-        tab.classList.remove('active-tab');
+      const isSelected = id === norm.toLowerCase();
+      tab.classList.toggle('active-tab', isSelected);
+      if (typeof tab.setAttribute === 'function') {
+        tab.setAttribute('aria-pressed', String(isSelected));
       }
     }
   });
@@ -479,6 +880,10 @@ export function setStudyVersion(versionId) {
 
   // Synchronize HUD layer button active classes
   syncLayerButtonsForVersion(norm);
+
+  // Update dynamic governance callout and active overlay counter
+  updateTrajectoryCallout(norm);
+  updateActiveOverlayBadge();
 }
 
 /**
@@ -499,22 +904,22 @@ function syncLayerButtonsForVersion(versionId) {
   const sarDrawer = document.getElementById('sar-telemetry-drawer');
 
   if (btnCyclone) {
-    btnCyclone.classList.toggle('active-btn', isV3);
+    setButtonState(btnCyclone, isV3);
     btnCyclone.disabled = !isV3;
     btnCyclone.style.opacity = isV3 ? '1.0' : '0.4';
   }
   if (btnDA) {
-    btnDA.classList.toggle('active-btn', isV3);
+    setButtonState(btnDA, isV3);
     btnDA.disabled = !isV3;
     btnDA.style.opacity = isV3 ? '1.0' : '0.4';
   }
   if (btnSpread) {
-    btnSpread.classList.toggle('active-btn', false);
+    setButtonState(btnSpread, false);
     btnSpread.disabled = !isV3;
     btnSpread.style.opacity = isV3 ? '1.0' : '0.4';
   }
   if (btnMeso) {
-    btnMeso.classList.toggle('active-btn', isV3);
+    setButtonState(btnMeso, isV3);
     btnMeso.disabled = !isV3;
     btnMeso.style.opacity = isV3 ? '1.0' : '0.4';
   }
@@ -526,7 +931,7 @@ function syncLayerButtonsForVersion(versionId) {
     sarTasking.setSarTaskingVisibility(isV3);
   }
   if (btnSarTasking) {
-    btnSarTasking.classList.toggle('active-btn', isV3);
+    setButtonState(btnSarTasking, isV3);
     btnSarTasking.disabled = !isV3;
     btnSarTasking.style.opacity = isV3 ? '1.0' : '0.4';
   }
@@ -555,6 +960,7 @@ export function setSpinState(isSpinning) {
   const btnSpin = document.getElementById('toggle-spin');
   if (btnSpin) {
     btnSpin.innerText = isSpinningState ? '⏸ Pause Rotation' : '▶ Resume Rotation';
+    btnSpin.setAttribute?.('aria-pressed', String(isSpinningState));
   }
   if (studyData?.setLayerVisibility) {
     studyData.setLayerVisibility('rotation', isSpinningState);
@@ -574,7 +980,7 @@ export function setReliefState(active) {
   isReliefActiveState = Boolean(active);
   const btnRelief = document.getElementById('toggle-relief');
   if (btnRelief) {
-    btnRelief.classList.toggle('active-btn', isReliefActiveState);
+    setButtonState(btnRelief, isReliefActiveState);
   }
   if (activeGlobe && activeGlobe.material) {
     activeGlobe.material.bumpScale = isReliefActiveState ? 0.18 : 0.0;
@@ -621,6 +1027,7 @@ export function stopForecastAnimation(resetStep = true) {
     if (studyData?.setActiveTimeStep) {
       studyData.setActiveTimeStep(0);
     }
+    activeLayers3D?.highlightCycloneWaypoint?.(-1);
   }
 }
 
@@ -678,7 +1085,8 @@ export function updatePopupPosition(camera = activeCamera, vpW = null, vpH = nul
       const popupWidth = Math.min(320, width - 32);
       const maxLeft = Math.max(16, width - popupWidth - 16);
       const clampedX = Math.max(16, Math.min(maxLeft, screenPos.x + 16));
-      const maxTop = Math.max(16, height - 240);
+      const bottomReserve = height <= 640 ? 250 : 240;
+      const maxTop = Math.max(16, height - bottomReserve);
       const clampedY = Math.max(16, Math.min(maxTop, screenPos.y - 40));
       popup.style.left = `${clampedX}px`;
       popup.style.top = `${clampedY}px`;
@@ -785,34 +1193,46 @@ export function initUI(globe, camera, renderer, layers3D) {
   if (btnCyclone) {
     btnCyclone.addEventListener('click', () => {
       const active = btnCyclone.classList.toggle('active-btn');
+      setButtonState(btnCyclone, active);
+      activePresetId = null;
       if (studyData.setLayerVisibility) studyData.setLayerVisibility('cyclone', active);
       if (activeLayers3D?.setLayerVisibility) activeLayers3D.setLayerVisibility('cyclone', active);
+      updateActiveOverlayBadge();
     });
   }
 
   if (btnDA) {
     btnDA.addEventListener('click', () => {
       const active = btnDA.classList.toggle('active-btn');
+      setButtonState(btnDA, active);
+      activePresetId = null;
       if (studyData.setLayerVisibility) studyData.setLayerVisibility('da_stations', active);
       if (activeLayers3D?.setLayerVisibility) activeLayers3D.setLayerVisibility('da_stations', active);
+      updateActiveOverlayBadge();
     });
   }
 
   if (btnSpread) {
     btnSpread.addEventListener('click', () => {
       const active = btnSpread.classList.toggle('active-btn');
+      setButtonState(btnSpread, active);
+      activePresetId = null;
       if (studyData.setLayerVisibility) studyData.setLayerVisibility('ensemble_spread', active);
       if (activeLayers3D?.setLayerVisibility) activeLayers3D.setLayerVisibility('ensemble_spread', active);
       if (active) updateLegend('spread');
       else updateLegend(studyData.getActiveVersionId ? studyData.getActiveVersionId() : 'V3');
+      updateActiveOverlayBadge();
     });
   }
 
   if (btnMeso) {
     btnMeso.addEventListener('click', () => {
       const active = btnMeso.classList.toggle('active-btn');
+      setButtonState(btnMeso, active);
+      activePresetId = null;
       if (studyData.setLayerVisibility) studyData.setLayerVisibility('mesoscale_insets', active);
       if (activeLayers3D?.setLayerVisibility) activeLayers3D.setLayerVisibility('mesoscale_insets', active);
+      updateActiveOverlayBadge();
     });
   }
 
@@ -831,14 +1251,20 @@ export function initUI(globe, camera, renderer, layers3D) {
   if (btnWind) {
     btnWind.addEventListener('click', () => {
       const active = btnWind.classList.toggle('active-btn');
+      setButtonState(btnWind, active);
+      activePresetId = null;
       windParticles.setWindParticlesVisibility(active);
+      updateActiveOverlayBadge();
     });
   }
 
   if (btnHazards) {
     btnHazards.addEventListener('click', () => {
       const active = btnHazards.classList.toggle('active-btn');
+      setButtonState(btnHazards, active);
+      activePresetId = null;
       hazardAlerts.setHazardAlertsVisibility(active);
+      updateActiveOverlayBadge();
     });
   }
 
@@ -852,12 +1278,15 @@ export function initUI(globe, camera, renderer, layers3D) {
   if (btnSarTasking) {
     btnSarTasking.addEventListener('click', () => {
       const active = btnSarTasking.classList.toggle('active-btn');
+      setButtonState(btnSarTasking, active);
+      activePresetId = null;
       sarTasking.setSarTaskingVisibility(active);
       if (active) {
         updateLegend(sarTasking.getSarDisplayMode() === 'flood_coherence' ? 'sar_flood' : 'sar');
       } else {
         updateLegend(studyData.getActiveVersionId ? studyData.getActiveVersionId() : 'V3');
       }
+      updateActiveOverlayBadge();
     });
   }
 
@@ -865,8 +1294,10 @@ export function initUI(globe, camera, renderer, layers3D) {
     btnCatalystAps.addEventListener('click', () => {
       const nextAps = !sarTasking.getCatalystApsCorrection();
       sarTasking.setCatalystApsCorrection(nextAps);
-      btnCatalystAps.classList.toggle('active-btn', nextAps);
-      btnCatalystAps.innerText = nextAps ? '🌈 CATALYST APS Fix: ON' : '🌈 CATALYST APS Fix: OFF';
+      setButtonState(btnCatalystAps, nextAps);
+      btnCatalystAps.innerText = nextAps
+        ? '🌈 Atmospheric Noise Fix (APS): ON'
+        : '🌈 Atmospheric Noise Fix (APS): OFF';
       if (apsStatusLine) {
         apsStatusLine.innerText = nextAps
           ? 'APS STATUS: CATALYST GFS-Corrected (RMSE: 0.16 rad, -98.8%)'
@@ -874,6 +1305,7 @@ export function initUI(globe, camera, renderer, layers3D) {
         apsStatusLine.style.color = nextAps ? '#10b981' : '#fbbf24';
       }
       updateLegend('sar');
+      explainerToolbar?.syncToolbarStates?.();
     });
   }
 
@@ -882,7 +1314,7 @@ export function initUI(globe, camera, renderer, layers3D) {
       const currentMode = sarTasking.getSarDisplayMode();
       const nextMode = currentMode === 'insar_fringes' ? 'flood_coherence' : 'insar_fringes';
       sarTasking.setSarDisplayMode(nextMode);
-      btnSarMode.classList.toggle('active-btn', nextMode === 'flood_coherence');
+      setButtonState(btnSarMode, nextMode === 'flood_coherence');
       btnSarMode.innerText = nextMode === 'flood_coherence'
         ? '🌊 Mode: Flood σ⁰ / γ CCD'
         : '🌊 Mode: InSAR Fringes';
@@ -900,6 +1332,40 @@ export function initUI(globe, camera, renderer, layers3D) {
     });
   }
 
+  // 5b-3. Quick View Presets, Clear All, HUD Collapse & Mobile Cam Drawer
+  const presetBindings = [
+    ['preset-clean', 'clean_globe'],
+    ['preset-sar', 'sar_focus'],
+    ['preset-weather', 'extreme_weather'],
+    ['preset-all', 'all_telemetry'],
+    ['btn-clear-layers', 'clear_all']
+  ];
+  presetBindings.forEach(([elId, presetId]) => {
+    const el = document.getElementById(elId);
+    if (el) {
+      el.addEventListener('click', () => applyLayerPreset(presetId));
+    }
+  });
+
+  const btnHudCollapse = document.getElementById('btn-hud-collapse');
+  const hudPanel = document.querySelector?.('.hud-panel');
+  if (btnHudCollapse && hudPanel) {
+    btnHudCollapse.addEventListener('click', () => {
+      const collapsed = hudPanel.classList.toggle('hud-collapsed');
+      btnHudCollapse.innerText = collapsed ? '▾ Expand' : '▴ Collapse';
+      btnHudCollapse.setAttribute('aria-expanded', String(!collapsed));
+    });
+  }
+
+  const btnMobileCam = document.getElementById('btn-mobile-cam-toggle');
+  const camWidget = document.getElementById('camera-controls-widget');
+  if (btnMobileCam && camWidget) {
+    btnMobileCam.addEventListener('click', () => {
+      const open = camWidget.classList.toggle('cam-drawer-open');
+      setButtonState(btnMobileCam, open);
+    });
+  }
+
   // 5c. Forecast Lead-Time Animation Scrubber
   const btnPlayForecast = document.getElementById('btn-play-forecast');
   const forecastLabel = document.getElementById('forecast-time-label');
@@ -912,6 +1378,7 @@ export function initUI(globe, camera, renderer, layers3D) {
 
       if (isPlayingForecast) {
         if (forecastInterval) clearInterval(forecastInterval);
+        activeLayers3D?.highlightCycloneWaypoint?.(forecastStep);
         forecastInterval = setInterval(() => {
           forecastStep = (forecastStep + 1) % 5;
           const leadHours = forecastStep * 6;
@@ -921,6 +1388,7 @@ export function initUI(globe, camera, renderer, layers3D) {
           if (studyData?.setActiveTimeStep) {
             studyData.setActiveTimeStep(forecastStep);
           }
+          activeLayers3D?.highlightCycloneWaypoint?.(forecastStep);
           // Slight rotational nudge to simulate dynamic atmospheric wave translation
           if (activeGlobe) {
             activeGlobe.rotation.y += 0.04;
@@ -939,27 +1407,27 @@ export function initUI(globe, camera, renderer, layers3D) {
 
   if (btnSat) {
     btnSat.addEventListener('click', () => {
-      btnSat.classList.add('active-btn');
-      if (btnT2m) btnT2m.classList.remove('active-btn');
-      if (btnTend) btnTend.classList.remove('active-btn');
+      setButtonState(btnSat, true);
+      setButtonState(btnT2m, false);
+      setButtonState(btnTend, false);
       updateLegend('sat');
     });
   }
 
   if (btnT2m) {
     btnT2m.addEventListener('click', () => {
-      btnT2m.classList.add('active-btn');
-      if (btnSat) btnSat.classList.remove('active-btn');
-      if (btnTend) btnTend.classList.remove('active-btn');
+      setButtonState(btnT2m, true);
+      setButtonState(btnSat, false);
+      setButtonState(btnTend, false);
       updateLegend('t2m');
     });
   }
 
   if (btnTend) {
     btnTend.addEventListener('click', () => {
-      btnTend.classList.add('active-btn');
-      if (btnSat) btnSat.classList.remove('active-btn');
-      if (btnT2m) btnT2m.classList.remove('active-btn');
+      setButtonState(btnTend, true);
+      setButtonState(btnSat, false);
+      setButtonState(btnT2m, false);
       updateLegend('tendency');
     });
   }
@@ -993,6 +1461,12 @@ export function initUI(globe, camera, renderer, layers3D) {
       stopForecastAnimation(true);
     });
 
+    studyData.on('timestep-changed', ({ stepIndex }) => {
+      if (typeof stepIndex === 'number') {
+        activeLayers3D?.highlightCycloneWaypoint?.(stepIndex);
+      }
+    });
+
     studyData.on('layer-toggled', ({ layerId, visible }) => {
       if (layerId === 'relief') {
         isReliefActiveState = Boolean(visible);
@@ -1020,7 +1494,8 @@ export function initUI(globe, camera, renderer, layers3D) {
     });
   }
 
-  // Initialize active version to V3
+  // Initialize tooltip system and active version to V3
+  initTooltipSystem();
   setStudyVersion('V3');
 }
 
@@ -1044,5 +1519,10 @@ export default {
   toggleReliefState,
   stopForecastAnimation,
   updatePopupPosition,
+  setSceneCallbacks,
+  applyLayerPreset,
+  applyCleanBootDefaults,
+  updateActiveOverlayBadge,
+  updateTrajectoryCallout,
   initUI
 };

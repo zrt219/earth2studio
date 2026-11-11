@@ -34,6 +34,7 @@ let cityPickables = [];
 let haloMeshes = [];
 let markersVisible = true;
 let activeCityId = null;
+let onVisibilityChangeCb = null;
 
 function createCityBeacon(city) {
   const payload = {
@@ -101,6 +102,7 @@ function createCityBeacon(city) {
 export function initCitySelector(globe, callbacks = {}) {
   disposeCitySelector();
   parentGlobe = globe || null;
+  onVisibilityChangeCb = typeof callbacks.onVisibilityChange === 'function' ? callbacks.onVisibilityChange : null;
 
   if (parentGlobe) {
     cityGroup = new THREE.Group();
@@ -163,8 +165,17 @@ export function setCityMarkersVisibility(visible) {
   }
   if (typeof document !== 'undefined') {
     const btn = document.getElementById('layer-cities');
-    if (btn) btn.classList.toggle('active-btn', markersVisible);
+    if (btn) {
+      btn.classList.toggle('active-btn', markersVisible);
+      btn.setAttribute('aria-pressed', String(markersVisible));
+    }
+    const tbBtn = document.getElementById('btn-toolbar-cities');
+    if (tbBtn) {
+      tbBtn.classList.toggle('active-btn', markersVisible);
+      tbBtn.setAttribute('aria-pressed', String(markersVisible));
+    }
   }
+  onVisibilityChangeCb?.(markersVisible);
   return markersVisible;
 }
 
@@ -172,8 +183,11 @@ export function getCityMarkersVisibility() {
   return markersVisible;
 }
 
-export function getInteractiveCityObjects() {
-  return markersVisible ? cityPickables : [];
+export function getInteractiveCityObjects({ visibleOnly = false } = {}) {
+  if (visibleOnly) {
+    return markersVisible ? cityPickables : [];
+  }
+  return cityPickables;
 }
 
 export function getActiveCityId() {

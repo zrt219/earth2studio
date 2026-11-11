@@ -271,8 +271,8 @@ const RAW_STUDY_VERSIONS = {
     version: "2.0",
     title: "Version 2: Decoupled 3-Stage Persistence Baseline",
     statusBadge: "VERIFIED GENUINE (BASELINE PERSISTENCE)",
-    auditStatus: "STATUS: QUARANTINED_DEFECTIVE_SYNTHETIC",
-    audit_status: "STATUS: QUARANTINED_DEFECTIVE_SYNTHETIC",
+    auditStatus: "STATUS: VERIFIED_GENUINE_BASELINE",
+    audit_status: "STATUS: VERIFIED_GENUINE_BASELINE",
     statusColor: "#22c55e", // Emerald Green
     badgeClass: "badge-verified",
     summary:
@@ -778,9 +778,9 @@ const RAW_STUDY_DATA = {
   },
   v2: {
     ...RAW_STUDY_VERSIONS.V2,
-    auditStatus: "STATUS: QUARANTINED_DEFECTIVE_SYNTHETIC",
-    audit_status: "STATUS: QUARANTINED_DEFECTIVE_SYNTHETIC",
-    status: "STATUS: QUARANTINED_DEFECTIVE_SYNTHETIC",
+    auditStatus: "STATUS: VERIFIED_GENUINE_BASELINE",
+    audit_status: "STATUS: VERIFIED_GENUINE_BASELINE",
+    status: "STATUS: VERIFIED_GENUINE_BASELINE",
   },
   v3: {
     ...RAW_STUDY_VERSIONS.V3,
