@@ -297,6 +297,246 @@ async function runCdpSession(targetUrl, suiteLabel, cdpPort) {
     console.log(`  [${dPass ? 'PASS' : 'FAIL'}] Desktop Viewport (1920x1080)`);
 
     // -------------------------------------------------------------------------
+    // TEST 1b: Clean Boot (0/8 Overlays), Quick View Presets & Clear All
+    // -------------------------------------------------------------------------
+    console.log('\n  --- Test 1b: Clean Boot (0/8 Overlays), Quick View Presets & Clear All ---');
+    const presetCheck = await send('Runtime.evaluate', {
+      expression: `(async () => {
+        const badge = document.querySelector('#active-layers-badge');
+        const cleanBtn = document.querySelector('#preset-clean');
+        const sarBtn = document.querySelector('#preset-sar');
+        const weatherBtn = document.querySelector('#preset-weather');
+        const allBtn = document.querySelector('#preset-all');
+        const clearBtn = document.querySelector('#btn-clear-layers');
+        const overlaySelectors = [
+          '#layer-cities', '#layer-da', '#layer-hazards', '#layer-cyclone',
+          '#layer-mesoscale', '#layer-spread', '#layer-wind', '#layer-sar-tasking'
+        ];
+        if (!badge || !cleanBtn || !sarBtn || !weatherBtn || !allBtn || !clearBtn) {
+          return { ok: false, reason: 'missing clean-boot preset controls' };
+        }
+        const bootBadge = badge.textContent.trim();
+        const bootActiveOverlays = overlaySelectors.filter(s => document.querySelector(s)?.classList.contains('active-btn'));
+        const bootCloudsActive = !!document.querySelector('#layer-clouds')?.classList.contains('active-btn');
+        const bootCleanPressed = cleanBtn.classList.contains('active-btn');
+
+        sarBtn.click();
+        await new Promise(r => setTimeout(r, 80));
+        const sarBadge = badge.textContent.trim();
+        const sarActive = !!document.querySelector('#layer-sar-tasking')?.classList.contains('active-btn')
+          && !!document.querySelector('#layer-cities')?.classList.contains('active-btn');
+
+        weatherBtn.click();
+        await new Promise(r => setTimeout(r, 80));
+        const weatherBadge = badge.textContent.trim();
+        const weatherActive = !!document.querySelector('#layer-hazards')?.classList.contains('active-btn')
+          && !!document.querySelector('#layer-cyclone')?.classList.contains('active-btn')
+          && !!document.querySelector('#layer-wind')?.classList.contains('active-btn');
+
+        allBtn.click();
+        await new Promise(r => setTimeout(r, 80));
+        const allBadge = badge.textContent.trim();
+
+        clearBtn.click();
+        await new Promise(r => setTimeout(r, 80));
+        const clearBadge = badge.textContent.trim();
+        const cloudsOffAfterClear = !document.querySelector('#layer-clouds')?.classList.contains('active-btn');
+
+        cleanBtn.click();
+        await new Promise(r => setTimeout(r, 80));
+        const restoredBadge = badge.textContent.trim();
+
+        const ok = bootBadge === 'Active: 0/8 overlays'
+          && bootActiveOverlays.length === 0
+          && bootCloudsActive
+          && bootCleanPressed
+          && sarBadge === 'Active: 2/8 overlays' && sarActive
+          && weatherBadge === 'Active: 3/8 overlays' && weatherActive
+          && allBadge === 'Active: 8/8 overlays'
+          && clearBadge === 'Active: 0/8 overlays' && cloudsOffAfterClear
+          && restoredBadge === 'Active: 0/8 overlays';
+
+        return {
+          ok, bootBadge, bootActiveOverlays, bootCloudsActive,
+          sarBadge, weatherBadge, allBadge, clearBadge, cloudsOffAfterClear, restoredBadge
+        };
+      })()`,
+      awaitPromise: true,
+      returnByValue: true
+    });
+    const pRes = presetCheck.result.value;
+    testReport.tests.push({
+      name: 'Clean Boot (0/8 Overlays), Quick View Presets & Clear All',
+      passed: Boolean(pRes?.ok),
+      details: pRes
+    });
+    console.log(`  [${pRes?.ok ? 'PASS' : 'FAIL'}] Clean Boot & Presets (Boot: ${pRes?.bootBadge}, SAR: ${pRes?.sarBadge}, Weather: ${pRes?.weatherBadge}, All: ${pRes?.allBadge}, Clear: ${pRes?.clearBadge})`);
+
+    // -------------------------------------------------------------------------
+    // TEST 1c: #ui-tooltip Hover Visibility & Viewport Clamping
+    // -------------------------------------------------------------------------
+    console.log('\n  --- Test 1c: #ui-tooltip Hover Visibility ---');
+    const sarBtnRectEval = await send('Runtime.evaluate', {
+      expression: `(() => {
+        const el = document.querySelector('#preset-sar');
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
+      })()`,
+      returnByValue: true
+    });
+    const sarBtnCoords = sarBtnRectEval.result.value;
+    let tipRes = { ok: false, reason: 'missing #preset-sar' };
+    if (sarBtnCoords) {
+      await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 10, y: 10, pointerType: 'mouse' });
+      await new Promise(r => setTimeout(r, 50));
+      await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: sarBtnCoords.x, y: sarBtnCoords.y, pointerType: 'mouse' });
+      await new Promise(r => setTimeout(r, 250));
+      const tipEval = await send('Runtime.evaluate', {
+        expression: `(() => {
+          const tip = document.querySelector('#ui-tooltip');
+          if (!tip) return { ok: false, reason: '#ui-tooltip missing' };
+          const style = window.getComputedStyle(tip);
+          const rect = tip.getBoundingClientRect();
+          const inViewport = rect.left >= 0 && rect.top >= 0 && rect.right <= window.innerWidth && rect.bottom <= window.innerHeight;
+          const ok = style.display === 'block' && tip.textContent.trim().length > 10 && rect.width > 0 && rect.height > 0 && inViewport;
+          return { ok, display: style.display, text: tip.textContent.trim(), rect: rect.toJSON(), inViewport };
+        })()`,
+        returnByValue: true
+      });
+      tipRes = tipEval.result.value;
+      await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 10, y: 10, pointerType: 'mouse' });
+      await new Promise(r => setTimeout(r, 50));
+    }
+    testReport.tests.push({
+      name: '#ui-tooltip Hover Visibility & Clamping',
+      passed: Boolean(tipRes?.ok),
+      details: tipRes
+    });
+    console.log(`  [${tipRes?.ok ? 'PASS' : 'FAIL'}] #ui-tooltip Hover Visibility (display=${tipRes?.display}, inViewport=${tipRes?.inViewport})`);
+
+    // -------------------------------------------------------------------------
+    // TEST 1d: #trajectory-callout V1 -> V2 -> V3 Governance Text
+    // -------------------------------------------------------------------------
+    console.log('\n  --- Test 1d: #trajectory-callout V1 -> V2 -> V3 Governance Text ---');
+    const calloutEval = await send('Runtime.evaluate', {
+      expression: `(async () => {
+        const callout = document.querySelector('#trajectory-callout');
+        const tabV1 = document.querySelector('#tab-v1');
+        const tabV2 = document.querySelector('#tab-v2');
+        const tabV3 = document.querySelector('#tab-v3');
+        if (!callout || !tabV1 || !tabV2 || !tabV3) return { ok: false, reason: 'missing trajectory elements' };
+
+        const v3InitText = callout.innerText.trim();
+
+        tabV1.click();
+        await new Promise(r => setTimeout(r, 80));
+        const v1Text = callout.innerText.trim();
+        const hasSwitchBtnV1 = !!document.querySelector('#btn-callout-switch-v3');
+
+        tabV2.click();
+        await new Promise(r => setTimeout(r, 80));
+        const v2Text = callout.innerText.trim();
+        const switchBtnV2 = document.querySelector('#btn-callout-switch-v3');
+        const hasSwitchBtnV2 = !!switchBtnV2;
+
+        switchBtnV2?.click();
+        await new Promise(r => setTimeout(r, 80));
+        const v3RestoredText = callout.innerText.trim();
+        const v3TabActive = tabV3.classList.contains('active-tab');
+
+        const ok = v3InitText.includes('Stage 3 Live Ops')
+          && v1Text.includes('Stage 1 Quarantined') && v1Text.includes('leakage') && hasSwitchBtnV1
+          && v2Text.includes('Stage 2 Air-Gapped Baseline') && v2Text.includes('2.129 K') && hasSwitchBtnV2
+          && v3RestoredText.includes('Stage 3 Live Ops') && v3TabActive;
+
+        return { ok, v3InitText, v1Text, v2Text, v3RestoredText, v3TabActive };
+      })()`,
+      awaitPromise: true,
+      returnByValue: true
+    });
+    const cRes = calloutEval.result.value;
+    testReport.tests.push({
+      name: '#trajectory-callout V1 -> V2 -> V3 Governance Text & 1-Click Switch',
+      passed: Boolean(cRes?.ok),
+      details: cRes
+    });
+    console.log(`  [${cRes?.ok ? 'PASS' : 'FAIL'}] #trajectory-callout V1->V2->V3 (ok=${cRes?.ok})`);
+
+    // -------------------------------------------------------------------------
+    // TEST 1e: 3D Cursor Hover Feedback & #globe-hover-pill
+    // -------------------------------------------------------------------------
+    console.log('\n  --- Test 1e: 3D Cursor Hover Feedback & #globe-hover-pill ---');
+    await send('Runtime.evaluate', {
+      expression: `(() => {
+        const spinBtn = document.querySelector('#toggle-spin');
+        if (spinBtn && spinBtn.textContent.includes('Pause')) spinBtn.click();
+        document.querySelector('#preset-sar')?.click();
+        const rotL = document.querySelector('#cam-rot-left');
+        for (let i = 0; i < 12; i++) rotL?.click();
+      })()`
+    });
+    await new Promise(r => setTimeout(r, 600));
+
+    let hOn = { cursor: 'grab', pillDisplay: 'none', pillText: '' };
+    for (const scanY of [85, 95, 105]) {
+      await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 960, y: scanY, pointerType: 'mouse' });
+      await new Promise(r => setTimeout(r, 120));
+      const hoverOnEval = await send('Runtime.evaluate', {
+        expression: `(() => {
+          const canvas = document.querySelector('#canvas-container canvas') || document.querySelector('canvas');
+          const pill = document.querySelector('#globe-hover-pill');
+          return {
+            cursor: canvas?.style.cursor,
+            pillDisplay: pill ? window.getComputedStyle(pill).display : null,
+            pillText: pill?.textContent?.trim() || '',
+            scanY: ${scanY}
+          };
+        })()`,
+        returnByValue: true
+      });
+      hOn = hoverOnEval.result.value;
+      if (hOn.cursor === 'pointer' && hOn.pillDisplay === 'block' && hOn.pillText.length > 0) {
+        break;
+      }
+    }
+
+    // Restore clean boot & reset camera, then check cursor reverts to grab & pill hides
+    await send('Runtime.evaluate', {
+      expression: `(() => {
+        document.querySelector('#preset-clean')?.click();
+        document.querySelector('#btn-camera-reset')?.click();
+      })()`
+    });
+    await new Promise(r => setTimeout(r, 200));
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 960, y: 540, pointerType: 'mouse' });
+    await new Promise(r => setTimeout(r, 120));
+    const hoverOffEval = await send('Runtime.evaluate', {
+      expression: `(() => {
+        const canvas = document.querySelector('#canvas-container canvas') || document.querySelector('canvas');
+        const pill = document.querySelector('#globe-hover-pill');
+        return {
+          cursor: canvas?.style.cursor,
+          pillDisplay: pill ? window.getComputedStyle(pill).display : null
+        };
+      })()`,
+      returnByValue: true
+    });
+    const hOff = hoverOffEval.result.value;
+    const hoverPass = hOn.cursor === 'pointer'
+      && hOn.pillDisplay === 'block'
+      && hOn.pillText.length > 0
+      && hOff.cursor === 'grab'
+      && hOff.pillDisplay === 'none';
+
+    testReport.tests.push({
+      name: '3D Cursor Hover Feedback (pointer + #globe-hover-pill -> grab)',
+      passed: hoverPass,
+      details: { hOn, hOff }
+    });
+    console.log(`  [${hoverPass ? 'PASS' : 'FAIL'}] 3D Cursor Hover (on=${hOn.cursor}/${hOn.pillDisplay}/${hOn.pillText}, off=${hOff.cursor}/${hOff.pillDisplay})`);
+
+    // -------------------------------------------------------------------------
     // TEST 2: Mobile Viewport (<480px, e.g. 390x844 iPhone 14/15 profile)
     // -------------------------------------------------------------------------
     console.log('\n  --- Test 2: Mobile Viewport (390x844, scale 3.0, <480px) ---');
@@ -621,9 +861,10 @@ async function runCdpSession(targetUrl, suiteLabel, cdpPort) {
     });
     console.log(`  [${bPass ? 'PASS' : 'FAIL'}] Brand Scrub: Clean = ${bRes.clean}, Zhane Daye Present = ${bRes.hasZhane}`);
 
-    // Summary of console and runtime errors
+    // Summary of console, runtime, and network errors
     const zeroConsoleErrors = testReport.consoleErrors.length === 0;
     const zeroExceptions = testReport.runtimeExceptions.length === 0;
+    const zeroNetworkFailures = testReport.networkFailures.length === 0;
 
     testReport.tests.push({
       name: 'Zero Console Errors',
@@ -634,6 +875,11 @@ async function runCdpSession(targetUrl, suiteLabel, cdpPort) {
       name: 'Zero Runtime Exceptions',
       passed: zeroExceptions,
       details: { exceptions: testReport.runtimeExceptions }
+    });
+    testReport.tests.push({
+      name: 'Zero Network Failures',
+      passed: zeroNetworkFailures,
+      details: { failures: testReport.networkFailures }
     });
 
     console.log(`\n  Console Errors: ${testReport.consoleErrors.length}`);
@@ -657,15 +903,24 @@ async function runCdpSession(targetUrl, suiteLabel, cdpPort) {
 }
 
 async function main() {
+  const isLocalOnly = process.argv.includes('--local-only');
+
   console.log('================================================================');
   console.log('EARTH-2 SAR & InSAR MISSION TWIN — HEADLESS BROWSER VERIFIER');
+  if (isLocalOnly) {
+    console.log('MODE: --local-only (Pre-Deploy Local Build Preview QA)');
+  }
   console.log('================================================================');
 
-  // Step 1: Production Asset Health Check
-  const prodAssets = await verifyAssets(PROD_URL, 'Production Vercel Assets');
+  let prodAssets = null;
+  let prodReport = null;
+  if (!isLocalOnly) {
+    // Step 1: Production Asset Health Check
+    prodAssets = await verifyAssets(PROD_URL, 'Production Vercel Assets');
 
-  // Step 2: Production CDP Verification
-  const prodReport = await runCdpSession(PROD_URL, 'Production Vercel (https://earth2-sar-insar.vercel.app)', 9226);
+    // Step 2: Production CDP Verification
+    prodReport = await runCdpSession(PROD_URL, 'Production Vercel (https://earth2-sar-insar.vercel.app)', 9226);
+  }
 
   // Step 3: Local Build Preview & Verification
   const previewProc = startVitePreview();
@@ -690,21 +945,25 @@ async function main() {
   console.log('\n================================================================');
   console.log('                    OVERALL VERIFICATION SUMMARY               ');
   console.log('================================================================');
-  console.log(`Production Asset Failures: ${prodAssets.failedCount}`);
-  console.log(`Production CDP Passed:     ${prodReport.passed}`);
+  if (!isLocalOnly) {
+    console.log(`Production Asset Failures: ${prodAssets.failedCount}`);
+    console.log(`Production CDP Passed:     ${prodReport.passed}`);
+  } else {
+    console.log('Production Checks:         SKIPPED (--local-only)');
+  }
   console.log(`Local Asset Failures:      ${localAssets ? localAssets.failedCount : 'N/A'}`);
   console.log(`Local CDP Passed:          ${localReport ? localReport.passed : false}`);
 
-  const overallPassed = prodAssets.failedCount === 0 &&
-                        prodReport.passed &&
-                        (localAssets && localAssets.failedCount === 0) &&
-                        (localReport && localReport.passed);
+  const prodOk = isLocalOnly || (prodAssets.failedCount === 0 && prodReport.passed);
+  const localOk = Boolean(localAssets && localAssets.failedCount === 0 && localReport && localReport.passed);
+  const overallPassed = prodOk && localOk;
 
   console.log(`\nFINAL SYSTEM VERDICT: ${overallPassed ? 'APPROVE' : 'REQUEST_CHANGES'}`);
 
   // Return full JSON payload for programmatic consumption or logging
   const finalSummary = {
     timestamp: new Date().toISOString(),
+    mode: isLocalOnly ? 'local-only' : 'prod-and-local',
     overallPassed,
     verdict: overallPassed ? 'APPROVE' : 'REQUEST_CHANGES',
     prodAssets,

@@ -18,6 +18,8 @@ import tutorialTour from '../tutorialTour.js';
 import tiledEarth from '../tiledEarth.js';
 import citySelector from '../citySelector.js';
 import explainerToolbar from '../explainerToolbar.js';
+import hazardAlerts from '../hazardAlerts.js';
+import windParticles from '../windParticles.js';
 
 let passed = 0;
 let failed = 0;
@@ -227,7 +229,15 @@ function createMockDOM() {
       style: { display: 'none', opacity: '1.0', background: '', left: '0px', top: '0px', color: '' },
       setAttribute: (k, v) => { attrs[k] = String(v); },
       getAttribute: (k) => attrs[k] ?? null,
-      appendChild: (c) => { children.push(c); return c; },
+      appendChild: (c) => {
+        if (c && c.id && c.id !== 'dynamic') elements.set(c.id, c);
+        children.push(c);
+        return c;
+      },
+      getBoundingClientRect: () => ({ left: 100, top: 100, right: 200, bottom: 130, width: 100, height: 30 }),
+      closest: () => null,
+      focus: () => {},
+      scrollIntoView: () => {},
       classList: {
         add: (c) => classes.add(c),
         remove: (c) => classes.delete(c),
@@ -265,17 +275,31 @@ function createMockDOM() {
     'btn-toolbar-clouds', 'btn-toolbar-help',
     'explainer-drawer', 'explainer-close-btn', 'explainer-topic-tabs',
     'explainer-topic-badge', 'explainer-topic-title', 'explainer-topic-summary',
-    'explainer-topic-howto', 'explainer-topic-metrics', 'explainer-try-btn'
+    'explainer-topic-howto', 'explainer-topic-metrics', 'explainer-try-btn',
+    'preset-clean', 'preset-sar', 'preset-weather', 'preset-all', 'btn-clear-layers',
+    'active-layers-badge', 'layer-clouds', 'layer-wind', 'layer-hazards', 'layer-sentinel-lod',
+    'comparison-modal', 'comparison-grid', 'modal-close', 'open-comparison',
+    'trajectory-callout', 'forecast-time-label', 'lod-res-badge',
+    'btn-hud-collapse', 'btn-mobile-cam-toggle', 'camera-controls-widget',
+    'globe-hover-pill'
   ].forEach(id => elements.set(id, makeEl(id)));
 
+  const bodyEl = makeEl('body');
+  const hudPanelEl = makeEl('hud-panel');
+  elements.set('hud-panel', hudPanelEl);
+
   globalThis.document = {
+    body: bodyEl,
     getElementById: (id) => elements.get(id) || null,
+    querySelector: (sel) => (sel === '.hud-panel' ? hudPanelEl : null),
     querySelectorAll: () => [],
+    addEventListener: () => {},
     createElement: () => makeEl('dynamic')
   };
   globalThis.window = {
     innerWidth: 1920,
     innerHeight: 1080,
+    matchMedia: () => ({ matches: true }),
     addEventListener: () => {},
     dispatchEvent: () => {}
   };
@@ -543,6 +567,266 @@ runTest('6.3 explainerToolbar exposes all 7 topics and opens/closes contextual e
   assert.equal(globalThis.document.getElementById('explainer-drawer').style.display, 'flex');
   explainerToolbar.closeExplainer();
   assert.equal(explainerToolbar.isExplainerOpen(), false);
+  delete globalThis.document;
+  delete globalThis.window;
+});
+
+// -----------------------------------------------------------------------------
+// Suite 7: Clean-Boot Presets, Executive Clarity, e2s-014 Parity, Raycast & Lazy LOD
+// -----------------------------------------------------------------------------
+console.log('\n--- Suite 7: Clean-Boot Presets, Clarity Parity, Raycast Filtering & Lazy LOD ---');
+
+runTest('7.1 Clean-boot defaults start with 0/8 overlays and Quick View Presets switch cleanly', () => {
+  const els = createMockDOM();
+  const cam = new THREE.PerspectiveCamera(45, 1920 / 1080, 0.1, 1000);
+  cam.position.set(0, 0, 14);
+  layers3D.initLayers(globe, cam, null);
+  sarTasking.initSarTasking(globe);
+  citySelector.initCitySelector(globe, {});
+  hazardAlerts.initHazardAlerts(globe);
+  windParticles.initWindParticles(globe, 64);
+
+  uiController.initUI(globe, cam, null, layers3D);
+  uiController.applyCleanBootDefaults();
+
+  assert.equal(uiController.updateActiveOverlayBadge(), 0, 'Clean boot must start with 0 active overlays');
+  assert.equal(els.get('active-layers-badge').innerText, 'Active: 0/8 overlays');
+  assert.equal(els.get('preset-clean').classList.contains('active-btn'), true);
+  assert.equal(studyData.getState().activeVersionId, 'V3');
+  assert.equal(citySelector.getCityMarkersVisibility(), false);
+  assert.equal(hazardAlerts.getHazardAlertsVisibility(), false);
+  assert.equal(sarTasking.getSarTaskingVisibility(), false);
+  assert.equal(studyData.getState().activeLayers.cyclone, false);
+  assert.equal(studyData.getState().activeLayers.da_stations, false);
+  assert.equal(studyData.getState().activeLayers.mesoscale_insets, false);
+  assert.equal(studyData.getState().activeLayers.ensemble_spread, false);
+  assert.equal(els.get('layer-clouds').classList.contains('active-btn'), true, 'Optical clouds stay ON in clean_globe preset');
+
+  // Switch to sar_focus (2/8: city_markers + sar_tasking)
+  assert.equal(uiController.applyLayerPreset('sar_focus'), true);
+  assert.equal(uiController.updateActiveOverlayBadge(), 2);
+  assert.equal(els.get('active-layers-badge').innerText, 'Active: 2/8 overlays');
+  assert.equal(sarTasking.getSarTaskingVisibility(), true);
+  assert.equal(citySelector.getCityMarkersVisibility(), true);
+  assert.equal(els.get('preset-sar').classList.contains('active-btn'), true);
+
+  // Switch to extreme_weather (3/8: hazards + cyclone + wind)
+  assert.equal(uiController.applyLayerPreset('extreme_weather'), true);
+  assert.equal(uiController.updateActiveOverlayBadge(), 3);
+  assert.equal(hazardAlerts.getHazardAlertsVisibility(), true);
+  assert.equal(studyData.getState().activeLayers.cyclone, true);
+  assert.equal(els.get('layer-wind').classList.contains('active-btn'), true);
+
+  // Switch to all_telemetry (8/8)
+  assert.equal(uiController.applyLayerPreset('all_telemetry'), true);
+  assert.equal(uiController.updateActiveOverlayBadge(), 8);
+  assert.equal(els.get('active-layers-badge').innerText, 'Active: 8/8 overlays');
+
+  // Switch to clear_all (0/8 + clouds OFF)
+  assert.equal(uiController.applyLayerPreset('clear_all'), true);
+  assert.equal(uiController.updateActiveOverlayBadge(), 0);
+  assert.equal(els.get('layer-clouds').classList.contains('active-btn'), false);
+  assert.equal(uiController.applyLayerPreset('unknown_preset'), false);
+
+  layers3D.disposeLayers();
+  sarTasking.disposeSarTasking();
+  citySelector.disposeCitySelector();
+  hazardAlerts.disposeHazardAlerts();
+  windParticles.disposeWindParticles();
+  delete globalThis.document;
+  delete globalThis.window;
+});
+
+runTest('7.2 showPopup() converts DA station Kelvin temperatures to Celsius alongside Kelvin', () => {
+  const els = createMockDOM();
+  const milanStation = studyData.getDAStationById('LIMC');
+  assert.ok(milanStation, 'LIMC station must exist in studyData');
+
+  uiController.showPopup(milanStation, { x: 520, y: 380, visible: true });
+  const bodyHtml = els.get('popup-body').innerHTML;
+
+  const expectedBgC = (milanStation.bgVal - 273.15).toFixed(1);
+  const expectedObsC = (milanStation.obsVal - 273.15).toFixed(1);
+  assert.ok(bodyHtml.includes(`${expectedBgC} °C (${milanStation.bgVal} K)`), `Expected bgVal in C/K, got: ${bodyHtml}`);
+  assert.ok(bodyHtml.includes(`${expectedObsC} °C (${milanStation.obsVal} K)`), `Expected obsVal in C/K, got: ${bodyHtml}`);
+  assert.ok(bodyHtml.includes(`+${milanStation.increment} K`), 'Expected DA increment in popup');
+
+  delete globalThis.document;
+  delete globalThis.window;
+});
+
+runTest('7.3 renderComparisonGrid(), trajectory callout & explainerToolbar maintain exact Rule e2s-014 parity with studyData.js', () => {
+  const els = createMockDOM();
+  const versions = studyData.getStudyVersions();
+  const matrix = studyData.getComparisonMatrix();
+  const ensemble = studyData.getEnsembleMetadata();
+
+  assert.equal(versions.V1.auditStatus, 'STATUS: QUARANTINED_DEFECTIVE_SYNTHETIC');
+  assert.equal(versions.V2.auditStatus, 'STATUS: VERIFIED_GENUINE_BASELINE');
+
+  uiController.openComparisonModal();
+  const gridHtml = els.get('comparison-grid').innerHTML;
+  assert.ok(gridHtml.includes('1. Caught Fake Skill'), 'Governance summary strip must be rendered');
+  assert.ok(gridHtml.includes('2. Proved Air-Gap Integrity'), 'Stage 2 governance strip must be rendered');
+  assert.ok(gridHtml.includes('3. Live SAR'), 'Stage 3 governance strip must be rendered');
+  assert.ok(gridHtml.includes('STATUS: VERIFIED_GENUINE_BASELINE'), 'V2 auditStatus must be VERIFIED_GENUINE_BASELINE');
+  assert.ok(gridHtml.includes(`CRPS ${ensemble.crps}`), 'Ensemble CRPS must match studyData.js');
+  assert.ok(gridHtml.includes(`SSR ${ensemble.ssr}`), 'Ensemble SSR must match studyData.js');
+  assert.ok(gridHtml.includes('735.27'), 'ICEYE flood km2 must appear in comparison grid');
+  assert.ok(gridHtml.includes('550.73'), 'StriX slope risk km2 must appear in comparison grid');
+  for (const row of matrix) {
+    assert.ok(gridHtml.includes(uiController.sanitizeHTML(row.dimension)), `Matrix dimension "${row.dimension}" must render from studyData.js`);
+  }
+
+  // Verify trajectory callout transitions across V1 -> V2 -> V3
+  uiController.updateTrajectoryCallout('V1');
+  assert.ok(els.get('trajectory-callout').innerHTML.includes('Stage 1 Quarantined'));
+  uiController.updateTrajectoryCallout('V2');
+  assert.ok(els.get('trajectory-callout').innerHTML.includes('Stage 2 Air-Gapped Baseline'));
+  uiController.updateTrajectoryCallout('V3');
+  assert.ok(els.get('trajectory-callout').innerHTML.includes('Stage 3 Live Ops'));
+
+  // Verify explainerToolbar metric and station parity with studyData.js
+  const topics = explainerToolbar.getExplainerTopics();
+  const pillarsTopic = topics.find(t => t.id === 'pillars');
+  const timelineTopic = topics.find(t => t.id === 'timeline');
+  const sarTopic = topics.find(t => t.id === 'sar_tasking');
+  assert.ok(pillarsTopic.keyMetrics.some(m => m.includes(`CRPS = ${ensemble.crps}`) && m.includes(`SSR = ${ensemble.ssr}`)));
+  assert.ok(pillarsTopic.keyMetrics.some(m => m.includes('LIMC (16066)') && m.includes('LIRQ (16170)') && m.includes('LIRF (16242)') && m.includes('LIRN (16289)')));
+  assert.ok(timelineTopic.keyMetrics.some(m => m.includes('2.1290 K') && m.includes('TAC 0.0000')));
+  assert.ok(sarTopic.keyMetrics.some(m => m.includes('12.20 fringes') && m.includes('-98.73%')));
+
+  delete globalThis.document;
+  delete globalThis.window;
+});
+
+runTest('7.4 timestep-changed event highlights active cyclone waypoint and resets on clear', () => {
+  const els = createMockDOM();
+  const cam = new THREE.PerspectiveCamera(45, 1920 / 1080, 0.1, 1000);
+  cam.position.set(0, 0, 14);
+  layers3D.initLayers(globe, cam, null);
+  uiController.initUI(globe, cam, null, layers3D);
+  layers3D.setLayerVisibility('cyclone', true);
+
+  studyData.setActiveTimeStep(2);
+  const cycloneGroup = layers3D.getLayers().cyclone;
+  const wp2 = cycloneGroup.getObjectByName('waypoint_WP-2');
+  const wp0 = cycloneGroup.getObjectByName('waypoint_WP-0');
+  assert.ok(wp2 && wp0, 'Cyclone waypoint meshes must exist');
+  assert.ok(Math.abs(wp2.scale.x - 1.65) < 1e-4, `Active WP-2 scale expected 1.65, got ${wp2.scale.x}`);
+  assert.ok(Math.abs(wp2.material.emissiveIntensity - 1.6) < 1e-4);
+  assert.ok(Math.abs(wp0.scale.x - 0.9) < 1e-4, `Inactive WP-0 scale expected 0.9, got ${wp0.scale.x}`);
+
+  layers3D.highlightCycloneWaypoint(-1);
+  assert.ok(Math.abs(wp2.scale.x - 1.0) < 1e-4, 'Cleared highlight must restore scale 1.0');
+  assert.ok(Math.abs(wp2.material.emissiveIntensity - 0.85) < 1e-4);
+
+  layers3D.disposeLayers();
+  delete globalThis.document;
+  delete globalThis.window;
+});
+
+runTest('7.5 { visibleOnly: true } filters pickables and handleRaycast ignores hidden layers', () => {
+  createMockDOM();
+  const cam = new THREE.PerspectiveCamera(45, 1920 / 1080, 0.1, 1000);
+  cam.position.set(0, 0, 14);
+  cam.lookAt(0, 0, 0);
+  cam.updateMatrixWorld();
+
+  layers3D.initLayers(globe, cam, null);
+  sarTasking.initSarTasking(globe);
+  citySelector.initCitySelector(globe, {});
+  hazardAlerts.initHazardAlerts(globe);
+
+  // Orient globe so LIMC station (45.63, 8.73) faces dead-center camera
+  const limc = studyData.getDAStationById('LIMC');
+  const rot = layers3D.boresightRotation(limc.lat, limc.lon);
+  globe.rotation.set(rot.rotX, rot.rotY, 0);
+  globe.updateMatrixWorld(true);
+
+  // Hide all layers
+  layers3D.setLayerVisibility('cyclone', false);
+  layers3D.setLayerVisibility('da_stations', false);
+  sarTasking.setSarTaskingVisibility(false);
+  citySelector.setCityMarkersVisibility(false);
+  hazardAlerts.setHazardAlertsVisibility(false);
+
+  assert.equal(layers3D.getInteractiveObjects({ visibleOnly: true }).length, 0);
+  assert.ok(layers3D.getInteractiveObjects().length > 0);
+  assert.equal(sarTasking.getSarPickableObjects({ visibleOnly: true }).length, 0);
+  assert.equal(sarTasking.getSarPickableObjects().length, 4);
+  assert.equal(citySelector.getInteractiveCityObjects({ visibleOnly: true }).length, 0);
+  assert.equal(citySelector.getInteractiveCityObjects().length, 39);
+  assert.equal(hazardAlerts.getHazardPickableObjects({ visibleOnly: true }).length, 0);
+  assert.ok(hazardAlerts.getHazardPickableObjects().length > 0);
+
+  const hiddenHit = layers3D.handleRaycast(
+    { clientX: 960, clientY: 540 },
+    cam,
+    1920,
+    1080,
+    { visibleOnly: true, skipDragCheck: true }
+  );
+  assert.equal(hiddenHit, null, 'Raycast with visibleOnly:true must not hit hidden DA station');
+
+  // Enable DA stations and verify pickable + raycast hit
+  layers3D.setLayerVisibility('da_stations', true);
+  assert.equal(layers3D.getInteractiveObjects({ visibleOnly: true }).length, 4);
+  const visibleHit = layers3D.handleRaycast(
+    { clientX: 960, clientY: 540 },
+    cam,
+    1920,
+    1080,
+    { visibleOnly: true, skipDragCheck: true }
+  );
+  assert.ok(visibleHit && visibleHit.type === 'da_station', 'Visible DA station must be hit at screen center');
+
+  layers3D.disposeLayers();
+  sarTasking.disposeSarTasking();
+  citySelector.disposeCitySelector();
+  hazardAlerts.disposeHazardAlerts();
+  delete globalThis.document;
+  delete globalThis.window;
+});
+
+runTest('7.6 tiledEarth lazy loading defers octants/regions at boot until camera zooms inside dist < 12.2', () => {
+  createMockDOM();
+  const root = tiledEarth.initTiledEarth(globe);
+  const octantGroup = root.getObjectByName('tiled_16k_octants');
+  const regionGroup = root.getObjectByName('sentinel2_regional_131k');
+  const liveGroup = root.getObjectByName('sentinel2_live_stream');
+
+  assert.equal(root.visible, true);
+  assert.equal(octantGroup.visible, false);
+  assert.equal(octantGroup.children.length, 0, 'Boot must not eagerly load 16K octants');
+  assert.equal(regionGroup.visible, false);
+  assert.equal(regionGroup.children.length, 0, 'Boot must not eagerly load 4K regional insets');
+  assert.equal(liveGroup.visible, false);
+  assert.equal(tiledEarth.hasActiveOctantCoverage(), false);
+
+  // Far global orbit (dist = 14 >= 12.2): groups remain hidden
+  const camFar = new THREE.PerspectiveCamera(45, 1.77, 0.1, 1000);
+  camFar.position.set(0, 0, 14);
+  tiledEarth.updateTiledEarth(camFar, globe);
+  assert.equal(octantGroup.visible, false);
+  assert.equal(regionGroup.visible, false);
+  assert.equal(tiledEarth.hasActiveOctantCoverage(), false);
+
+  // Re-init to reset 180ms throttle and zoom into Italy (dist = 8.2 < 12.2)
+  const root2 = tiledEarth.initTiledEarth(globe);
+  const rotItaly = layers3D.boresightRotation(42.0, 12.0);
+  globe.rotation.set(rotItaly.rotX, rotItaly.rotY, 0);
+  globe.updateMatrixWorld(true);
+  const camNear = new THREE.PerspectiveCamera(45, 1.77, 0.1, 1000);
+  camNear.position.set(0, 0, 8.2);
+  camNear.lookAt(0, 0, 0);
+  tiledEarth.updateTiledEarth(camNear, globe);
+
+  assert.equal(root2.getObjectByName('tiled_16k_octants').visible, true);
+  assert.equal(root2.getObjectByName('sentinel2_regional_131k').visible, true);
+  assert.equal(tiledEarth.getActiveResolutionLabel(), '131K Sentinel-2 Regional');
+
+  tiledEarth.disposeTiledEarth();
   delete globalThis.document;
   delete globalThis.window;
 });

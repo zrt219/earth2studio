@@ -490,8 +490,9 @@ function renderComparisonGrid() {
   const alpsDomain = domains.find(d => d.id === 'alps_superres') || domains[0] || {};
   const minDaInc = daStations.length ? Math.min(...daStations.map(s => s.increment)).toFixed(2) : '2.94';
   const maxDaInc = daStations.length ? Math.max(...daStations.map(s => s.increment)).toFixed(2) : '7.45';
-  const iceye = (sarMeta.acquisitions || []).find(a => a.operator === 'ICEYE') || {};
-  const strix = (sarMeta.acquisitions || []).find(a => a.operator === 'Synspective') || {};
+  const sarConstellations = sarMeta.constellations || sarMeta.acquisitions || [];
+  const iceye = sarConstellations.find(a => a.operator === 'ICEYE') || {};
+  const strix = sarConstellations.find(a => a.operator === 'Synspective') || {};
 
   const matrixRowsHtml = matrix.map((row) => `
     <tr style="border-top:1px solid rgba(255,255,255,0.08);">
