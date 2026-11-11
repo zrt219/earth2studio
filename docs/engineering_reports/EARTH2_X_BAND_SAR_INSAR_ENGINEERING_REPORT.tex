@@ -19,6 +19,7 @@
 \usepackage{caption}
 \usepackage{float}
 \usepackage{tcolorbox}
+\emergencystretch 1.5em
 
 \graphicspath{{figures/}{paper/figures/}{../../outputs/scientific_study_verified/advanced_capabilities/figures/}{../../outputs/scientific_study_verified/figures/}}
 
@@ -87,10 +88,11 @@ Table~\ref{tab:industry_alignment} summarizes how the modules engineered in this
 \begin{table*}[t]
 \centering
 \footnotesize
+\setlength{\tabcolsep}{4.5pt}
 \caption{System Architecture Alignment with Commercial SAR Constellations and Enterprise InSAR Workflows}
 \label{tab:industry_alignment}
 \vspace{0.1cm}
-\begin{tabularx}{\textwidth}{l l p{5.2cm} X}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.8cm} >{\raggedright\arraybackslash}p{3.5cm} >{\raggedright\arraybackslash}p{5.1cm} >{\raggedright\arraybackslash}X}
 \toprule
 \textbf{Target Organization} & \textbf{Engineered Module} & \textbf{Physical \& Algorithmic Implementation} & \textbf{Verified Quantitative Performance} \\
 \midrule
@@ -112,10 +114,11 @@ A core engineering principle of this work (enforced via repository rule \texttt{
 \begin{table*}[t]
 \centering
 \footnotesize
+\setlength{\tabcolsep}{4.5pt}
 \caption{Provenance Demarcation: Real Operational Observations vs.\ Deterministic Forward-Modeled SAR Physics}
 \label{tab:provenance_boundaries}
 \vspace{0.1cm}
-\begin{tabularx}{\textwidth}{p{3.4cm} p{3.3cm} p{5.0cm} X}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.6cm} >{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}p{4.7cm} >{\raggedright\arraybackslash}X}
 \toprule
 \textbf{Subsystem / Artifact} & \textbf{Provenance Tier} & \textbf{Physical Data Source / Input Tensors} & \textbf{Scope \& Validation Limitations} \\
 \midrule
@@ -159,11 +162,14 @@ where $\text{ZTD}(x,y,t) = \text{ZHD}(x,y,t) + \text{ZWD}(x,y,t)$ is the sum of 
 \subsection{Saastamoinen Hydrostatic \& Askne--Nordius Wet Delay}
 Given surface elevation $h(x,y)$ in meters and initial/verifying $2\text{ m}$ temperature $T_{2m}(x,y,t)$ from the verified NOAA GFS analysis, we compute the barometric surface pressure $P_s(x,y,t)$ accounting for topographic height and synoptic thermal tendency $\Delta T_{2m}$:
 \begin{equation}
-    P_s(x,y,t) = 1013.25 \left(1 - \frac{\Gamma h(x,y)}{288.15}\right)^{5.255} - 1.35\,\Delta T_{2m}(x,y,t)
+\begin{split}
+    P_s(x,y,t) &= 1013.25 \left(1 - \frac{\Gamma h(x,y)}{288.15}\right)^{5.255} \\
+    &\quad - 1.35\,\Delta T_{2m}(x,y,t)
+\end{split}
 \end{equation}
 where $\Gamma = 0.0065\text{ K/m}$ is the standard tropospheric lapse rate. The Saastamoinen Zenith Hydrostatic Delay (in meters) at latitude $\phi$ is:
 \begin{equation}
-    \text{ZHD}(\phi, h, P_s) = \frac{0.0022768 \, P_s}{1 - 0.00266\cos(2\phi) - 0.00028 \times 10^{-3} h}
+    \text{ZHD}(\phi, h, P_s) = \frac{0.0022768\,P_s}{1 - 0.00266\cos(2\phi) - 0.28\times 10^{-6} h}
     \label{eq:saastamoinen}
 \end{equation}
 
@@ -189,19 +195,20 @@ We therefore apply $8\times$ bicubic spline refinement ($\text{order}=3$) to map
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.98\textwidth]{06_geoint_sar_aps_trifecta.png}
-\caption{\textbf{Verified 4-Panel SAR & InSAR Mission Diagnostic (\texttt{06\_geoint\_sar\_aps\_trifecta.png}):} \textbf{(A)} Po Valley \& Alpine Foothills raw wrapped X-band interferogram ($\lambda = 3.11\text{ cm}$, $\theta_{\text{inc}} = 28.4^\circ$) exhibiting $12.20$ atmospheric fringes ($\text{RMSE} = 14.78\text{ rad}$) that obscure surface deformation. \textbf{(B)} CATALYST NWP-assisted APS-compensated interferogram reducing phase RMSE by \textbf{98.73\%} to $0.1874\text{ rad}$ and cleanly isolating the Po Valley subsidence bowl. \textbf{(C)} ICEYE-X38 Spotlight VV backscatter ($\sigma^0_{\text{VV}}$) delineating $735.3\text{ km}^2$ of specular open-water flood inundation ($< -16.5\text{ dB}$, cyan contour). \textbf{(D)} Synspective StriX-3 repeat-pass coherence ($\gamma_{\text{CCD}}$) over Honshu during Typhoon Megi, isolating $550.7\text{ km}^2$ of severe slope decorrelation ($\gamma < 0.32$, crimson contour).}
+\caption{\textbf{Verified 4-Panel SAR \& InSAR Mission Diagnostic (\texttt{06\_geoint\_sar\_aps\_trifecta.png}):} \textbf{(A)} Po Valley \& Alpine Foothills raw wrapped X-band interferogram ($\lambda = 3.11\text{ cm}$, $\theta_{\text{inc}} = 28.4^\circ$) exhibiting $12.20$ atmospheric fringes ($\text{RMSE} = 14.78\text{ rad}$) that obscure surface deformation. \textbf{(B)} CATALYST NWP-assisted APS-compensated interferogram reducing phase RMSE by \textbf{98.73\%} to $0.1874\text{ rad}$ and cleanly isolating the Po Valley subsidence bowl. \textbf{(C)} ICEYE-X38 Spotlight VV backscatter ($\sigma^0_{\text{VV}}$) delineating $735.3\text{ km}^2$ of specular open-water flood inundation ($< -16.5\text{ dB}$, cyan contour). \textbf{(D)} Synspective StriX-3 repeat-pass coherence ($\gamma_{\text{CCD}}$) over Honshu during Typhoon Megi, isolating $550.7\text{ km}^2$ of severe slope decorrelation ($\gamma < 0.32$, crimson contour).}
 \label{fig:sar_trifecta}
 \end{figure*}
 
 \begin{table*}[t]
 \centering
 \footnotesize
+\setlength{\tabcolsep}{4.5pt}
 \caption{Verified Quantitative Benchmark: CATALYST X-Band APS Compensation, ICEYE Flood Backscatter, and StriX Coherence}
 \label{tab:sar_metrics}
 \vspace{0.1cm}
-\begin{tabular}{l c c l}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X >{\centering\arraybackslash}p{3.4cm} >{\centering\arraybackslash}p{3.4cm} >{\raggedright\arraybackslash}p{3.9cm}}
 \toprule
-\textbf{Diagnostic Metric / Parameter} & \textbf{Theater 1: Italy (Po Valley / Alps)} & \textbf{Theater 2: Japan (Central Honshu)} & \textbf{Physical Unit / Criterion} \\
+\textbf{Diagnostic Metric / Parameter} & \textbf{Theater 1: Italy} \newline \textbf{(Po Valley / Alps)} & \textbf{Theater 2: Japan} \newline \textbf{(Central Honshu)} & \textbf{Physical Unit / Criterion} \\
 \midrule
 Assigned SAR Constellation \& Sensor & \textbf{ICEYE-X38} (Ascending) & \textbf{Synspective StriX-3} (Descending) & Sun-Synchronous LEO \\
 Imaging Mode \& Polarization & Spotlight ($0.5\text{ m}$, VV) & StripMap ($3.0\text{ m}$, VV/VH) & X-Band ($f_c = 9.65\text{ GHz}$) \\
@@ -224,7 +231,7 @@ Minimum Observed Coherence ($\gamma_{\text{min}}$) & $0.080$ & $0.080$ & Complet
 Mean Land Coherence ($\overline{\gamma}_{\text{land}}$) & $0.697$ & $0.786$ & Stable terrestrial scatterers \\
 \textbf{High-Risk Slope Decorrelation Area} & $1,500.92\text{ km}^2$ ($16,672\text{ px}$) & \textbf{550.73 $\text{km}^2$} ($5,294\text{ px}$) & Landslide/erosion alert zone \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table*}
 
 \section{ICEYE Flood Backscatter \& Synspective StriX Coherence Attribution}
@@ -241,14 +248,17 @@ Integrating cosine-weighted pixel areas across the $0.03125^\circ$ grid identifi
 \subsection{Synspective StriX-3 Honshu Coherence Decay ($\gamma_{\text{CCD}}$)}
 During Typhoon Megi's passage over Central Honshu ($\theta_{\text{inc}} = 34.1^\circ$), repeat-pass interferometric coherence $\gamma_{\text{CCD}} \in [0, 1]$ decays multiplicatively due to geometric, volume/wind, and moisture-induced surface scatterer rearrangement:
 \begin{equation}
-    \gamma_{\text{CCD}}(x,y) = \gamma_0 \cdot \gamma_{\text{geom}}(\lVert\nabla h\rVert) \cdot \gamma_{\text{vol}}(\lvert\Delta T_{2m}\rvert, \text{RH}) \cdot \gamma_{\text{hazard}}(x,y)
+\begin{split}
+    \gamma_{\text{CCD}}(x,y) &= \gamma_0 \cdot \gamma_{\text{geom}}(\lVert\nabla h\rVert) \\
+    &\quad \cdot \gamma_{\text{vol}}(\lvert\Delta T_{2m}\rvert, \text{RH}) \cdot \gamma_{\text{hazard}}(x,y)
+\end{split}
 \end{equation}
 Across steep Japanese Alps and central Honshu slopes ($h > 380\text{ m}$), intense typhoon moisture convergence drives coherence below the critical unwrapping threshold $\gamma_{\text{CCD}} < 0.32$ across \textbf{$550.73\text{ km}^2$} ($5,294$ pixels, $\gamma_{\text{min}} = 0.080$), while stable low-relief land maintains $\bar{\gamma}_{\text{land}} = 0.786$ (Figure~\ref{fig:sar_trifecta}D).
 
-\section{OGC STAC v1.0.0 Autonomous Tip-and-Cue Tasking & 3D Mission Twin}
+\section{OGC STAC v1.0.0 Autonomous Tip-and-Cue Tasking \& 3D Mission Twin}
 
 \subsection{Standards-Compliant STAC v1.0.0 SAR Tasking Orders}
-To close the operational loop between atmospheric hazard detection and satellite constellation tasking, \texttt{generate\_stac\_tasking\_geojson()} translates the detected flood and slope-instability footprints into an OGC SpatioTemporal Asset Catalog (STAC v1.0.0) \texttt{FeatureCollection} (\texttt{stac\_tasking\_orders.geojson}, SHA-256: \texttt{3fecc24808fad6b7e6e1631b40742b129fc84a8817a43088bc75f71fd0d47035}). Each tasking feature embeds full \texttt{sar:*} extension metadata (\texttt{sar:instrument\_mode}, \texttt{sar:frequency\_band="X"}, \texttt{sar:center\_frequency=9.65}, \texttt{sar:polarizations}, \texttt{sar:product\_type="SLC"}, \texttt{view:incidence\_angle}, \texttt{sat:orbit\_state}) alongside the quantitative CATALYST APS and hazard attribution telemetry.
+To close the operational loop between atmospheric hazard detection and satellite constellation tasking, \texttt{generate\_stac\_tasking\_geojson()} translates the detected flood and slope-instability footprints into an OGC SpatioTemporal Asset Catalog (STAC v1.0.0) \texttt{FeatureCollection} (\texttt{stac\_tasking\_orders.geojson}, SHA-256: \texttt{3fecc248}\allowbreak\texttt{08fad6b7}\allowbreak\texttt{e6e1631b}\allowbreak\texttt{40742b12}\allowbreak\texttt{9fc84a88}\allowbreak\texttt{17a43088}\allowbreak\texttt{bc75f71f}\allowbreak\texttt{d0d47035}). Each tasking feature embeds full \texttt{sar:*} extension metadata (\texttt{sar:instrument\_mode}, \texttt{sar:frequency\_band="X"}, \texttt{sar:center\_frequency=9.65}, \texttt{sar:polarizations}, \texttt{sar:product\_type="SLC"}, \texttt{view:incidence\_angle}, \texttt{sat:orbit\_state}) alongside the quantitative CATALYST APS and hazard attribution telemetry.
 
 \begin{figure}[h!]
 \centering
@@ -261,11 +271,11 @@ To close the operational loop between atmospheric hazard detection and satellite
 The live application deployed at \url{https://earth2-sar-insar.vercel.app} (\texttt{viewer\_app/}) renders seven concentric geophysical and orbital shells around a displaced 3D Earth sphere ($R_0 = 5.000$):
 \begin{itemize}[leftmargin=*,noitemsep,topsep=2pt]
     \item \textbf{Shells $R = 5.008\text{--}5.060$:} Mesoscale Alpine terrain patch, 25-member ensemble spread shell, 5K surface wind particle streamlines, and pulsing hazard rings.
-    \item \textbf{Shell $R = 5.018$ (\texttt{sarTasking.js}):} Custom GLSL `ShaderMaterial` ground swaths over Northern Italy and Honshu supporting live interactive toggling between raw wrapped X-band tropospheric fringes ($12.2$ / $9.2$ fringes), CATALYST APS-compensated deformation fringes ($98.7\%$ / $98.8\%$ error removed), and ICEYE flood / StriX coherence hazard masks.
+    \item \textbf{Shell $R = 5.018$ (\texttt{sarTasking.js}):} Custom GLSL \texttt{ShaderMaterial} ground swaths over Northern Italy and Honshu supporting live interactive toggling between raw wrapped X-band tropospheric fringes ($12.2$ / $9.2$ fringes), CATALYST APS-compensated deformation fringes ($98.7\%$ / $98.8\%$ error removed), and ICEYE flood / StriX coherence hazard masks.
     \item \textbf{Shell $R = 5.420$ (\texttt{sarTasking.js}):} Animated Sun-Synchronous LEO orbital arcs ($h_{\text{orb}} \approx 535\text{ km}$ scaled), 3D spacecraft meshes (\texttt{ICEYE-X38} and \texttt{StriX-3}), and semi-transparent slant-range radar look-cone frustums projecting from spacecraft to ground swath corners.
 \end{itemize}
 
-\section{Verification Record & Reproducibility}
+\section{Verification Record \& Reproducibility}
 
 The complete codebase is verified by automated test suites across Python and Node.js:
 \begin{itemize}[leftmargin=*,noitemsep,topsep=2pt]

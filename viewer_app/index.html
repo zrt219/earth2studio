@@ -522,11 +522,28 @@
       .hud-footer {
         display: none;
       }
+
+      #quick-toolbar {
+        top: 8px;
+        left: 10px;
+        right: 10px;
+        transform: none;
+        max-width: calc(100vw - 20px);
+        padding: 4px 6px;
+        gap: 4px;
+        overflow-x: auto;
+      }
+
+      .hud-panel {
+        top: 52px;
+        max-height: 36vh;
+      }
     }
 
     @media (max-width: 480px) {
       .hud-panel {
-        max-height: 38vh;
+        top: 50px;
+        max-height: 34vh;
         padding: 10px 12px;
       }
 
@@ -659,11 +676,126 @@
       align-items: center;
       gap: 8px;
     }
+
+    /* Floating Top Quick-Toolbar & '?' Contextual Explainer Styles */
+    #quick-toolbar {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 22;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 9999px;
+      max-width: calc(100vw - 440px);
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .toolbar-btn {
+      padding: 5px 10px;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .help-chip {
+      width: 17px;
+      height: 17px;
+      padding: 0;
+      border-radius: 9999px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(56, 189, 248, 0.16);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #38bdf8;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+
+    .help-chip:hover {
+      background: #0284c7;
+      color: #fff;
+    }
+
+    .city-picker-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .city-select {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.88);
+      color: #f8fafc;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 6px;
+      padding: 5px 7px;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+
+    #explainer-drawer {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 45;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .explainer-card {
+      width: min(94vw, 640px);
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 18px 20px;
+      border-color: rgba(56, 189, 248, 0.5);
+    }
+
+    .explainer-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 10px 0 12px;
+    }
+
+    .explainer-metrics-list {
+      margin: 8px 0 12px 16px;
+      padding: 0;
+      font-size: 0.74rem;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
   <!-- Three.js Canvas Container -->
   <div id="canvas-container"></div>
+
+  <!-- Floating Quick-Action Toolbar -->
+  <div id="quick-toolbar" class="glass-card" role="toolbar" aria-label="Mission Quick Toolbar">
+    <button id="btn-toolbar-cities" class="toolbar-btn">📍 Cities</button>
+    <button id="btn-toolbar-tour" class="toolbar-btn">🎓 Tour</button>
+    <button id="btn-toolbar-sar" class="toolbar-btn active-btn">🛰 SAR</button>
+    <button id="btn-toolbar-aps" class="toolbar-btn">🌈 APS</button>
+    <button id="btn-toolbar-clouds" class="toolbar-btn active-btn">☁️ Clouds</button>
+    <button id="btn-toolbar-help" class="toolbar-btn">❓ Help</button>
+  </div>
 
   <!-- Glassmorphic HUD Panel -->
   <div class="hud-panel glass-card">
@@ -681,7 +813,7 @@
 
     <!-- Base Globe & Atmospheric Data Layer -->
     <div class="control-label">
-      <span>Base Globe &amp; Surface LOD</span>
+      <span>Base Globe &amp; Surface LOD <button class="help-chip" data-help-topic="base_lod" title="Explain Base Globe &amp; 16K-131K Sentinel-2 LOD">?</button></span>
       <span id="lod-res-badge" style="color:#10b981; font-size:0.62rem; font-weight:700;">16K Global Octants</span>
     </div>
     <div class="btn-group">
@@ -692,7 +824,7 @@
     </div>
 
     <!-- 3D Advanced Capability Pillars Toggles -->
-    <div class="control-label">3D Advanced Pillars (V3)</div>
+    <div class="control-label"><span>3D Advanced Pillars (V3) <button class="help-chip" data-help-topic="pillars" title="Explain 3D Capability Pillars">?</button></span></div>
     <div class="btn-group">
       <button id="layer-cyclone" class="active-btn">🌀 Cyclone Trajectory</button>
       <button id="layer-da" class="active-btn">📍 DA Stations</button>
@@ -701,7 +833,7 @@
     </div>
 
     <!-- Cinematic Atmospheric Layers -->
-    <div class="control-label">Cinematic Dynamics</div>
+    <div class="control-label"><span>Cinematic Dynamics <button class="help-chip" data-help-topic="cinematic" title="Explain Clouds, Wind &amp; Hazards">?</button></span></div>
     <div class="btn-group">
       <button id="layer-clouds" class="active-btn">☁️ Optical Clouds</button>
       <button id="layer-wind" class="active-btn">💨 Wind Streamlines</button>
@@ -710,7 +842,7 @@
 
     <!-- GEOINT SAR Tip-and-Cue & CATALYST X-Band APS Suite -->
     <div class="control-label">
-      <span>🛰️ SAR Tip-and-Cue (ICEYE / StriX / CATALYST)</span>
+      <span>🛰️ SAR Tip-and-Cue (ICEYE / StriX / CATALYST) <button class="help-chip" data-help-topic="sar_tasking" title="Explain SAR Tasking &amp; CATALYST APS">?</button></span>
       <span style="color:#38bdf8; font-size:0.62rem;">X-BAND 9.65 GHz</span>
     </div>
     <div class="btn-group">
@@ -748,6 +880,43 @@
       <button id="fly-americas">🌎 Americas</button>
       <button id="fly-arctic">❄️ Arctic</button>
       <button id="fly-antarctic">🇦🇶 Antarctic</button>
+    </div>
+
+    <!-- Interactive Italy & Japan City Target Picker -->
+    <div class="control-label">
+      <span>Target Cities (Italy &amp; Japan) <button class="help-chip" data-help-topic="cities" title="Explain Precision City Beacons">?</button></span>
+      <button id="layer-cities" class="active-btn" style="padding:2px 7px; font-size:0.65rem;">📍 Beacons</button>
+    </div>
+    <div id="city-picker-group">
+      <div class="city-picker-row">
+        <select id="city-select-italy" class="city-select" aria-label="Select Italy City">
+          <option value="">🇮🇹 Italy Cities...</option>
+          <option value="it_milan">Milan (Lombardy)</option>
+          <option value="it_turin">Turin (Piedmont)</option>
+          <option value="it_venice">Venice Lagoon</option>
+          <option value="it_bologna">Bologna / Po Delta</option>
+          <option value="it_florence">Florence (Tuscany)</option>
+          <option value="it_rome">Rome (Lazio)</option>
+          <option value="it_naples">Naples / Vesuvius</option>
+        </select>
+        <select id="city-select-japan" class="city-select" aria-label="Select Japan City">
+          <option value="">🇯🇵 Japan Cities...</option>
+          <option value="jp_tokyo">Tokyo / Tokyo Bay</option>
+          <option value="jp_fuji">Mount Fuji / Chubu</option>
+          <option value="jp_nagoya">Nagoya / Ise Bay</option>
+          <option value="jp_osaka">Osaka / Kansai</option>
+          <option value="jp_kyoto">Kyoto / Lake Biwa</option>
+          <option value="jp_sendai">Sendai / Tohoku</option>
+        </select>
+      </div>
+      <div class="btn-group">
+        <button class="city-quick-chip" data-city-id="it_milan">Milan</button>
+        <button class="city-quick-chip" data-city-id="it_venice">Venice</button>
+        <button class="city-quick-chip" data-city-id="it_rome">Rome</button>
+        <button class="city-quick-chip" data-city-id="jp_tokyo">Tokyo</button>
+        <button class="city-quick-chip" data-city-id="jp_fuji">Mt. Fuji</button>
+        <button class="city-quick-chip" data-city-id="jp_osaka">Osaka</button>
+      </div>
     </div>
 
     <!-- Scene Controls & Comparison Trigger -->
@@ -819,7 +988,7 @@
   <!-- Segmented Timeline Navigation Bar -->
   <div class="timeline-bar glass-card">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-      <div class="timeline-title" style="margin-bottom: 0;">Study Trajectory:</div>
+      <div class="timeline-title" style="margin-bottom: 0;">Study Trajectory: <button class="help-chip" data-help-topic="timeline" title="Explain V1 to V3 Integrity Lineage">?</button></div>
       <!-- Forecast Lead Time Animation Scrubber -->
       <div id="forecast-scrubber-box" style="display: flex; align-items: center; gap: 8px; font-size: 0.72rem; color: #38bdf8;">
         <button id="btn-play-forecast" style="padding: 2px 8px; font-size: 0.68rem; background: #0284c7; border: 1px solid #38bdf8; border-radius: 4px; color: #fff; cursor: pointer;">▶ Play 24h</button>
@@ -877,6 +1046,28 @@
       <div style="display:flex; gap:6px;">
         <button id="tour-prev-btn">← Prev</button>
         <button id="tour-next-btn" class="active-btn">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive '?' Contextual Explainer Drawer / Modal -->
+  <div id="explainer-drawer" class="hidden" role="dialog" aria-label="Mission Feature Explainer">
+    <div class="explainer-card glass-card">
+      <div class="modal-header">
+        <div>
+          <span id="explainer-topic-badge" class="tour-badge">SYSTEM ARCHITECTURE</span>
+          <div id="explainer-topic-title" class="modal-title" style="margin-top:6px;">Earth-2 X-Band SAR &amp; InSAR Mission Twin</div>
+        </div>
+        <button id="explainer-close-btn" class="close-btn">×</button>
+      </div>
+      <div id="explainer-topic-tabs" class="explainer-tabs"></div>
+      <p id="explainer-topic-summary" style="font-size:0.78rem; color:#e2e8f0; line-height:1.5; margin-bottom:8px;"></p>
+      <div style="font-size:0.74rem; color:#94a3b8; line-height:1.45; margin-bottom:8px;">
+        <b style="color:#38bdf8;">How to Interact:</b> <span id="explainer-topic-howto"></span>
+      </div>
+      <ul id="explainer-topic-metrics" class="explainer-metrics-list"></ul>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
+        <button id="explainer-try-btn" class="active-btn">Apply Example</button>
       </div>
     </div>
   </div>

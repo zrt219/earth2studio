@@ -1684,6 +1684,292 @@ export function generateStacTaskingOrderGeoJSON() {
 }
 
 // =============================================================================
+// 11b. ITALY & JAPAN TARGET CITIES TELEMETRY CATALOG (131K SENTINEL-2 BOUNDS)
+// =============================================================================
+
+export const TARGET_CITIES = deepFreeze([
+  // --- Italy Regional Corridor (38°N–48°N, 6°E–18°E) ---
+  {
+    id: "it_milan",
+    country: "Italy",
+    countryCode: "IT",
+    name: "Milan",
+    region: "Lombardy / Western Po Plain",
+    lat: 45.4642,
+    lon: 9.1900,
+    elevM: 122,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X38 (0.5m Spotlight) + Sentinel-2 10m",
+    sarSatelliteId: "ICEYE-X38",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Tropospheric ZTD Correction Available",
+    apsZtdM: 2.3225,
+    fringesRemoved: 12.20,
+    rmseReductionPct: 98.73,
+    sentinel2Lod: "131K Regional Crop",
+    roleSummary: "Western Po basin urban deformation & flood-plain X-band reference corridor (WMO 16080 Milano Linate sounding vicinity)."
+  },
+  {
+    id: "it_turin",
+    country: "Italy",
+    countryCode: "IT",
+    name: "Turin",
+    region: "Piedmont / Western Alps Foothills",
+    lat: 45.0703,
+    lon: 7.6869,
+    elevM: 240,
+    zoomDistance: 6.00,
+    sensorSuite: "ICEYE-X38 + Alpine 8x Super-Res Terrain",
+    sarSatelliteId: "ICEYE-X38",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Stratified Delay Active",
+    apsZtdM: 2.3225,
+    fringesRemoved: 12.20,
+    rmseReductionPct: 98.73,
+    sentinel2Lod: "131K Regional Crop",
+    roleSummary: "Western Alpine orographic boundary (6.5 K/km lapse-rate downscaling) and upper Po catchment."
+  },
+  {
+    id: "it_venice",
+    country: "Italy",
+    countryCode: "IT",
+    name: "Venice Lagoon",
+    region: "Veneto / Northern Adriatic",
+    lat: 45.4408,
+    lon: 12.3155,
+    elevM: 2,
+    zoomDistance: 5.92,
+    sensorSuite: "ICEYE-X38 Spotlight + Coastal Tide / InSAR",
+    sarSatelliteId: "ICEYE-X38",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Wet-Delay Compensation Ready",
+    apsZtdM: 2.3225,
+    fringesRemoved: 12.20,
+    rmseReductionPct: 98.73,
+    sentinel2Lod: "131K Regional Crop",
+    roleSummary: "Lagoon subsidence & coastal storm-surge specular σ⁰ monitoring in the Po-Adriatic drainage basin."
+  },
+  {
+    id: "it_bologna",
+    country: "Italy",
+    countryCode: "IT",
+    name: "Bologna / Po Delta",
+    region: "Emilia-Romagna",
+    lat: 44.4949,
+    lon: 11.3426,
+    elevM: 54,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X38 (σ⁰ < -16.5 dB Flood Mask)",
+    sarSatelliteId: "ICEYE-X38",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST ZTD + Po Flood Attribution",
+    apsZtdM: 2.3225,
+    fringesRemoved: 12.20,
+    rmseReductionPct: 98.73,
+    sentinel2Lod: "131K Regional Crop",
+    roleSummary: "Primary Po Valley flood swath core (735.27 km² inundated area, min σ⁰ VV = -31.77 dB, WMO 16144 Bologna sounding)."
+  },
+  {
+    id: "it_florence",
+    country: "Italy",
+    countryCode: "IT",
+    name: "Florence",
+    region: "Tuscany / Northern Apennines",
+    lat: 43.7696,
+    lon: 11.2558,
+    elevM: 50,
+    zoomDistance: 6.00,
+    sensorSuite: "ICEYE-X38 + Mediterranean Cyclone Corridor",
+    sarSatelliteId: "ICEYE-X38",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST ZTD Correction Ready",
+    apsZtdM: 2.3225,
+    fringesRemoved: 12.20,
+    rmseReductionPct: 98.73,
+    sentinel2Lod: "131K Regional Crop",
+    roleSummary: "Arno basin convective rainband & Apennine topographic phase-gradient benchmark."
+  },
+  {
+    id: "it_rome",
+    country: "Italy",
+    countryCode: "IT",
+    name: "Rome",
+    region: "Lazio / Central Italy",
+    lat: 41.9028,
+    lon: 12.4964,
+    elevM: 21,
+    zoomDistance: 6.00,
+    sensorSuite: "ICEYE-X38 + Pratica di Mare DA Verification",
+    sarSatelliteId: "ICEYE-X38",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Stratified Delay Active",
+    apsZtdM: 2.3225,
+    fringesRemoved: 12.20,
+    rmseReductionPct: 98.73,
+    sentinel2Lod: "131K Regional Crop",
+    roleSummary: "Central Mediterranean baseline urban scatterer target adjacent to Pratica di Mare (WMO 16245) radiosonde."
+  },
+  {
+    id: "it_naples",
+    country: "Italy",
+    countryCode: "IT",
+    name: "Naples / Vesuvius",
+    region: "Campania / Tyrrhenian Coast",
+    lat: 40.8518,
+    lon: 14.2681,
+    elevM: 17,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X38 Volcanic Slope InSAR + Sounding",
+    sarSatelliteId: "ICEYE-X38",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Topographic Phase Decoupling",
+    apsZtdM: 2.3225,
+    fringesRemoved: 12.20,
+    rmseReductionPct: 98.73,
+    sentinel2Lod: "131K Regional Crop",
+    roleSummary: "Campi Flegrei / Mt. Vesuvius steep-relief tropospheric delay & Naples Capodichino (WMO 16289) sounding check."
+  },
+
+  // --- Japan Regional Corridor (30°N–42°N, 128°E–145°E) ---
+  {
+    id: "jp_tokyo",
+    country: "Japan",
+    countryCode: "JP",
+    name: "Tokyo / Tokyo Bay",
+    region: "Kanto Plain / Honshu",
+    lat: 35.6762,
+    lon: 139.6503,
+    elevM: 40,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-3 (3.0m StripMap VV/VH) + Sentinel-2 10m",
+    sarSatelliteId: "STRIX-3",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Typhoon Megi ZTD Correction",
+    apsZtdM: 2.3690,
+    fringesRemoved: 9.24,
+    rmseReductionPct: 98.81,
+    sentinel2Lod: "131K Regional Crop",
+    roleSummary: "Kanto coastal reclamation PS-InSAR reference and Typhoon Megi outer-rainband moisture plume target."
+  },
+  {
+    id: "jp_fuji",
+    country: "Japan",
+    countryCode: "JP",
+    name: "Mount Fuji / Chubu",
+    region: "Yamanashi–Shizuoka / Honshu",
+    lat: 35.3606,
+    lon: 138.7274,
+    elevM: 3776,
+    zoomDistance: 5.90,
+    sensorSuite: "StriX-3 + Japan 8x Orographic Super-Res",
+    sarSatelliteId: "STRIX-3",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST High-Relief Stratified APS",
+    apsZtdM: 2.3690,
+    fringesRemoved: 9.24,
+    rmseReductionPct: 98.81,
+    sentinel2Lod: "131K Regional Crop",
+    roleSummary: "3,776m stratovolcano vertical delay benchmark isolating stratified atmosphere from volcanic fringes (550.73 km² Honshu slope γ < 0.32 suite)."
+  },
+  {
+    id: "jp_nagoya",
+    country: "Japan",
+    countryCode: "JP",
+    name: "Nagoya / Ise Bay",
+    region: "Aichi / Tokai Corridor",
+    lat: 35.1815,
+    lon: 136.9066,
+    elevM: 15,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-3 Descending StripMap VV/VH",
+    sarSatelliteId: "STRIX-3",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST ZTD + Typhoon Recurvature Tasking",
+    apsZtdM: 2.3690,
+    fringesRemoved: 9.24,
+    rmseReductionPct: 98.81,
+    sentinel2Lod: "131K Regional Crop",
+    roleSummary: "Tokai industrial port & Nobi Plain flood/subsidence corridor directly beneath StriX-3 descending swath."
+  },
+  {
+    id: "jp_osaka",
+    country: "Japan",
+    countryCode: "JP",
+    name: "Osaka / Kansai",
+    region: "Kansai / Osaka Bay",
+    lat: 34.6937,
+    lon: 135.5023,
+    elevM: 20,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-3 StripMap + Coastal Airport InSAR",
+    sarSatelliteId: "STRIX-3",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST ZTD Correction Available",
+    apsZtdM: 2.3690,
+    fringesRemoved: 9.24,
+    rmseReductionPct: 98.81,
+    sentinel2Lod: "131K Regional Crop",
+    roleSummary: "Kansai coastal infrastructure & typhoon storm-tide backscatter change-detection site."
+  },
+  {
+    id: "jp_kyoto",
+    country: "Japan",
+    countryCode: "JP",
+    name: "Kyoto / Lake Biwa",
+    region: "Kinki Basin / Central Honshu",
+    lat: 35.0116,
+    lon: 135.7681,
+    elevM: 50,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-3 VV/VH Coherence Decay (CCD)",
+    sarSatelliteId: "STRIX-3",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Moisture Delay Removal",
+    apsZtdM: 2.3690,
+    fringesRemoved: 9.24,
+    rmseReductionPct: 98.81,
+    sentinel2Lod: "131K Regional Crop",
+    roleSummary: "Lake Biwa shoreline & forested valley slope coherence decay validation (min γ = 0.080 in Honshu trigger)."
+  },
+  {
+    id: "jp_sendai",
+    country: "Japan",
+    countryCode: "JP",
+    name: "Sendai / Tohoku",
+    region: "Miyagi / Pacific Coast",
+    lat: 38.2682,
+    lon: 140.8694,
+    elevM: 52,
+    zoomDistance: 6.00,
+    sensorSuite: "StriX-3 + Northeast Pacific Co-Seismic Strip",
+    sarSatelliteId: "STRIX-3",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST ZTD + Coastal Moisture Check",
+    apsZtdM: 2.3690,
+    fringesRemoved: 9.24,
+    rmseReductionPct: 98.81,
+    sentinel2Lod: "131K Regional Crop",
+    roleSummary: "Tohoku Pacific margin tectonic displacement & cyclonic rain-induced coherence monitoring target."
+  }
+]);
+
+export function getTargetCities(countryFilter = null) {
+  if (!countryFilter) {
+    return TARGET_CITIES;
+  }
+  const norm = String(countryFilter).trim().toLowerCase();
+  return TARGET_CITIES.filter(
+    (c) => c.country.toLowerCase() === norm || c.countryCode.toLowerCase() === norm
+  );
+}
+
+export function getTargetCityById(id) {
+  if (!id) return null;
+  const norm = String(id).trim().toLowerCase();
+  return TARGET_CITIES.find((c) => c.id.toLowerCase() === norm) || null;
+}
+
+// =============================================================================
 // 12. RUNTIME SCHEMA & SCIENTIFIC INTEGRITY VALIDATOR
 // =============================================================================
 
@@ -1777,6 +2063,14 @@ export function validateStudyData() {
   assert(rh.uncertaintyCone < rh.cycloneTrajectorySpline, "Cyclone spline (5.050) must be above uncertainty cone (5.045)");
   assert(rh.cycloneTrajectorySpline <= rh.daStationBeacons[0], "DA station base must sit at or above trajectory spline");
 
+  // Italy & Japan Target Cities Bounds Check (Sentinel-2 131K Regions)
+  assert(Array.isArray(TARGET_CITIES) && TARGET_CITIES.length === 13, "Must define 13 verified Italy (7) and Japan (6) target cities");
+  TARGET_CITIES.forEach((city) => {
+    const inItaly = city.country === "Italy" && city.lat >= 38 && city.lat <= 48 && city.lon >= 6 && city.lon <= 18;
+    const inJapan = city.country === "Japan" && city.lat >= 30 && city.lat <= 42 && city.lon >= 128 && city.lon <= 145;
+    assert(inItaly || inJapan, `Target city ${city.id} (${city.lat}, ${city.lon}) must lie inside Sentinel-2 regional crop bounds`);
+  });
+
   const passedCount = assertions.filter((a) => a.condition).length;
   const isAllValid = passedCount === assertions.length;
 
@@ -1827,6 +2121,7 @@ export default {
   DOMAINS_MAP,
   COMPARISON_MATRIX,
   SAR_TASKING_METADATA,
+  TARGET_CITIES,
 
   // Reactive State Machine
   getState,
@@ -1866,6 +2161,8 @@ export default {
   getComparisonMatrix,
   getSarTaskingMetadata,
   generateStacTaskingOrderGeoJSON,
+  getTargetCities,
+  getTargetCityById,
 
   // Validation
   validateStudyData

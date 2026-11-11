@@ -40,6 +40,8 @@ import hazardAlerts from './hazardAlerts.js';
 import sarTasking from './sarTasking.js';
 import tutorialTour from './tutorialTour.js';
 import tiledEarth from './tiledEarth.js';
+import citySelector from './citySelector.js';
+import explainerToolbar from './explainerToolbar.js';
 
 // =============================================================================
 // 1. APPLICATION STATE & CONTEXT
@@ -216,6 +218,22 @@ export function init() {
     flyToLatLon,
     flyTo,
     setSpinState
+  });
+
+  // 9c. Initialize Italy & Japan City Target Picker + 3D Surface Beacons
+  const cityNavCallbacks = {
+    flyToLatLon,
+    setSpinState,
+    showPopup: uiController.showPopup,
+    getCamera: () => camera
+  };
+  citySelector.initCitySelector(globe, cityNavCallbacks);
+
+  // 9d. Initialize Floating Quick-Toolbar & '?' Contextual Explainer Drawer
+  explainerToolbar.initExplainerToolbar({
+    startTour: tutorialTour.startTour,
+    focusCity: (cityId) => citySelector.focusCity(cityId, cityNavCallbacks),
+    getActiveCityId: citySelector.getActiveCityId
   });
 
   // 10. Wire DOM Event Listeners
@@ -435,6 +453,37 @@ function setupPointerEvents(canvas) {
       const isLeftOrTouch = pointerButton === 0 || e.pointerType === 'touch' || e.pointerType === 'pen';
       if (deltaDist <= 5 && isLeftOrTouch && !e.shiftKey) {
         let hit = layers3D.handleRaycast(e, camera, window.innerWidth, window.innerHeight);
+        if (!hit && citySelector?.getInteractiveCityObjects && citySelector.getCityMarkersVisibility?.()) {
+          const cityPickables = citySelector.getInteractiveCityObjects();
+          if (cityPickables.length > 0 && camera) {
+            const w = window.innerWidth || 1;
+            const h = window.innerHeight || 1;
+            const ndc = new THREE.Vector2((e.clientX / w) * 2 - 1, -(e.clientY / h) * 2 + 1);
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(ndc, camera);
+            const hits = raycaster.intersectObjects(cityPickables, true);
+            for (const cand of hits) {
+              const worldPt = cand.point;
+              if (layers3D?.isFrontFacing && !layers3D.isFrontFacing(worldPt, new THREE.Vector3(0, 0, 0), camera.position)) {
+                continue;
+              }
+              let obj = cand.object;
+              while (obj && (!obj.userData || !obj.userData.type)) {
+                obj = obj.parent;
+              }
+              if (obj && obj.userData) {
+                const payload = obj.userData.data ? { ...obj.userData.data, type: obj.userData.type } : obj.userData;
+                hit = {
+                  object: obj,
+                  point: worldPt,
+                  data: payload,
+                  screenPos: { x: e.clientX, y: e.clientY }
+                };
+                break;
+              }
+            }
+          }
+        }
         if (!hit && sarTasking?.getSarPickableObjects && sarTasking.getSarTaskingVisibility()) {
           const sarPickables = sarTasking.getSarPickableObjects();
           if (sarPickables.length > 0 && camera) {
@@ -939,11 +988,13 @@ function animate() {
   // 3. Update 3D Scientific Layers (Pulsing Beacons, Plasma Shaders)
   layers3D.updateLayers(elapsedTime, camera);
 
-  // 3b. Update Wind Particles Advection, Hazard Alert Pulses, GEOINT SAR Orbits & 16K-131K Tiled LOD
+  // 3b. Update Wind Particles Advection, Hazard Alert Pulses, City Beacons, GEOINT SAR Orbits & 16K-131K Tiled LOD
   windParticles.updateWindParticles(0.016);
   hazardAlerts.updateHazardAlerts(elapsedTime);
+  citySelector.updateCityMarkers(elapsedTime);
   sarTasking.updateSarTasking(elapsedTime);
   tiledEarth.updateTiledEarth(camera, globe, renderer);
+  uiController.updatePopupPosition?.(camera, globe, window.innerWidth, window.innerHeight);
 
   // 4. Render Scene
   if (renderer && scene && camera) {

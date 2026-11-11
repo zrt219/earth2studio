@@ -533,6 +533,60 @@ async function runCdpSession(targetUrl, suiteLabel, cdpPort) {
     console.log(`  [${tRes?.ok ? 'PASS' : 'FAIL'}] Mission Tutorial Tour (Step 1 -> 2 -> 4 -> Close: ${tRes?.ok})`);
 
     // -------------------------------------------------------------------------
+    // TEST 5c: Italy & Japan City Selector + '?' Contextual Explainer Toolbar
+    // -------------------------------------------------------------------------
+    const cityExplainerCheck = await send('Runtime.evaluate', {
+      expression: `(async () => {
+        const selIt = document.querySelector('#city-select-italy');
+        const selJp = document.querySelector('#city-select-japan');
+        const popup = document.querySelector('#poi-popup-card');
+        const popupTitle = document.querySelector('#popup-title');
+        const helpBtn = document.querySelector('#btn-toolbar-help');
+        const drawer = document.querySelector('#explainer-drawer');
+        const drawerClose = document.querySelector('#explainer-close-btn');
+        if (!selIt || !selJp || !popup || !helpBtn || !drawer || !drawerClose) {
+          return { ok: false, reason: 'missing city/explainer DOM nodes' };
+        }
+        selIt.value = 'it_milan';
+        selIt.dispatchEvent(new Event('change', { bubbles: true }));
+        await new Promise(r => setTimeout(r, 120));
+        const itTitle = popupTitle?.innerText || '';
+
+        selJp.value = 'jp_tokyo';
+        selJp.dispatchEvent(new Event('change', { bubbles: true }));
+        await new Promise(r => setTimeout(r, 120));
+        const jpTitle = popupTitle?.innerText || '';
+
+        helpBtn.click();
+        await new Promise(r => setTimeout(r, 80));
+        const drawerOpened = drawer.style.display === 'flex' && !drawer.classList.contains('hidden');
+        const sarTab = document.querySelector('.explainer-tab-btn[data-topic-id="sar_tasking"]');
+        sarTab?.click();
+        const sarTitle = document.querySelector('#explainer-topic-title')?.textContent || '';
+        drawerClose.click();
+        const drawerClosed = drawer.classList.contains('hidden');
+
+        return {
+          ok: itTitle.includes('Milan') && jpTitle.includes('Tokyo') && drawerOpened && sarTitle.includes('SAR') && drawerClosed,
+          itTitle,
+          jpTitle,
+          drawerOpened,
+          sarTitle,
+          drawerClosed
+        };
+      })()`,
+      awaitPromise: true,
+      returnByValue: true
+    });
+    const ceRes = cityExplainerCheck.result.value;
+    testReport.tests.push({
+      name: 'Italy & Japan City Selector + Contextual Explainer Toolbar',
+      passed: Boolean(ceRes?.ok),
+      details: ceRes
+    });
+    console.log(`  [${ceRes?.ok ? 'PASS' : 'FAIL'}] City Picker & '?' Explainer (Milan=${ceRes?.itTitle?.includes('Milan')}, Tokyo=${ceRes?.jpTitle?.includes('Tokyo')}, Drawer=${ceRes?.drawerOpened}/${ceRes?.drawerClosed})`);
+
+    // -------------------------------------------------------------------------
     // TEST 6: Brand Scrub & Attribution Verification in Rendered DOM
     // -------------------------------------------------------------------------
     console.log('\n  --- Test 6: Brand Scrub & Attribution Audit in Rendered DOM ---');

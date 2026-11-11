@@ -34,6 +34,7 @@ import studyData from './studyData.js';
 import windParticles from './windParticles.js';
 import hazardAlerts from './hazardAlerts.js';
 import sarTasking from './sarTasking.js';
+import explainerToolbar from './explainerToolbar.js';
 
 // =============================================================================
 // 1. UTILITIES & SECURITY SANITIZATION
@@ -191,8 +192,9 @@ export function showPopup(rawPoiData, screenPos) {
   const bodyEl = document.getElementById('popup-body');
 
   const isSar = Boolean(poiData.isSarSatellite || poiData.isSarSwath || poiData.operator === 'ICEYE' || poiData.operator === 'Synspective');
-  const isStation = !isSar && Boolean(poiData.increment !== undefined || poiData.wmoId || poiData.type?.includes('Sounding'));
-  const isHazard = !isSar && !isStation && Boolean(poiData.isHazardAlert || poiData.type === 'hazard_alert' || poiData.severity);
+  const isCity = !isSar && Boolean(poiData.isTargetCity || poiData.type === 'target_city');
+  const isStation = !isSar && !isCity && Boolean(poiData.increment !== undefined || poiData.wmoId || poiData.type?.includes('Sounding'));
+  const isHazard = !isSar && !isCity && !isStation && Boolean(poiData.isHazardAlert || poiData.type === 'hazard_alert' || poiData.severity);
 
   const rawLat = poiData.lat !== undefined ? poiData.lat : poiData.center?.lat;
   const rawLon = poiData.lon !== undefined ? poiData.lon : poiData.center?.lon;
@@ -216,6 +218,24 @@ export function showPopup(rawPoiData, screenPos) {
           <div style="margin-bottom:4px;"><strong>CATALYST APS ZTD:</strong> ${aps.meanZtdM} m (${aps.fringesRemoved} fringes removed)</div>
           <div style="margin-bottom:4px;"><strong>InSAR Phase RMSE:</strong> <span style="color:#f43f5e;">${aps.uncorrectedRmseRad} rad</span> → <span style="color:#10b981; font-weight:700;">${aps.correctedRmseRad} rad (-${aps.rmseReductionPct}%)</span></div>
           <div><strong>Attribution:</strong> ${hazardLine}</div>
+        </div>
+      `;
+    }
+  } else if (isCity) {
+    const cityLatPrecise = typeof rawLat === 'number' ? rawLat.toFixed(4) : latVal;
+    const cityLonPrecise = typeof rawLon === 'number' ? rawLon.toFixed(4) : lonVal;
+    if (titleEl) {
+      titleEl.innerText = `📍 ${poiData.name || 'Target City'} (${poiData.country || 'Target'})`;
+    }
+    if (bodyEl) {
+      bodyEl.innerHTML = `
+        <div style="font-size:0.75rem; line-height:1.45; color:#cbd5e1;">
+          <div style="margin-bottom:4px;"><strong>Corridor:</strong> ${sanitizeHTML(poiData.region || 'Verified 131K Domain')}</div>
+          <div style="margin-bottom:4px;"><strong>Coordinates:</strong> ${cityLatPrecise}°N, ${cityLonPrecise}°E (Elev: <b>${poiData.elevM ?? 0} m</b>)</div>
+          <div style="margin-bottom:4px;"><strong>Sensor Tasking:</strong> <span style="color:#38bdf8; font-weight:700;">${sanitizeHTML(poiData.sarSatelliteId || 'X-BAND')}</span> (Inc: ${poiData.incidenceAngleDeg ?? 30}°)</div>
+          <div style="margin-bottom:4px;"><strong>CATALYST APS:</strong> ZTD <b>${poiData.apsZtdM ?? 'N/A'} m</b> | ${poiData.fringesRemoved ?? 'N/A'} fringes | <span style="color:#10b981; font-weight:700;">-${poiData.rmseReductionPct ?? 98}% RMSE</span></div>
+          <div style="margin-bottom:4px;"><strong>Optical Surface:</strong> ${sanitizeHTML(poiData.sentinel2Lod || '131K Regional Crop')}</div>
+          <div style="margin-top:5px; font-size:0.71rem; color:#94a3b8; border-top:1px solid rgba(255,255,255,0.08); padding-top:4px;">${sanitizeHTML(poiData.roleSummary || '')}</div>
         </div>
       `;
     }
@@ -631,13 +651,16 @@ export function updatePopupPosition(camera = activeCamera, vpW = null, vpH = nul
   if (typeof poiLat === 'number' && typeof poiLon === 'number' && activeLayers3D?.latLonToVector3) {
     const isSarSat = Boolean(activePopupPOI.isSarSatellite || activePopupPOI.type === 'sar_satellite');
     const isSarSwath = Boolean(activePopupPOI.isSarSwath || activePopupPOI.type === 'sar_swath');
-    const isHazard = Boolean(activePopupPOI.isHazardAlert || activePopupPOI.type === 'hazard_alert');
-    const isStation = !isSarSat && !isSarSwath && !isHazard && Boolean(activePopupPOI.increment !== undefined || activePopupPOI.wmoId);
+    const isCity = !isSarSat && !isSarSwath && Boolean(activePopupPOI.isTargetCity || activePopupPOI.type === 'target_city');
+    const isHazard = !isSarSat && !isSarSwath && !isCity && Boolean(activePopupPOI.isHazardAlert || activePopupPOI.type === 'hazard_alert');
+    const isStation = !isSarSat && !isSarSwath && !isCity && !isHazard && Boolean(activePopupPOI.increment !== undefined || activePopupPOI.wmoId);
     let radius = activeLayers3D.RADIAL_SHELLS?.CYCLONE_TUBE || 5.050;
     if (isSarSat) {
       radius = sarTasking?.SAR_SHELLS?.SSO_ORBIT || 5.420;
     } else if (isSarSwath) {
       radius = sarTasking?.SAR_SHELLS?.SAR_FOOTPRINT || 5.040;
+    } else if (isCity) {
+      radius = 5.056;
     } else if (isHazard) {
       radius = 5.052;
     } else if (isStation) {
@@ -732,13 +755,19 @@ export function initUI(globe, camera, renderer, layers3D) {
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         const modalEl = document.getElementById('comparison-modal');
+        const explainerEl = document.getElementById('explainer-drawer');
         const popupEl = document.getElementById('poi-popup-card') || document.getElementById('poi-popup');
 
         const isModalOpen = modalEl && (modalEl.style.display === 'flex' || !modalEl.classList.contains('hidden'));
+        const isExplainerDrawerOpen =
+          explainerToolbar.isExplainerOpen() ||
+          (explainerEl && (explainerEl.style.display === 'flex' || !explainerEl.classList.contains('hidden')));
         const isPopupOpen = popupEl && (popupEl.style.display === 'block' || !popupEl.classList.contains('hidden'));
 
         if (isModalOpen) {
           closeComparisonModal();
+        } else if (isExplainerDrawerOpen) {
+          explainerToolbar.closeExplainer();
         } else if (isPopupOpen) {
           hidePopup();
         }

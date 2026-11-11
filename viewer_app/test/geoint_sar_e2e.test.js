@@ -16,6 +16,8 @@ import studyData from '../studyData.js';
 import sarTasking from '../sarTasking.js';
 import tutorialTour from '../tutorialTour.js';
 import tiledEarth from '../tiledEarth.js';
+import citySelector from '../citySelector.js';
+import explainerToolbar from '../explainerToolbar.js';
 
 let passed = 0;
 let failed = 0;
@@ -212,13 +214,20 @@ function createMockDOM() {
   const makeEl = (id) => {
     const classes = new Set(['active-btn']);
     const listeners = {};
+    const attrs = {};
+    const children = [];
     return {
       id,
       innerText: '',
       innerHTML: '',
+      textContent: '',
       value: '2',
       disabled: false,
+      children,
       style: { display: 'none', opacity: '1.0', background: '', left: '0px', top: '0px', color: '' },
+      setAttribute: (k, v) => { attrs[k] = String(v); },
+      getAttribute: (k) => attrs[k] ?? null,
+      appendChild: (c) => { children.push(c); return c; },
       classList: {
         add: (c) => classes.add(c),
         remove: (c) => classes.delete(c),
@@ -235,7 +244,7 @@ function createMockDOM() {
         listeners[evt].push(fn);
       },
       click: () => {
-        (listeners.click || []).forEach(fn => fn({ target: elements.get(id) }));
+        (listeners.click || []).forEach(fn => fn({ target: elements.get(id), stopPropagation: () => {} }));
       }
     };
   };
@@ -250,11 +259,18 @@ function createMockDOM() {
     'sar-aps-status-line', 'sar-telemetry-drawer', 'btn-play-forecast', 'toggle-spin', 'toggle-relief',
     'btn-mission-tutorial', 'mission-tour-card', 'tour-step-badge', 'tour-step-title',
     'tour-step-target', 'tour-step-body', 'tour-step-eq', 'tour-progress-fill',
-    'tour-prev-btn', 'tour-next-btn', 'tour-close-btn'
+    'tour-prev-btn', 'tour-next-btn', 'tour-close-btn',
+    'city-select-italy', 'city-select-japan', 'layer-cities',
+    'btn-toolbar-cities', 'btn-toolbar-tour', 'btn-toolbar-sar', 'btn-toolbar-aps',
+    'btn-toolbar-clouds', 'btn-toolbar-help',
+    'explainer-drawer', 'explainer-close-btn', 'explainer-topic-tabs',
+    'explainer-topic-badge', 'explainer-topic-title', 'explainer-topic-summary',
+    'explainer-topic-howto', 'explainer-topic-metrics', 'explainer-try-btn'
   ].forEach(id => elements.set(id, makeEl(id)));
 
   globalThis.document = {
     getElementById: (id) => elements.get(id) || null,
+    querySelectorAll: () => [],
     createElement: () => makeEl('dynamic')
   };
   globalThis.window = {
@@ -436,6 +452,97 @@ runTest('5.3 initTiledEarth() and LOD/thermal toggles manage visibility and reso
 
   tiledEarth.setTiledEarthEnabled(true);
   tiledEarth.disposeTiledEarth();
+  delete globalThis.document;
+  delete globalThis.window;
+});
+
+// -----------------------------------------------------------------------------
+// Suite 6: Interactive Italy & Japan City Selector + '?' Explainer Toolbar
+// -----------------------------------------------------------------------------
+console.log('\n--- Suite 6: Italy & Japan City Selector + Explainer Toolbar ---');
+
+runTest('6.1 TARGET_CITIES exposes 13 frozen cities strictly inside 131K Sentinel-2 bounds', () => {
+  const all = studyData.getTargetCities();
+  const it = studyData.getTargetCities('Italy');
+  const jp = studyData.getTargetCities('Japan');
+  assert.equal(all.length, 13);
+  assert.equal(it.length, 7);
+  assert.equal(jp.length, 6);
+  assert.ok(Object.isFrozen(all));
+  it.forEach((c) => {
+    assert.ok(c.lat >= 38 && c.lat <= 48 && c.lon >= 6 && c.lon <= 18, `Italy bounds check failed for ${c.id}`);
+  });
+  jp.forEach((c) => {
+    assert.ok(c.lat >= 30 && c.lat <= 42 && c.lon >= 128 && c.lon <= 145, `Japan bounds check failed for ${c.id}`);
+  });
+});
+
+runTest('6.2 citySelector creates 3D beacons at R=5.056 and focusCity centers exact boresight + telemetry popup', () => {
+  createMockDOM();
+  const group = citySelector.initCitySelector(globe, {
+    flyToLatLon: (lat, lon, dist) => {
+      const rot = layers3D.boresightRotation(lat, lon);
+      globe.rotation.set(rot.rotX, rot.rotY, 0);
+      globe.updateMatrixWorld();
+      const cam = new THREE.PerspectiveCamera(45, 1.77, 0.1, 1000);
+      cam.position.set(0, 0, dist);
+      const recovered = tiledEarth.getCameraBoresightLatLon(cam, globe);
+      assert.ok(Math.abs(recovered.lat - lat) < 0.5 && Math.abs(recovered.lon - lon) < 0.5,
+        `Boresight mismatch for (${lat},${lon}): got (${recovered.lat},${recovered.lon})`);
+    },
+    setSpinState: () => {},
+    showPopup: (poi, pos) => uiController.showPopup(poi, pos)
+  });
+  assert.ok(group && citySelector.getInteractiveCityObjects().length === 39);
+  assert.equal(citySelector.CITY_SHELL_RADIUS, 5.056);
+
+  const milan = citySelector.focusCity('it_milan', {
+    flyToLatLon: (lat, lon, dist) => {
+      const rot = layers3D.boresightRotation(lat, lon);
+      globe.rotation.set(rot.rotX, rot.rotY, 0);
+      globe.updateMatrixWorld();
+      const cam = new THREE.PerspectiveCamera(45, 1.77, 0.1, 1000);
+      cam.position.set(0, 0, dist);
+      const recovered = tiledEarth.getCameraBoresightLatLon(cam, globe);
+      assert.ok(Math.abs(recovered.lat - lat) < 0.5 && Math.abs(recovered.lon - lon) < 0.5);
+    },
+    setSpinState: () => {},
+    showPopup: (poi, pos) => uiController.showPopup(poi, pos)
+  });
+  assert.equal(milan.id, 'it_milan');
+  assert.ok(globalThis.document.getElementById('popup-title').innerText.includes('Milan'));
+
+  const tokyo = citySelector.focusCity('jp_tokyo', {
+    flyToLatLon: (lat, lon, dist) => {
+      const rot = layers3D.boresightRotation(lat, lon);
+      globe.rotation.set(rot.rotX, rot.rotY, 0);
+      globe.updateMatrixWorld();
+      const cam = new THREE.PerspectiveCamera(45, 1.77, 0.1, 1000);
+      cam.position.set(0, 0, dist);
+      const recovered = tiledEarth.getCameraBoresightLatLon(cam, globe);
+      assert.ok(Math.abs(recovered.lat - lat) < 0.5 && Math.abs(recovered.lon - lon) < 0.5);
+    },
+    setSpinState: () => {},
+    showPopup: (poi, pos) => uiController.showPopup(poi, pos)
+  });
+  assert.equal(tokyo.id, 'jp_tokyo');
+  assert.ok(globalThis.document.getElementById('popup-title').innerText.includes('Tokyo'));
+
+  citySelector.disposeCitySelector();
+  delete globalThis.document;
+  delete globalThis.window;
+});
+
+runTest('6.3 explainerToolbar exposes all 7 topics and opens/closes contextual explainer cleanly', () => {
+  createMockDOM();
+  explainerToolbar.initExplainerToolbar({});
+  assert.equal(explainerToolbar.getExplainerTopics().length, 7);
+  const topic = explainerToolbar.openExplainer('sar_tasking');
+  assert.equal(topic.id, 'sar_tasking');
+  assert.equal(explainerToolbar.isExplainerOpen(), true);
+  assert.equal(globalThis.document.getElementById('explainer-drawer').style.display, 'flex');
+  explainerToolbar.closeExplainer();
+  assert.equal(explainerToolbar.isExplainerOpen(), false);
   delete globalThis.document;
   delete globalThis.window;
 });
