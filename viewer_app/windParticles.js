@@ -29,7 +29,6 @@
  */
 
 import * as THREE from 'three';
-import { latLonToVector3 } from './layers3D.js';
 
 let particleCount = 3500;
 let particlePoints = null;
@@ -46,19 +45,21 @@ let activeGlobe = null;
 
 // Radius positioned in radial shell hierarchy: R = 5.060
 const WIND_SHELL_RADIUS = 5.060;
+const DEG_TO_RAD = Math.PI / 180.0;
+const DEG_PER_METER = 1.0 / 111139.0;
+const _windScratch = new Float64Array(3);
 
 /**
- * Mathematical analytical wind vector at any spherical coordinate (lat, lon).
- * Replicates genuine Earth planetary circulation (Hadley, Ferrel, Polar cells)
- * and localized Western Pacific Typhoon cyclonic vortex.
+ * Evaluate analytical wind vector (u, v, speed) into a pre-allocated 3-element array
+ * to avoid per-particle heap allocations inside the animation loop.
  *
  * @param {number} latDeg - Latitude in degrees [-90, +90]
  * @param {number} lonDeg - Longitude in degrees [0, 360)
- * @returns {{ u: number, v: number, speed: number }} - Zonal, meridional components and total speed in m/s
+ * @param {Float64Array} out - Output buffer [u, v, speed]
  */
-export function getAtmosphericWindVector(latDeg, lonDeg) {
-  const phi = (latDeg * Math.PI) / 180;
-  const lambda = (lonDeg * Math.PI) / 180;
+function evalAtmosphericWind(latDeg, lonDeg, out) {
+  const phi = latDeg * DEG_TO_RAD;
+  const lambda = lonDeg * DEG_TO_RAD;
 
   // 1. Planetary Zonal Wind Profile (m/s)
   // Equatorial Easterlies (Trades): lat 0-30 -> negative u (westward)
@@ -71,7 +72,8 @@ export function getAtmosphericWindVector(latDeg, lonDeg) {
   const jetLatitude = 42.0 + 8.0 * Math.sin(4.0 * lambda);
   const distToJet = Math.abs(latDeg - jetLatitude);
   if (distToJet < 12.0) {
-    const jetFactor = Math.exp(-Math.pow(distToJet / 6.0, 2));
+    const jetRatio = distToJet / 6.0;
+    const jetFactor = Math.exp(-(jetRatio * jetRatio));
     u += 32.0 * jetFactor;
     v += 14.0 * jetFactor * Math.cos(4.0 * lambda);
   }
@@ -84,29 +86,71 @@ export function getAtmosphericWindVector(latDeg, lonDeg) {
     const rKm = distTyphoonDeg * 111.0;
     // Cyclonic (counter-clockwise in Northern Hemisphere) tangential vortex
     const vMax = 48.0; // 48 m/s (~95 kts, Category 2/3)
-    const rMaxKm = 55.0;
-    const vTheta = vMax * (2.0 * (rKm / rMaxKm)) / (1.0 + Math.pow(rKm / rMaxKm, 2));
+    const rRatio = rKm / 55.0;
+    const vTheta = (vMax * 2.0 * rRatio) / (1.0 + rRatio * rRatio);
 
     // Tangential direction vector (-sin theta, cos theta)
     const angle = Math.atan2(dLatTyphoon, dLonTyphoon);
-    const uVortex = -vTheta * Math.sin(angle);
-    const vVortex = vTheta * Math.cos(angle);
-
-    u += uVortex;
-    v += vVortex;
+    u += -vTheta * Math.sin(angle);
+    v += vTheta * Math.cos(angle);
   }
 
-  const speed = Math.hypot(u, v);
-  return { u, v, speed };
+  out[0] = u;
+  out[1] = v;
+  out[2] = Math.hypot(u, v);
 }
 
 /**
- * Convert spherical coordinates (lat, lon, radius) to Cartesian coordinates (x, y, z)
+ * Mathematical analytical wind vector at any spherical coordinate (lat, lon).
+ * Replicates genuine Earth planetary circulation (Hadley, Ferrel, Polar cells)
+ * and localized Western Pacific Typhoon cyclonic vortex.
+ *
+ * @param {number} latDeg - Latitude in degrees [-90, +90]
+ * @param {number} lonDeg - Longitude in degrees [0, 360)
+ * @returns {{ u: number, v: number, speed: number }} - Zonal, meridional components and total speed in m/s
+ */
+export function getAtmosphericWindVector(latDeg, lonDeg) {
+  evalAtmosphericWind(latDeg, lonDeg, _windScratch);
+  return { u: _windScratch[0], v: _windScratch[1], speed: _windScratch[2] };
+}
+
+/**
+ * Write spherical (lat, lon, radius) directly into a Float32Array at offset idx3
  * matching Three.js convention where lon=0 is on +X axis.
  */
-function sphericalToCartesian(latDeg, lonDeg, radius = WIND_SHELL_RADIUS) {
-  const v = latLonToVector3(latDeg, lonDeg, radius);
-  return { x: v.x, y: v.y, z: v.z };
+function writeSphericalToArray(latDeg, lonDeg, radius, outArray, idx3) {
+  const phi = latDeg * DEG_TO_RAD;
+  const lambda = ((((lonDeg % 360.0) + 360.0) % 360.0) * DEG_TO_RAD);
+  const cosPhi = Math.cos(phi);
+  const rCosPhi = radius * cosPhi;
+  outArray[idx3] = rCosPhi * Math.cos(lambda);
+  outArray[idx3 + 1] = radius * Math.sin(phi);
+  outArray[idx3 + 2] = -rCosPhi * Math.sin(lambda);
+}
+
+/**
+ * Write speed-mapped RGB color directly into a Float32Array at offset idx3.
+ * 0-10 m/s: Cyan/Teal (Gentle Breeze)
+ * 10-25 m/s: Bright Gold/Yellow (Gale/Jet Stream)
+ * 25-50+ m/s: Fiery Orange/Red (Severe Storm/Typhoon Core)
+ */
+function writeSpeedColorToArray(speed, fade, outArray, idx3) {
+  const norm = Math.min(Math.max((speed - 5.0) / 40.0, 0.0), 1.0);
+  let r, g, b;
+  if (norm < 0.5) {
+    const t = norm * 2.0;
+    r = 0.1 + t * 0.9;
+    g = 0.8 + t * 0.15;
+    b = 0.95 - t * 0.7;
+  } else {
+    const t = (norm - 0.5) * 2.0;
+    r = 1.0;
+    g = 0.95 - t * 0.75;
+    b = 0.25 - t * 0.2;
+  }
+  outArray[idx3] = r * fade;
+  outArray[idx3 + 1] = g * fade;
+  outArray[idx3 + 2] = b * fade;
 }
 
 /**
@@ -139,22 +183,22 @@ export function initWindParticles(globeMesh, count = 3500) {
     lons[i] = v * 360.0;
     particleLifetimes[i] = Math.random() * 100.0; // Phase offset
 
-    const pos = sphericalToCartesian(lats[i], lons[i], WIND_SHELL_RADIUS);
-    positions[i * 3 + 0] = pos.x;
-    positions[i * 3 + 1] = pos.y;
-    positions[i * 3 + 2] = pos.z;
+    const idx3 = i * 3;
+    writeSphericalToArray(lats[i], lons[i], WIND_SHELL_RADIUS, positions, idx3);
 
     // Color based on wind speed
-    const wind = getAtmosphericWindVector(lats[i], lons[i]);
-    particleSpeeds[i] = wind.speed;
-    const c = getSpeedColor(wind.speed);
-    colors[i * 3 + 0] = c.r;
-    colors[i * 3 + 1] = c.g;
-    colors[i * 3 + 2] = c.b;
+    evalAtmosphericWind(lats[i], lons[i], _windScratch);
+    particleSpeeds[i] = _windScratch[2];
+    writeSpeedColorToArray(_windScratch[2], 1.0, colors, idx3);
   }
 
-  particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const posAttr = new THREE.BufferAttribute(positions, 3);
+  posAttr.setUsage(THREE.DynamicDrawUsage);
+  const colAttr = new THREE.BufferAttribute(colors, 3);
+  colAttr.setUsage(THREE.DynamicDrawUsage);
+
+  particleGeometry.setAttribute('position', posAttr);
+  particleGeometry.setAttribute('color', colAttr);
   particleGeometry.userData = { lats, lons };
 
   // Shader point material with glowing circular particle texture
@@ -178,32 +222,8 @@ export function initWindParticles(globeMesh, count = 3500) {
 }
 
 /**
- * Color mapper from wind speed (m/s) to Three.js RGB.
- * 0-10 m/s: Cyan/Teal (Gentle Breeze)
- * 10-25 m/s: Bright Gold/Yellow (Gale/Jet Stream)
- * 25-50+ m/s: Fiery Orange/Red (Severe Storm/Typhoon Core)
- */
-function getSpeedColor(speed) {
-  const norm = Math.min(Math.max((speed - 5.0) / 40.0, 0.0), 1.0);
-  if (norm < 0.5) {
-    const t = norm / 0.5;
-    return {
-      r: 0.1 + t * 0.9,
-      g: 0.8 + t * 0.15,
-      b: 0.95 - t * 0.7
-    };
-  } else {
-    const t = (norm - 0.5) / 0.5;
-    return {
-      r: 1.0,
-      g: 0.95 - t * 0.75,
-      b: 0.25 - t * 0.2
-    };
-  }
-}
-
-/**
  * Animate wind particles step-by-step in the main animation loop.
+ * Zero heap allocations per frame.
  *
  * @param {number} deltaSeconds - Time delta in seconds
  */
@@ -219,7 +239,10 @@ export function updateWindParticles(deltaSeconds = 0.016) {
   const lons = particleGeometry.userData?.lons;
   if (!lats || !lons || !particleLifetimes || !particleSpeeds) return;
 
-  const dt = (Number.isFinite(deltaSeconds) ? deltaSeconds : 0.016) * speedMultiplier;
+  const rawDt = Number.isFinite(deltaSeconds) ? deltaSeconds : 0.016;
+  const clampedDt = Math.min(Math.max(rawDt, 0.001), 0.05);
+  const dt = clampedDt * speedMultiplier;
+  const advectScale = dt * DEG_PER_METER * 80.0;
 
   for (let i = 0; i < particleCount; i++) {
     particleLifetimes[i] += dt * 30.0;
@@ -235,35 +258,37 @@ export function updateWindParticles(deltaSeconds = 0.016) {
       particleLifetimes[i] = 0.0;
     }
 
-    // Query physical wind vector at current position
-    const wind = getAtmosphericWindVector(lats[i], lons[i]);
-    particleSpeeds[i] = wind.speed;
+    // Query physical wind vector at current position (zero-alloc)
+    evalAtmosphericWind(lats[i], lons[i], _windScratch);
+    const windU = _windScratch[0];
+    const windV = _windScratch[1];
+    const windSpeed = _windScratch[2];
+    particleSpeeds[i] = windSpeed;
 
     // Advection: dLon/dt = u / (R * cos(lat)), dLat/dt = v / R
-    const cosLat = Math.max(Math.cos((lats[i] * Math.PI) / 180.0), 0.05);
-    const degPerMeter = 1.0 / 111139.0;
+    const cosLat = Math.max(Math.cos(lats[i] * DEG_TO_RAD), 0.05);
 
-    lons[i] += (wind.u * dt * degPerMeter * 80.0) / cosLat;
-    lats[i] += wind.v * dt * degPerMeter * 80.0;
-    lats[i] = Math.max(-89.9, Math.min(89.9, lats[i]));
+    let nextLon = lons[i] + (windU * advectScale) / cosLat;
+    let nextLat = lats[i] + windV * advectScale;
+    nextLat = Math.max(-89.9, Math.min(89.9, nextLat));
+    nextLon = ((nextLon % 360.0) + 360.0) % 360.0;
 
-    // Wrap longitude into [0, 360)
-    lons[i] = ((lons[i] % 360.0) + 360.0) % 360.0;
+    lats[i] = nextLat;
+    lons[i] = nextLon;
 
-    // Convert back to 3D Cartesian coords
-    const p = sphericalToCartesian(lats[i], lons[i], WIND_SHELL_RADIUS);
-    posArray[i * 3 + 0] = p.x;
-    posArray[i * 3 + 1] = p.y;
-    posArray[i * 3 + 2] = p.z;
+    const idx3 = i * 3;
+    // Inline spherical -> Cartesian directly into posArray
+    const phi = nextLat * DEG_TO_RAD;
+    const lambda = nextLon * DEG_TO_RAD;
+    const cosPhi = Math.cos(phi);
+    const rCosPhi = WIND_SHELL_RADIUS * cosPhi;
+    posArray[idx3] = rCosPhi * Math.cos(lambda);
+    posArray[idx3 + 1] = WIND_SHELL_RADIUS * Math.sin(phi);
+    posArray[idx3 + 2] = -rCosPhi * Math.sin(lambda);
 
-    // Update color and dynamic alpha fade near rebirth/death
-    const c = getSpeedColor(wind.speed);
-    const lifeRatio = particleLifetimes[i] / 120.0;
-    const fade = Math.sin(lifeRatio * Math.PI); // Smooth envelope [0 -> 1 -> 0]
-
-    colArray[i * 3 + 0] = c.r * fade;
-    colArray[i * 3 + 1] = c.g * fade;
-    colArray[i * 3 + 2] = c.b * fade;
+    // Inline speed RGB + smooth fade-in/out directly into colArray
+    const fade = Math.sin((particleLifetimes[i] / 120.0) * Math.PI);
+    writeSpeedColorToArray(windSpeed, fade, colArray, idx3);
   }
 
   posAttr.needsUpdate = true;

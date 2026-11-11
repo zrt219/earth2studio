@@ -329,37 +329,72 @@ export function getOrographicLapseRateDeltaT(elevationMeters, lapseRateKPerKm = 
  */
 export function createSphericalPatchGeometry(minLat, maxLat, minLon, maxLon, radius = RADIAL_SHELLS.MESOSCALE_INSETS, segments = 32) {
   const geom = new THREE.BufferGeometry();
-  const positions = [];
-  const uvs = [];
-  const indices = [];
+  const segs = Math.max(1, Math.floor(segments));
+  const cols = segs + 1;
+  const vertCount = cols * cols;
+  const positions = new Float32Array(vertCount * 3);
+  const normals = new Float32Array(vertCount * 3);
+  const uvs = new Float32Array(vertCount * 2);
+  const indexCount = segs * segs * 6;
+  const indices = vertCount > 65535 ? new Uint32Array(indexCount) : new Uint16Array(indexCount);
 
-  for (let i = 0; i <= segments; i++) {
-    const v = i / segments;
-    const lat = maxLat - v * (maxLat - minLat);
-    for (let j = 0; j <= segments; j++) {
-      const u = j / segments;
+  const r = (Number.isFinite(Number(radius)) && Number(radius) > 0) ? Number(radius) : RADIAL_SHELLS.BASE_GLOBE;
+  const invR = 1.0 / r;
+  const degToRad = Math.PI / 180.0;
+
+  let vOffset = 0;
+  let uvOffset = 0;
+  for (let i = 0; i <= segs; i++) {
+    const v = i / segs;
+    const lat = Math.max(-90.0, Math.min(90.0, maxLat - v * (maxLat - minLat)));
+    const phi = lat * degToRad;
+    const cosPhi = Math.cos(phi);
+    const sinPhi = Math.sin(phi);
+    const py = r * sinPhi;
+
+    for (let j = 0; j <= segs; j++) {
+      const u = j / segs;
       const lon = minLon + u * (maxLon - minLon);
-      const p = latLonToVector3(lat, lon, radius);
-      positions.push(p.x, p.y, p.z);
-      uvs.push(u, 1.0 - v);
+      const lambda = ((((lon % 360) + 360) % 360) * degToRad);
+      const px = r * cosPhi * Math.cos(lambda);
+      const pz = -r * cosPhi * Math.sin(lambda);
+
+      positions[vOffset] = px;
+      positions[vOffset + 1] = py;
+      positions[vOffset + 2] = pz;
+
+      normals[vOffset] = px * invR;
+      normals[vOffset + 1] = py * invR;
+      normals[vOffset + 2] = pz * invR;
+
+      uvs[uvOffset] = u;
+      uvs[uvOffset + 1] = 1.0 - v;
+
+      vOffset += 3;
+      uvOffset += 2;
     }
   }
 
-  for (let i = 0; i < segments; i++) {
-    for (let j = 0; j < segments; j++) {
-      const a = i * (segments + 1) + j;
-      const b = (i + 1) * (segments + 1) + j;
-      const c = (i + 1) * (segments + 1) + (j + 1);
-      const d = i * (segments + 1) + (j + 1);
-      indices.push(a, b, d);
-      indices.push(b, c, d);
+  let idxOffset = 0;
+  for (let i = 0; i < segs; i++) {
+    for (let j = 0; j < segs; j++) {
+      const a = i * cols + j;
+      const b = (i + 1) * cols + j;
+      const c = (i + 1) * cols + (j + 1);
+      const d = i * cols + (j + 1);
+      indices[idxOffset++] = a;
+      indices[idxOffset++] = b;
+      indices[idxOffset++] = d;
+      indices[idxOffset++] = b;
+      indices[idxOffset++] = c;
+      indices[idxOffset++] = d;
     }
   }
 
-  geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  geom.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-  geom.setIndex(indices);
-  geom.computeVertexNormals();
+  geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geom.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+  geom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+  geom.setIndex(new THREE.BufferAttribute(indices, 1));
   return geom;
 }
 
@@ -660,7 +695,7 @@ function createDAStationsLayer(stations) {
  * Pillar 1: Concentric Ensemble Spread Layer (Plasma Colormap Shader)
  */
 function createEnsembleSpreadLayer() {
-  const geom = new THREE.SphereGeometry(RADIAL_SHELLS.ENSEMBLE_SPREAD, 96, 96);
+  const geom = new THREE.SphereGeometry(RADIAL_SHELLS.ENSEMBLE_SPREAD, 64, 64);
 
   const vertexShader = `
     varying vec2 vUv;
@@ -734,7 +769,7 @@ function createEnsembleSpreadLayer() {
     },
     transparent: true,
     depthWrite: false,
-    side: THREE.DoubleSide
+    side: THREE.FrontSide
   });
 
   const mesh = new THREE.Mesh(geom, mat);
@@ -889,6 +924,21 @@ let pointerDownPos = null;
 let pointerDownTarget = null;
 let pointerDownHandler = null;
 let studyDataUnsubscribers = [];
+let highlightedWaypointIndex = -1;
+
+function isObjectVisibleInHierarchy(obj) {
+  let cur = obj;
+  while (cur) {
+    if (cur.visible === false) {
+      return false;
+    }
+    if (cur === activeGlobe) {
+      break;
+    }
+    cur = cur.parent;
+  }
+  return true;
+}
 
 /**
  * Initialize 3D Scientific Layers Engine.
@@ -965,6 +1015,12 @@ export function initLayers(globe, camera, renderer) {
       }
     });
     if (typeof unsubVersionChanged === 'function') studyDataUnsubscribers.push(unsubVersionChanged);
+
+    const unsubTimestep = studyData.on('timestep-changed', (payload) => {
+      const step = payload && typeof payload.step === 'number' ? payload.step : null;
+      highlightCycloneWaypoint(step);
+    });
+    if (typeof unsubTimestep === 'function') studyDataUnsubscribers.push(unsubTimestep);
   }
 
   return {
@@ -1040,19 +1096,34 @@ export function setEnsembleSpreadOpacity(value) {
  *
  * @param {MouseEvent|PointerEvent|object} event
  * @param {THREE.Camera} camera
- * @param {number} width
- * @param {number} height
+ * @param {number|object|null} width
+ * @param {number|object|null} height
+ * @param {object} [options={}]
  * @returns {object|null} Hit payload or null
  */
-export function handleRaycast(event, camera = activeCamera, width = null, height = null) {
+export function handleRaycast(event, camera = activeCamera, width = null, height = null, options = {}) {
   if (!event || !camera) return null;
   const targetCamera = camera;
 
-  if (width !== null && (typeof width !== 'number' || width <= 0 || !Number.isFinite(width))) return null;
-  if (height !== null && (typeof height !== 'number' || height <= 0 || !Number.isFinite(height))) return null;
+  let resolvedWidth = width;
+  let resolvedHeight = height;
+  let resolvedOptions = options && typeof options === 'object' ? options : {};
+  if (width !== null && typeof width === 'object') {
+    resolvedOptions = width;
+    resolvedWidth = null;
+    resolvedHeight = null;
+  } else if (height !== null && typeof height === 'object') {
+    resolvedOptions = height;
+    resolvedHeight = null;
+  }
 
-  const rawW = width || (activeRenderer?.domElement?.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 1920));
-  const rawH = height || (activeRenderer?.domElement?.clientHeight || (typeof window !== 'undefined' ? window.innerHeight : 1080));
+  const { visibleOnly = false, skipDragCheck = false } = resolvedOptions;
+
+  if (resolvedWidth !== null && (typeof resolvedWidth !== 'number' || resolvedWidth <= 0 || !Number.isFinite(resolvedWidth))) return null;
+  if (resolvedHeight !== null && (typeof resolvedHeight !== 'number' || resolvedHeight <= 0 || !Number.isFinite(resolvedHeight))) return null;
+
+  const rawW = resolvedWidth || (activeRenderer?.domElement?.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 1920));
+  const rawH = resolvedHeight || (activeRenderer?.domElement?.clientHeight || (typeof window !== 'undefined' ? window.innerHeight : 1080));
   const w = (rawW && rawW > 0) ? rawW : 1920;
   const h = (rawH && rawH > 0) ? rawH : 1080;
 
@@ -1062,12 +1133,15 @@ export function handleRaycast(event, camera = activeCamera, width = null, height
   if (Math.abs(clientX) > 1e6 || Math.abs(clientY) > 1e6) return null;
 
   // Drag-vs-click suppression: reject clicks with movement > 5px
-  if (pointerDownPos) {
+  if (pointerDownPos && !skipDragCheck) {
     const dist = Math.hypot(clientX - pointerDownPos.x, clientY - pointerDownPos.y);
     if (dist > 5) {
       return null;
     }
   }
+
+  const targets = visibleOnly ? pickableObjects.filter(isObjectVisibleInHierarchy) : pickableObjects;
+  if (targets.length === 0) return null;
 
   const ndc = new THREE.Vector2(
     (clientX / w) * 2 - 1,
@@ -1075,7 +1149,7 @@ export function handleRaycast(event, camera = activeCamera, width = null, height
   );
 
   raycaster.setFromCamera(ndc, targetCamera);
-  const intersects = raycaster.intersectObjects(pickableObjects, true);
+  const intersects = raycaster.intersectObjects(targets, true);
 
   if (intersects.length === 0) return null;
 
@@ -1085,19 +1159,7 @@ export function handleRaycast(event, camera = activeCamera, width = null, height
     const camPos = targetCamera.position || new THREE.Vector3(0, 5, 14);
 
     // Verify visibility along parent layer hierarchy up to activeGlobe (BUG-M2-001)
-    let cur = hit.object;
-    let isVisible = true;
-    while (cur) {
-      if (cur.visible === false) {
-        isVisible = false;
-        break;
-      }
-      if (cur === activeGlobe) {
-        break;
-      }
-      cur = cur.parent;
-    }
-    if (!isVisible) {
+    if (!isObjectVisibleInHierarchy(hit.object)) {
       continue;
     }
 
@@ -1130,12 +1192,49 @@ export function handleRaycast(event, camera = activeCamera, width = null, height
 /**
  * Public click handler alias satisfying interface contract.
  */
-export function onGlobeClick(mouseEvent, camera = activeCamera, width = null, height = null) {
-  return handleRaycast(mouseEvent, camera, width, height);
+export function onGlobeClick(mouseEvent, camera = activeCamera, width = null, height = null, options = {}) {
+  return handleRaycast(mouseEvent, camera, width, height, options);
+}
+
+/**
+ * Highlight an active cyclone waypoint sphere corresponding to the 24h Storm Lead-Time step.
+ * Pass negative or null/undefined to clear the active highlight gracefully.
+ *
+ * @param {number|null|undefined} stepIndex - Waypoint index (0..4) or null/-1 to clear
+ */
+export function highlightCycloneWaypoint(stepIndex) {
+  if (
+    stepIndex === null ||
+    stepIndex === undefined ||
+    typeof stepIndex !== 'number' ||
+    !Number.isFinite(stepIndex) ||
+    stepIndex < 0
+  ) {
+    highlightedWaypointIndex = -1;
+  } else {
+    const idx = Math.floor(stepIndex);
+    highlightedWaypointIndex = idx < cycloneBeaconMeshes.length ? idx : -1;
+  }
+
+  for (let idx = 0; idx < cycloneBeaconMeshes.length; idx++) {
+    const mesh = cycloneBeaconMeshes[idx];
+    if (!mesh) continue;
+    const isActive = idx === highlightedWaypointIndex;
+    const hasHighlight = highlightedWaypointIndex >= 0;
+    const targetScale = isActive ? 1.65 : (hasHighlight ? 0.9 : 1.0);
+    const targetEmissive = isActive ? 1.6 : (hasHighlight ? 0.55 : 0.85);
+    if (mesh.scale) {
+      mesh.scale.set(targetScale, targetScale, targetScale);
+    }
+    if (mesh.material && typeof mesh.material.emissiveIntensity === 'number') {
+      mesh.material.emissiveIntensity = targetEmissive;
+    }
+  }
 }
 
 /**
  * Per-frame animation update driving beacon pulsing and shader time uniform.
+ * Skips updates on hidden layer groups.
  *
  * @param {number} time - Elapsed time in seconds
  * @param {THREE.Camera} camera - Active camera
@@ -1143,38 +1242,59 @@ export function onGlobeClick(mouseEvent, camera = activeCamera, width = null, he
 export function updateLayers(time, camera = activeCamera) {
   const t = typeof time === 'number' ? time : (Date.now() * 0.001);
 
-  // 1. Pulsing waypoint beacon nodes
-  if (cycloneBeaconMeshes && cycloneBeaconMeshes.length > 0) {
-    cycloneBeaconMeshes.forEach((mesh, idx) => {
-      if (!mesh || !mesh.scale) return;
-      const s = 1.0 + 0.25 * Math.sin(t * 4.0 + idx * 0.8);
-      mesh.scale.set(s, s, s);
-    });
+  // 1. Pulsing waypoint beacon nodes (skip if hidden)
+  if (layerGroups.cyclone && layerGroups.cyclone.visible !== false && cycloneBeaconMeshes.length > 0) {
+    for (let idx = 0; idx < cycloneBeaconMeshes.length; idx++) {
+      const mesh = cycloneBeaconMeshes[idx];
+      if (!mesh || !mesh.scale) continue;
+      if (idx === highlightedWaypointIndex) {
+        const s = 1.6 + 0.2 * Math.sin(t * 5.0);
+        mesh.scale.set(s, s, s);
+        if (mesh.material && typeof mesh.material.emissiveIntensity === 'number') {
+          mesh.material.emissiveIntensity = 1.5 + 0.3 * Math.sin(t * 5.0);
+        }
+      } else if (highlightedWaypointIndex >= 0) {
+        const s = 0.9 + 0.1 * Math.sin(t * 4.0 + idx * 0.8);
+        mesh.scale.set(s, s, s);
+        if (mesh.material && typeof mesh.material.emissiveIntensity === 'number') {
+          mesh.material.emissiveIntensity = 0.55;
+        }
+      } else {
+        const s = 1.0 + 0.25 * Math.sin(t * 4.0 + idx * 0.8);
+        mesh.scale.set(s, s, s);
+      }
+    }
   }
 
-  // 2. Pulsing DA station beacon caps
-  if (daCapMeshes && daCapMeshes.length > 0) {
-    daCapMeshes.forEach((mesh, idx) => {
-      if (!mesh || !mesh.scale) return;
+  // 2. Pulsing DA station beacon caps (skip if hidden)
+  if (layerGroups.da && layerGroups.da.visible !== false && daCapMeshes.length > 0) {
+    for (let idx = 0; idx < daCapMeshes.length; idx++) {
+      const mesh = daCapMeshes[idx];
+      if (!mesh || !mesh.scale) continue;
       const s = 1.0 + 0.18 * Math.sin(t * 3.5 + idx * 1.2);
       mesh.scale.set(s, s, s);
       if (mesh.material && typeof mesh.material.emissiveIntensity === 'number') {
         mesh.material.emissiveIntensity = 0.75 + 0.35 * Math.sin(t * 3.5 + idx * 1.2);
       }
-    });
+    }
   }
 
-  // 3. Update ensemble spread time uniform
-  if (layerGroups.spread?.material?.uniforms?.uTime) {
+  // 3. Update ensemble spread time uniform (skip if hidden)
+  if (layerGroups.spread && layerGroups.spread.visible !== false && layerGroups.spread.material?.uniforms?.uTime) {
     layerGroups.spread.material.uniforms.uTime.value = t;
   }
 }
 
 /**
  * Returns pickable 3D marker objects for raycasting.
+ * @param {object} [options={}]
+ * @param {boolean} [options.visibleOnly=false]
  * @returns {Array<THREE.Object3D>}
  */
-export function getInteractiveObjects() {
+export function getInteractiveObjects(options = {}) {
+  if (options && options.visibleOnly) {
+    return pickableObjects.filter(isObjectVisibleInHierarchy);
+  }
   return pickableObjects;
 }
 
@@ -1257,6 +1377,7 @@ export function disposeLayers() {
   }
 
   pointerDownPos = null;
+  highlightedWaypointIndex = -1;
   activeGlobe = null;
   activeCamera = null;
   activeRenderer = null;
@@ -1283,6 +1404,7 @@ export default {
   initLayers,
   setLayerVisibility,
   setEnsembleSpreadOpacity,
+  highlightCycloneWaypoint,
   handleRaycast,
   onGlobeClick,
   updateLayers,

@@ -53,6 +53,24 @@ const swathShaderMaterials = [];
 const satelliteEntries = [];
 const interactiveSarObjects = [];
 
+const DEG_TO_RAD = Math.PI / 180.0;
+const _upAxis = new THREE.Vector3(0, 1, 0);
+const _scratchSatPos = new THREE.Vector3();
+const _scratchNormal = new THREE.Vector3();
+
+function writeLatLonVector3(lat, lon, radius, target) {
+  const clampedLat = Math.max(-90.0, Math.min(90.0, lat));
+  const phi = clampedLat * DEG_TO_RAD;
+  const lambda = ((((lon % 360.0) + 360.0) % 360.0) * DEG_TO_RAD);
+  const cosPhi = Math.cos(phi);
+  target.set(
+    radius * cosPhi * Math.cos(lambda),
+    radius * Math.sin(phi),
+    -radius * cosPhi * Math.sin(lambda)
+  );
+  return target;
+}
+
 /**
  * Create a custom GLSL ShaderMaterial rendering:
  *  - Mode 0 ('insar_fringes'): X-Band (lambda = 3.11 cm) wrapped [-pi, +pi] interferometric fringes.
@@ -295,7 +313,9 @@ function createSatelliteAndLookCone(satConfig) {
   }
 
   const frustumGeom = new THREE.BufferGeometry();
-  frustumGeom.setAttribute('position', new THREE.BufferAttribute(frustumPositions, 3));
+  const frustumAttr = new THREE.BufferAttribute(frustumPositions, 3);
+  frustumAttr.setUsage(THREE.DynamicDrawUsage);
+  frustumGeom.setAttribute('position', frustumAttr);
   const frustumMat = new THREE.LineBasicMaterial({
     color: orbitColor,
     transparent: true,
@@ -358,23 +378,26 @@ export function updateSarTasking(elapsedTime) {
   if (!sarGroup || !isVisible) return;
   const t = typeof elapsedTime === 'number' ? elapsedTime : (Date.now() * 0.001);
 
-  swathShaderMaterials.forEach(mat => {
+  for (let mIdx = 0; mIdx < swathShaderMaterials.length; mIdx++) {
+    const mat = swathShaderMaterials[mIdx];
     if (mat && mat.uniforms && mat.uniforms.uTime) {
       mat.uniforms.uTime.value = t;
     }
-  });
+  }
 
-  satelliteEntries.forEach((entry, idx) => {
+  for (let idx = 0; idx < satelliteEntries.length; idx++) {
+    const entry = satelliteEntries[idx];
     const { satRig, frustumGeom, corners, satHomeLat, satHomeLon, isAsc } = entry;
     // Gentle along-track orbital motion (+/- 2.2 deg) during Spotlight/StripMap dwell
     const alongTrackOffset = 2.2 * Math.sin(t * 0.85 + idx * 1.5);
     const curLat = satHomeLat + alongTrackOffset;
     const curLon = satHomeLon + (isAsc ? -alongTrackOffset * 0.22 : alongTrackOffset * 0.22);
-    const satPos = latLonToVector3(curLat, curLon, SAR_SHELLS.SSO_ORBIT);
 
-    satRig.position.copy(satPos);
-    const normal = satPos.clone().normalize();
-    satRig.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
+    writeLatLonVector3(curLat, curLon, SAR_SHELLS.SSO_ORBIT, _scratchSatPos);
+
+    satRig.position.copy(_scratchSatPos);
+    _scratchNormal.copy(_scratchSatPos).normalize();
+    satRig.quaternion.setFromUnitVectors(_upAxis, _scratchNormal);
     if (entry.busMesh?.userData?.data) {
       entry.busMesh.userData.data.lat = curLat;
       entry.busMesh.userData.data.lon = curLon;
@@ -385,16 +408,16 @@ export function updateSarTasking(elapsedTime) {
     if (posAttr && posAttr.array) {
       const arr = posAttr.array;
       for (let i = 0; i < 4; i++) {
-        arr[i * 6 + 0] = satPos.x;
-        arr[i * 6 + 1] = satPos.y;
-        arr[i * 6 + 2] = satPos.z;
+        arr[i * 6 + 0] = _scratchSatPos.x;
+        arr[i * 6 + 1] = _scratchSatPos.y;
+        arr[i * 6 + 2] = _scratchSatPos.z;
         arr[i * 6 + 3] = corners[i].x;
         arr[i * 6 + 4] = corners[i].y;
         arr[i * 6 + 5] = corners[i].z;
       }
       posAttr.needsUpdate = true;
     }
-  });
+  }
 }
 
 /**
@@ -457,8 +480,14 @@ export function getSarDisplayMode() {
 
 /**
  * Return interactive SAR meshes (satellites and ground swaths) for raycasting.
+ *
+ * @param {object} [options={}]
+ * @param {boolean} [options.visibleOnly=false] - When true, return [] if SAR layer is hidden
  */
-export function getInteractiveSarObjects() {
+export function getInteractiveSarObjects(options = {}) {
+  if (options && options.visibleOnly) {
+    return (isVisible && (!sarGroup || sarGroup.visible !== false)) ? interactiveSarObjects : [];
+  }
   return interactiveSarObjects;
 }
 
