@@ -454,6 +454,91 @@ export function closeComparisonModal() {
 }
 
 /**
+ * Opens keyboard shortcuts cheat-sheet modal
+ */
+export function openShortcutsModal() {
+  if (typeof document === 'undefined') return;
+  const modal = document.getElementById('shortcuts-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
+  }
+}
+
+/**
+ * Closes keyboard shortcuts cheat-sheet modal
+ */
+export function closeShortcutsModal() {
+  if (typeof document === 'undefined') return;
+  const modal = document.getElementById('shortcuts-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+  }
+}
+
+/**
+ * Copies direct executive deep-link URL to clipboard and triggers feedback toast
+ */
+export function copyShareLink() {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return '';
+  const activeCity = citySelector?.getActiveCityId?.();
+  const activeVersion = studyData?.getActiveStudyVersion?.() || 'V3';
+  const hashParts = [];
+  if (activeCity) hashParts.push(`city=${encodeURIComponent(activeCity)}`);
+  if (activePresetId) hashParts.push(`preset=${encodeURIComponent(activePresetId)}`);
+  if (activeVersion) hashParts.push(`stage=${encodeURIComponent(activeVersion.toLowerCase())}`);
+  const hashStr = hashParts.length > 0 ? '#' + hashParts.join('&') : '';
+  const shareUrl = window.location.origin + window.location.pathname + hashStr;
+
+  try {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(shareUrl).catch(() => {});
+    }
+  } catch (err) {
+    // Clipboard permission fallback
+  }
+
+  const toast = document.getElementById('share-toast');
+  if (toast) {
+    toast.textContent = `🔗 Direct link copied: ${hashStr || 'Default View'}`;
+    toast.classList.remove('hidden');
+    toast.style.display = 'block';
+    toast.style.opacity = '1';
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.style.display = 'none';
+      }, 300);
+    }, 2200);
+  }
+  return shareUrl;
+}
+
+let lastPerfUpdate = 0;
+/**
+ * Updates live WebGL performance telemetry badge (FPS and estimated VRAM)
+ */
+export function updatePerfTelemetry(renderer, scene, fps = 60) {
+  if (typeof document === 'undefined') return;
+  const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  if (now - lastPerfUpdate < 400) return;
+  lastPerfUpdate = now;
+
+  const fpsEl = document.getElementById('perf-fps');
+  const vramEl = document.getElementById('perf-vram');
+  if (fpsEl) {
+    fpsEl.textContent = String(Math.max(1, Math.round(fps)));
+  }
+  if (vramEl && renderer?.info?.memory) {
+    const textures = renderer.info.memory.textures || 12;
+    const estVramMB = Math.min(320, Math.max(180, textures * 16 + 28));
+    vramEl.textContent = `${estVramMB}`;
+  }
+}
+
+/**
  * Renders the 3-step Executive Governance Summary Strip, 3-column version cards,
  * and full COMPARISON_MATRIX directly from studyData.js (Single Source of Truth).
  */
@@ -818,19 +903,29 @@ function initTooltipSystem() {
       if (tooltipTargetEl === target) {
         positionAndShow(target);
       }
-    }, 120);
+    }, 60);
   };
 
-  document.addEventListener('pointerenter', (e) => {
+  const handlePointerEnter = (e) => {
     if (e.pointerType === 'touch') return;
     const target = typeof e.target?.closest === 'function' ? e.target.closest('[data-tooltip]') : null;
-    if (target) scheduleTooltip(target, true);
-  }, true);
+    if (target && target !== tooltipTargetEl) {
+      scheduleTooltip(target, true);
+    }
+  };
 
-  document.addEventListener('pointerleave', (e) => {
-    const target = typeof e.target?.closest === 'function' ? e.target.closest('[data-tooltip]') : null;
-    if (target && target === tooltipTargetEl) hideTooltip();
-  }, true);
+  const handlePointerLeave = (e) => {
+    const related = typeof e.relatedTarget?.closest === 'function' ? e.relatedTarget.closest('[data-tooltip]') : null;
+    if (!related || related !== tooltipTargetEl) {
+      hideTooltip();
+    }
+  };
+
+  document.addEventListener('mouseover', handlePointerEnter, true);
+  document.addEventListener('pointerenter', handlePointerEnter, true);
+  document.addEventListener('pointerover', handlePointerEnter, true);
+  document.addEventListener('mouseout', handlePointerLeave, true);
+  document.addEventListener('pointerleave', handlePointerLeave, true);
 
   document.addEventListener('focusin', (e) => {
     const target = typeof e.target?.closest === 'function' ? e.target.closest('[data-tooltip]') : null;
@@ -1153,27 +1248,52 @@ export function initUI(globe, camera, renderer, layers3D) {
     });
   }
 
+  // 2b. Keyboard Shortcuts Modal & Share Link
+  const btnShortcuts = document.getElementById('btn-toolbar-shortcuts');
+  const btnCloseShortcuts = document.getElementById('shortcuts-close-btn');
+  const modalShortcuts = document.getElementById('shortcuts-modal');
+  const btnShare = document.getElementById('btn-toolbar-share');
+
+  if (btnShortcuts) {
+    btnShortcuts.addEventListener('click', openShortcutsModal);
+  }
+  if (btnCloseShortcuts) {
+    btnCloseShortcuts.addEventListener('click', closeShortcutsModal);
+  }
+  if (modalShortcuts) {
+    modalShortcuts.addEventListener('click', (e) => {
+      if (e.target === modalShortcuts) closeShortcutsModal();
+    });
+  }
+  if (btnShare) {
+    btnShare.addEventListener('click', copyShareLink);
+  }
+
   // 3. POI Popup Close Button
   const popupClose = document.getElementById('popup-close');
   if (popupClose) {
     popupClose.addEventListener('click', hidePopup);
   }
 
-  // 4. Global Keyboard Escape Handler (Prioritizes modal over popup per T3.12)
+  // 4. Global Keyboard Escape Handler (Prioritizes modals over popup per T3.12)
   if (typeof window !== 'undefined') {
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        const shortcutsEl = document.getElementById('shortcuts-modal');
         const modalEl = document.getElementById('comparison-modal');
         const explainerEl = document.getElementById('explainer-drawer');
         const popupEl = document.getElementById('poi-popup-card') || document.getElementById('poi-popup');
 
+        const isShortcutsOpen = shortcutsEl && (shortcutsEl.style.display === 'flex' || !shortcutsEl.classList.contains('hidden'));
         const isModalOpen = modalEl && (modalEl.style.display === 'flex' || !modalEl.classList.contains('hidden'));
         const isExplainerDrawerOpen =
           explainerToolbar.isExplainerOpen() ||
           (explainerEl && (explainerEl.style.display === 'flex' || !explainerEl.classList.contains('hidden')));
         const isPopupOpen = popupEl && (popupEl.style.display === 'block' || !popupEl.classList.contains('hidden'));
 
-        if (isModalOpen) {
+        if (isShortcutsOpen) {
+          closeShortcutsModal();
+        } else if (isModalOpen) {
           closeComparisonModal();
         } else if (isExplainerDrawerOpen) {
           explainerToolbar.closeExplainer();
@@ -1525,5 +1645,9 @@ export default {
   applyCleanBootDefaults,
   updateActiveOverlayBadge,
   updateTrajectoryCallout,
+  openShortcutsModal,
+  closeShortcutsModal,
+  copyShareLink,
+  updatePerfTelemetry,
   initUI
 };

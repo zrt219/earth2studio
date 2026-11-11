@@ -122,6 +122,52 @@ export function initCitySelector(globe, callbacks = {}) {
     const selJapan = document.getElementById('city-select-japan');
     const btnToggle = document.getElementById('layer-cities');
     const quickChips = document.querySelectorAll('.city-quick-chip');
+    const searchInput = document.getElementById('city-search-input');
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const q = (e.target.value || '').trim().toLowerCase();
+        if (selItaly) {
+          Array.from(selItaly.options).forEach((opt, idx) => {
+            if (idx === 0) return;
+            const match = !q || opt.text.toLowerCase().includes(q) || opt.value.toLowerCase().includes(q);
+            opt.hidden = !match;
+          });
+        }
+        if (selJapan) {
+          Array.from(selJapan.options).forEach((opt, idx) => {
+            if (idx === 0) return;
+            const match = !q || opt.text.toLowerCase().includes(q) || opt.value.toLowerCase().includes(q);
+            opt.hidden = !match;
+          });
+        }
+        quickChips.forEach((chip) => {
+          const cid = chip.getAttribute('data-city-id') || '';
+          const txt = (chip.textContent || '').toLowerCase();
+          const match = !q || txt.includes(q) || cid.toLowerCase().includes(q);
+          chip.style.display = match ? '' : 'none';
+        });
+      });
+
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const q = (searchInput.value || '').trim().toLowerCase();
+          if (!q) return;
+          const allCities = studyData.getTargetCities ? studyData.getTargetCities() : (studyData.TARGET_CITIES || []);
+          const match = allCities.find((c) =>
+            c.name.toLowerCase().includes(q) ||
+            c.id.toLowerCase().includes(q) ||
+            (c.district && c.district.toLowerCase().includes(q)) ||
+            (c.radarTarget && c.radarTarget.toLowerCase().includes(q))
+          );
+          if (match) {
+            focusCity(match.id, callbacks);
+            searchInput.blur();
+          }
+        }
+      });
+    }
 
     if (selItaly) {
       selItaly.addEventListener('change', (e) => {

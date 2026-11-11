@@ -106,6 +106,37 @@ let roughTex = null;
 let t2mTex = null;
 let tendTex = null;
 let currentPixelRatio = 0;
+let globalCityNavCallbacks = null;
+
+function parseHashParams() {
+  if (typeof window === 'undefined') return {};
+  const hash = (window.location.hash || '').replace(/^#/, '');
+  const params = {};
+  if (!hash) return params;
+  hash.split('&').forEach((part) => {
+    const [k, v] = part.split('=');
+    if (k) params[decodeURIComponent(k).toLowerCase()] = decodeURIComponent(v || '');
+  });
+  return params;
+}
+
+export function applyUrlHash() {
+  const params = parseHashParams();
+  if (params.stage) {
+    const st = params.stage.toUpperCase();
+    if (['V1', 'V2', 'V3'].includes(st)) {
+      uiController.setStudyVersion(st);
+    }
+  }
+  if (params.preset) {
+    uiController.applyLayerPreset(params.preset);
+  }
+  if (params.city && globalCityNavCallbacks) {
+    setTimeout(() => {
+      citySelector.focusCity(params.city, globalCityNavCallbacks);
+    }, 250);
+  }
+}
 
 function ensureStartupTextures() {
   if (!textureLoader || satTex) return;
@@ -270,6 +301,7 @@ export function init() {
     getCamera: () => camera,
     onVisibilityChange: () => uiController.updateActiveOverlayBadge?.()
   };
+  globalCityNavCallbacks = cityNavCallbacks;
   citySelector.initCitySelector(globe, cityNavCallbacks);
 
   // 9d. Initialize Floating Quick-Toolbar & '?' Contextual Explainer Drawer
@@ -324,6 +356,10 @@ export function init() {
 
   // Apply clean-boot preset (all 8 beacon/clutter overlays OFF, Sat + LOD + Relief + Clouds ON)
   uiController.applyCleanBootDefaults?.();
+
+  // Apply executive deep-link hash if present
+  applyUrlHash();
+  window.addEventListener('hashchange', applyUrlHash);
 
   // Start Animation Loop
   animate();
@@ -657,10 +693,70 @@ function setupKeyboardControls() {
   window.addEventListener('keydown', (e) => {
     if (['INPUT', 'TEXTAREA'].includes(e.target?.tagName)) return;
 
+    // AI Trust Stage switching: 1, 2, 3
+    if (e.key === '1') {
+      uiController.setStudyVersion('V1');
+      return;
+    }
+    if (e.key === '2') {
+      uiController.setStudyVersion('V2');
+      return;
+    }
+    if (e.key === '3') {
+      uiController.setStudyVersion('V3');
+      return;
+    }
+
+    // Quick presets
+    if (e.key === 'c' || e.key === 'C') {
+      uiController.applyLayerPreset('clean_globe');
+      return;
+    }
+    if (e.key === 'x' || e.key === 'X') {
+      uiController.applyLayerPreset('clear_all');
+      return;
+    }
+    if (e.altKey && (e.key === 's' || e.key === 'S')) {
+      e.preventDefault();
+      uiController.applyLayerPreset('sar_focus');
+      return;
+    }
+    if (e.altKey && (e.key === 'w' || e.key === 'W')) {
+      e.preventDefault();
+      uiController.applyLayerPreset('extreme_weather');
+      return;
+    }
+    if (e.altKey && (e.key === 'a' || e.key === 'A')) {
+      e.preventDefault();
+      uiController.applyLayerPreset('all_telemetry');
+      return;
+    }
+
+    // Scrubber animation toggle
+    if (e.key === 'p' || e.key === 'P' || e.code === 'Space') {
+      e.preventDefault();
+      document.getElementById('btn-play-forecast')?.click();
+      return;
+    }
+
+    // Interactive tour & explainer
+    if (e.key === 't' || e.key === 'T') {
+      tutorialTour.startTour();
+      return;
+    }
+    if (e.key === '?') {
+      if (explainerToolbar.isExplainerOpen()) {
+        explainerToolbar.closeExplainer();
+      } else {
+        explainerToolbar.openExplainer('overview');
+      }
+      return;
+    }
+
     const panAmount = 35;
     const rotAmount = 0.08;
 
-    if (e.key === 'r' || e.key === 'R' || e.code === 'Space') {
+    if (e.key === 'r' || e.key === 'R') {
       resetCameraView();
       return;
     }
@@ -1042,11 +1138,25 @@ export function onWindowResize() {
   }
 }
 
+let frameCount = 0;
+let lastFpsTimestamp = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+let currentFps = 60;
+
 function animate() {
   requestAnimationFrame(animate);
 
   const delta = Math.min(clock.getDelta(), 0.05);
   const elapsedTime = clock.getElapsedTime();
+
+  // Performance telemetry calculation
+  frameCount++;
+  const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  if (now - lastFpsTimestamp >= 500) {
+    currentFps = (frameCount * 1000) / (now - lastFpsTimestamp);
+    frameCount = 0;
+    lastFpsTimestamp = now;
+  }
+  uiController.updatePerfTelemetry?.(renderer, scene, currentFps);
 
   // 1. Smooth Camera & Globe Navigation Interpolation
   if (isFlying && targetCameraPos && targetGlobeRot && globe && camera) {
