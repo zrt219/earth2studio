@@ -8,6 +8,7 @@
 [![Live 3D Mission Twin](https://img.shields.io/badge/Live_3D_Mission_Twin-earth2--sar--insar.vercel.app-0284c7?style=for-the-badge&logo=vercel)](https://earth2-sar-insar.vercel.app)
 [![Viewer Mirror](https://img.shields.io/badge/Production_Mirror-viewerapp.vercel.app-0ea5e9?style=for-the-badge&logo=vercel)](https://viewerapp.vercel.app)
 [![Engineering Report PDF](https://img.shields.io/badge/Engineering_Report_PDF-Read_Full_Paper-e11d48?style=for-the-badge&logo=adobeacrobatreader)](./docs/engineering_reports/EARTH2_X_BAND_SAR_INSAR_ENGINEERING_REPORT.pdf)
+[![Career Dossier](https://img.shields.io/badge/Geospatial_Career_Dossier-Target_Companies_%26_Pitches-8b5cf6?style=for-the-badge&logo=target)](./docs/engineering_reports/GEOSPATIAL_JOB_PROSPECTING_DOSSIER.md)
 [![STAC v1.0.0 Tasking Orders](https://img.shields.io/badge/OGC_STAC_v1.0.0-SAR_Tasking_GeoJSON-10b981?style=for-the-badge&logo=json)](./docs/engineering_reports/stac_tasking_orders.geojson)
 [![Pytest Suite](https://img.shields.io/badge/Pytest_Suite-321%2F321_Passing-success?style=for-the-badge&logo=pytest)](./od_experiments/tests/)
 [![WebGL E2E Suite](https://img.shields.io/badge/WebGL_E2E_Suite-105%2F105_Passing-success?style=for-the-badge&logo=javascript)](./viewer_app/test/)

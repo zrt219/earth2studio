@@ -4,11 +4,13 @@
 📧 Email: [`zhanedaye@umattr.ca`](mailto:zhanedaye@umattr.ca) · 🔗 LinkedIn: [`https://www.linkedin.com/in/zhane-umattr`](https://www.linkedin.com/in/zhane-umattr)  
 🚀 Live Digital Twin: [`https://earth2-sar-insar.vercel.app`](https://earth2-sar-insar.vercel.app) *(Mirror: [`https://viewerapp.vercel.app`](https://viewerapp.vercel.app))*  
 📄 Standalone Report PDF: [`https://earth2-sar-insar.vercel.app/reports/EARTH2_X_BAND_SAR_INSAR_ENGINEERING_REPORT.pdf`](https://earth2-sar-insar.vercel.app/reports/EARTH2_X_BAND_SAR_INSAR_ENGINEERING_REPORT.pdf)  
+🎯 Master Career & Target Companies Dossier: [`./GEOSPATIAL_JOB_PROSPECTING_DOSSIER.md`](./GEOSPATIAL_JOB_PROSPECTING_DOSSIER.md)  
 🏛️ GitHub Release v1.0.0: [`https://github.com/zrt219/earth2studio/releases/tag/v1.0.0-mission-twin`](https://github.com/zrt219/earth2studio/releases/tag/v1.0.0-mission-twin)
 
 ---
 
 ## 📌 Table of Contents
+0. [Master Career Prospecting & Company Target Dossier (`GEOSPATIAL_JOB_PROSPECTING_DOSSIER.md`)](./GEOSPATIAL_JOB_PROSPECTING_DOSSIER.md)
 1. [LinkedIn Publication Post (Ready-to-Post)](#1-linkedin-publication-post-ready-to-post)
 2. [Targeted Commercial Partner Outreach Templates](#2-targeted-commercial-partner-outreach-templates)
    - [A. ICEYE Outreach Template (Flood Remote Sensing & Rapid Constellation Tasking)](#a-iceye-outreach-template)
