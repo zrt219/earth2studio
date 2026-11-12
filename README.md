@@ -225,6 +225,21 @@ The complete mathematical derivations, architectural diagrams, and empirical val
 - 📄 **[34-Figure Visual Scientific Atlas & SHA-256 Compendium (PDF)](./docs/engineering_reports/OD_EARTH2_VISUAL_RECAP.pdf)** ([LaTeX Source](./docs/engineering_reports/OD_EARTH2_VISUAL_RECAP.tex))
 - 🗺️ **[OGC STAC v1.0.0 Autonomous SAR Tasking Orders (`stac_tasking_orders.geojson`)](./docs/engineering_reports/stac_tasking_orders.geojson)** ([Manifest JSON](./outputs/scientific_study_verified/advanced_capabilities/geoint_sar_manifest.json))
 
+### 🎯 1-Page Commercial & Mission Briefs (`viewer_app/public/briefs/`)
+
+| Target Organization / Domain | 1-Page Technical Brief (PDF) | Core Engineering Alignment & Quantitative Result |
+| :--- | :--- | :--- |
+| **ICEYE** *(Commercial SAR)* | [**ICEYE SAR Brief**](./viewer_app/public/briefs/BRIEF_ICEYE_SAR_ENGINEERING.pdf) | Autonomous flood tip-and-cue ($735.27\text{ km}^2$, $< -16.5\text{ dB}$) & STAC v1.0.0 order automation. |
+| **CATALYST** *(PCI Geomatics)* | [**CATALYST InSAR Brief**](./viewer_app/public/briefs/BRIEF_CATALYST_INSAR_SOLUTIONS.pdf) | Saastamoinen/Askne tropospheric APS mitigation with 98.73% / 98.81% phase RMSE reduction. |
+| **Synspective** *(StriX SAR)* | [**Synspective StriX Brief**](./viewer_app/public/briefs/BRIEF_SYNSPECTIVE_STRIX_INSAR.pdf) | StriX-3 repeat-pass coherence ($\gamma_{\text{CCD}} < 0.32$, $550.73\text{ km}^2$ slope decorrelation). |
+| **TRE Altamira** *(InSAR APS)* | [**TRE Altamira Brief**](./viewer_app/public/briefs/BRIEF_TRE_ALTAMIRA_INSAR_APS.pdf) | High-gradient DEM-coupled APS compensation removing 12.20 fringes for millimeter deformation. |
+| **3vGeomatics** *(Mining / Geohazards)* | [**3vGeomatics Brief**](./viewer_app/public/briefs/BRIEF_3V_GEOMATICS_INSAR_MINING.pdf) | Extreme-weather InSAR coherence defense and mining/geohazard slope stability monitoring. |
+| **MDA Space** *(CHORUS SAR)* | [**MDA Space Brief**](./viewer_app/public/briefs/BRIEF_MDA_SPACE_CHORUS_SAR.pdf) | Multi-orbit C/X-band SAR tip-and-cue constellation integration and maritime radar surveillance. |
+| **Umbra Space** *(High-Res SAR)* | [**Umbra Space Brief**](./viewer_app/public/briefs/BRIEF_UMBRA_SPACE_SAR_GROUND.pdf) | Sub-meter X-band SAR tasking, automated STAC v1.0.0 pipelines, and rapid-response ground segments. |
+| **Planet Labs** *(Earth Observation)* | [**Planet Labs Brief**](./viewer_app/public/briefs/BRIEF_PLANET_LABS_WEBGL_GEOSPATIAL.pdf) | Tiled 131K LOD globe streaming, 60 FPS WebGL rendering, and multi-sensor automated cueing. |
+| **Tomorrow.io** *(Weather Intelligence)* | [**Tomorrow.io Brief**](./viewer_app/public/briefs/BRIEF_TOMORROW_IO_RADAR_WEATHER.pdf) | Spaceborne weather radar, AI precipitation tracking, and atmospheric phase delay mitigation. |
+| **NVIDIA Earth-2** *(Scientific ML)* | [**NVIDIA Earth-2 Brief**](./viewer_app/public/briefs/BRIEF_NVIDIA_EARTH2_SCIENTIFIC_ML.pdf) | Earth2Studio integration, FourCastNet hosted API, and multi-model neural NWP operationalization. |
+
 ---
 
 ## ⚡ Quick-Start Reproduction & Verification
