@@ -6,6 +6,7 @@
 🔗 **LinkedIn:** [`https://www.linkedin.com/in/zhane-umattr`](https://www.linkedin.com/in/zhane-umattr)  
 🚀 **Live 3D Digital Twin:** [`https://earth2-sar-insar.vercel.app`](https://earth2-sar-insar.vercel.app) *(Mirror: [`https://viewerapp.vercel.app`](https://viewerapp.vercel.app))*  
 📄 **Engineering Report (PDF, 10 Pages):** [`https://earth2-sar-insar.vercel.app/reports/EARTH2_X_BAND_SAR_INSAR_ENGINEERING_REPORT.pdf`](https://earth2-sar-insar.vercel.app/reports/EARTH2_X_BAND_SAR_INSAR_ENGINEERING_REPORT.pdf)  
+📑 **Job-Specific Visual Briefs Suite (10 One-Page PDFs):** [`./visual_briefs/README.md`](./visual_briefs/README.md)  
 🏛️ **GitHub Release v1.0.0:** [`https://github.com/zrt219/earth2studio/releases/tag/v1.0.0-mission-twin`](https://github.com/zrt219/earth2studio/releases/tag/v1.0.0-mission-twin)  
 
 ---
@@ -24,24 +25,24 @@ This dossier provides an operational career targeting strategy for **Zhane Daye*
 
 The following 16 commercial organizations, space agencies, and advanced engineering teams represent the highest-affinity opportunities for this technical profile across North America, Europe, and Asia-Pacific.
 
-| # | Company | Tier | Headquarters / Key Hubs | Primary Technology & Space Domain | Target Roles & Departments | Career Portal |
-| :- | :--- | :---: | :--- | :--- | :--- | :--- |
-| **1** | **ICEYE** | **Tier 1** | Espoo, Finland & Irvine, CA / Washington, DC | Commercial X-band SAR constellation, flood monitoring, disaster analytics | SAR Remote Sensing Engineer, Geospatial Solutions Engineer, InSAR Scientist | [iceye.com/careers](https://www.iceye.com/careers) |
-| **2** | **Synspective** | **Tier 1** | Tokyo, Japan & Singapore | StriX X-band SAR constellation, Land Displacement Monitoring (LDM), slope hazard InSAR | SAR Image Processing Engineer, Applied Scientist (InSAR), Satellite Ops Dev | [synspective.com/careers](https://synspective.com/careers/) |
-| **3** | **TRE ALTAMIRA (CLS Group)** | **Tier 1** | Milan, Italy & Vancouver, BC, Canada | World leader in SqueeSAR™ / PS-InSAR / DS-InSAR ground displacement geodesy | InSAR Geoscientist, Radar Remote Sensing Developer, Cloud Pipeline Architect | [tre-altamira.com/careers](https://tre-altamira.com/) |
-| **4** | **MDA Space** | **Tier 1** | Richmond, BC & Brampton, ON, Canada | Prime contractor RADARSAT-1/2, RCM, CHORUS commercial X/C-band constellation | SAR Payload Systems Engineer, Earth Observation Scientist, Geointelligence Lead | [mda.space/careers](https://www.mda.space/careers/) |
-| **5** | **CATALYST (PCI Geomatics)** | **Tier 1** | Richmond Hill, ON & Gatineau, QC, Canada | Enterprise earth observation software, automated InSAR pipelines, DEM extraction | InSAR Solutions Architect, Remote Sensing Algorithm Engineer, Product Specialist | [catalyst.earth/company/careers](https://catalyst.earth/company/careers/) |
-| **6** | **Capella Space** | **Tier 1** | San Francisco, CA & Louisville, CO | High-resolution commercial X-band SAR constellation, automated tasking APIs | Radar Systems Engineer, Ground Software Architect, Remote Sensing Data Scientist | [capellaspace.com/careers](https://www.capellaspace.com/careers/) |
-| **7** | **Umbra Space** | **Tier 1** | Santa Barbara, CA & Arlington, VA | Sub-meter commercial X-band SAR constellation, open data platform, high-throughput cloud ops | Senior Ground Software Engineer, Radar Remote Sensing Lead, Systems Engineer | [umbra.space/careers](https://umbra.space/) |
-| **8** | **3v Geomatics (Orica Digital)** | **Tier 1** | Vancouver, BC, Canada | Radar InSAR displacement monitoring for mining, dams, infrastructure, and slopes | Senior InSAR Analyst, Geospatial Software Engineer, Scientific Computing Dev | [3vgeomatics.com](https://www.3vgeomatics.com) |
-| **9** | **Planet Labs** | **Tier 2** | San Francisco, CA / Berlin / Remote | Global daily optical & SAR Earth observation, STAC cloud pipelines, web mapping | Geospatial Software Engineer, Senior Frontend / WebGL Engineer, Data Platform Dev | [planet.com/careers](https://www.planet.com/careers/) |
-| **10** | **Tomorrow.io** | **Tier 2** | Boston, MA & Golden, CO | Commercial weather radar satellite constellation & weather intelligence platform | Space Radar Software Engineer, Mission Operations Lead, Geospatial Data Scientist | [tomorrow.io/careers](https://www.tomorrow.io/) |
-| **11** | **NVIDIA (Earth-2 / AI for Science)** | **Tier 2** | Santa Clara, CA / Remote | Earth-2 digital twin, Earth2Studio, FourCastNet, CorrDiff, physics-informed AI | AI Climate / Weather Research Scientist, Scientific ML Engineer, Solutions Architect | [nvidia.com/careers](https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite) |
-| **12** | **Descartes Labs** | **Tier 2** | Santa Fe, NM / Denver, CO / Remote | Automated big-data satellite analytics, SAR processing platform, national defense | Senior Geospatial Engineer, Remote Sensing Scientist (SAR), Cloud Systems Dev | [descarteslabs.com/careers](https://descarteslabs.com/) |
-| **13** | **LiveEO** | **Tier 2** | Berlin, Germany / New York / Remote | AI satellite infrastructure monitoring (railways, pipelines, electric utilities) | Geospatial Platform Engineer, Senior Full-Stack Dev, EO Product Manager | [live-eo.com/careers](https://live-eo.com/) |
-| **14** | **Fugro** | **Tier 2** | Calgary / Vancouver, Canada & Leidschendam, NL | Geo-data specialist, land deformation monitoring, geohazard remote sensing | InSAR Geoscientist, Remote Sensing Specialist, Asset Integrity Engineer | [fugro.com/careers](https://www.fugro.com/careers) |
-| **15** | **Orbital Insight** | **Tier 2** | Mountain View, CA / Remote | Multi-sensor geospatial analytics platform (SAR + Optical + AIS) | Geospatial AI Engineer, Computer Vision Scientist, Senior Backend Engineer | [orbitalinsight.com/company/careers](https://orbitalinsight.com/) |
-| **16** | **Muon Space** | **Tier 2** | Mountain View, CA | Climate-focused multi-sensor Earth observation constellation & data platform | Mission Software Engineer, Earth Science Applications Lead, Systems Engineer | [muonspace.com/careers](https://www.muonspace.com/careers) |
+| # | Company | Tier | Headquarters / Key Hubs | Target Roles & Departments | 1-Page PDF Visual Brief | Career Portal |
+| :- | :--- | :---: | :--- | :--- | :---: | :--- |
+| **1** | **ICEYE** | **Tier 1** | Espoo, Finland & Irvine, CA / DC | SAR Remote Sensing / Solutions Engineer | [**`PDF Brief`**](./visual_briefs/BRIEF_ICEYE_SAR_ENGINEERING.pdf) | [iceye.com/careers](https://www.iceye.com/careers) |
+| **2** | **Synspective** | **Tier 1** | Tokyo, Japan & Singapore | SAR Image Processing / InSAR Scientist | [**`PDF Brief`**](./visual_briefs/BRIEF_SYNSPECTIVE_STRIX_INSAR.pdf) | [synspective.com/careers](https://synspective.com/careers/) |
+| **3** | **TRE ALTAMIRA (CLS)** | **Tier 1** | Milan, Italy & Vancouver, Canada | InSAR Geoscientist / Remote Sensing Dev | [**`PDF Brief`**](./visual_briefs/BRIEF_TRE_ALTAMIRA_INSAR_APS.pdf) | [tre-altamira.com](https://tre-altamira.com/) |
+| **4** | **MDA Space** | **Tier 1** | Richmond, BC & Brampton, ON (Canada) | SAR Payload Systems / EO Scientist | [**`PDF Brief`**](./visual_briefs/BRIEF_MDA_SPACE_CHORUS_SAR.pdf) | [mda.space/careers](https://www.mda.space/careers/) |
+| **5** | **CATALYST (PCI)** | **Tier 1** | Richmond Hill, ON & Gatineau, QC | InSAR Solutions Architect / Algorithm Dev | [**`PDF Brief`**](./visual_briefs/BRIEF_CATALYST_INSAR_SOLUTIONS.pdf) | [catalyst.earth](https://catalyst.earth/company/careers/) |
+| **6** | **3v Geomatics** | **Tier 1** | Vancouver, BC, Canada | Senior InSAR Analyst / Scientific Dev | [**`PDF Brief`**](./visual_briefs/BRIEF_3V_GEOMATICS_INSAR_MINING.pdf) | [3vgeomatics.com](https://www.3vgeomatics.com) |
+| **7** | **Planet Labs** | **Tier 2** | San Francisco, CA / Berlin / Remote | Senior Frontend / 3D WebGL Engineer | [**`PDF Brief`**](./visual_briefs/BRIEF_PLANET_LABS_WEBGL_GEOSPATIAL.pdf) | [planet.com/careers](https://www.planet.com/careers/) |
+| **8** | **NVIDIA (Earth-2)** | **Tier 2** | Santa Clara, CA / Remote | Scientific ML Engineer / Solutions Architect | [**`PDF Brief`**](./visual_briefs/BRIEF_NVIDIA_EARTH2_SCIENTIFIC_ML.pdf) | [nvidia.com/careers](https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite) |
+| **9** | **Tomorrow.io** | **Tier 2** | Boston, MA & Golden, CO | Space Radar Software / Mission Ops Lead | [**`PDF Brief`**](./visual_briefs/BRIEF_TOMORROW_IO_RADAR_WEATHER.pdf) | [tomorrow.io/careers](https://www.tomorrow.io/) |
+| **10** | **Umbra Space** | **Tier 1** | Santa Barbara, CA & Arlington, VA | Senior Ground Software / Radar Systems | [**`PDF Brief`**](./visual_briefs/BRIEF_UMBRA_SPACE_SAR_GROUND.pdf) | [umbra.space](https://umbra.space/) |
+| **11** | **Capella Space** | **Tier 1** | San Francisco, CA & Louisville, CO | Radar Systems / Ground Software Architect | [**`Target Matrix`**](#3-capella-space) | [capellaspace.com](https://capellaspace.com/careers/) |
+| **12** | **Descartes Labs** | **Tier 2** | Santa Fe, NM / Denver, CO / Remote | Senior Geospatial Engineer / SAR Scientist | [**`Target Matrix`**](#11-descartes-labs) | [descarteslabs.com](https://descarteslabs.com/) |
+| **13** | **LiveEO** | **Tier 2** | Berlin, Germany / New York / Remote | Geospatial Platform / Full-Stack Engineer | [**`Target Matrix`**](#12-liveeo) | [live-eo.com/careers](https://live-eo.com/) |
+| **14** | **Fugro** | **Tier 2** | Calgary / Vancouver & Leidschendam, NL | InSAR Geoscientist / Asset Integrity | [**`Target Matrix`**](#1-master-target-companies-matrix) | [fugro.com/careers](https://www.fugro.com/careers) |
+| **15** | **Orbital Insight** | **Tier 2** | Mountain View, CA / Remote | Geospatial AI / Computer Vision Scientist | [**`Target Matrix`**](#1-master-target-companies-matrix) | [orbitalinsight.com](https://orbitalinsight.com/) |
+| **16** | **Muon Space** | **Tier 2** | Mountain View, CA | Mission Software / Earth Science Lead | [**`Target Matrix`**](#1-master-target-companies-matrix) | [muonspace.com](https://www.muonspace.com/careers) |
 
 ---
 
