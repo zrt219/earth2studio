@@ -1,0 +1,228 @@
+{
+  "type": "FeatureCollection",
+  "stac_version": "1.0.0",
+  "title": "OD-EARTH2-001 South Africa Hidden Terrain Weather-to-SAR Tasking Orders",
+  "description": "Operational STAC v1.0.0 SAR constellation tasking schedule and CATALYST X-Band Tropospheric Phase Screen (APS) correction manifest for the Drakensberg Escarpment, Lesotho highlands (3482m), Cape Fold Belt, and Tugela/Durban coastal corridor.",
+  "features": [
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-ICEYE-X42-SOUTHAFRICA-DURBAN-001",
+      "bbox": [
+        30.6,
+        -30.2,
+        31.6,
+        -28.8
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              30.6,
+              -30.2
+            ],
+            [
+              31.6,
+              -30.2
+            ],
+            [
+              31.6,
+              -28.8
+            ],
+            [
+              30.6,
+              -28.8
+            ],
+            [
+              30.6,
+              -30.2
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-13T00:00:00Z",
+        "platform": "ICEYE-X42",
+        "constellation": "ICEYE",
+        "instruments": [
+          "SAR-X"
+        ],
+        "sar:instrument_mode": "Spotlight",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV"
+        ],
+        "sar:product_type": "SLC",
+        "sar:resolution_range": 0.5,
+        "sar:resolution_azimuth": 0.5,
+        "view:incidence_angle": 28.4,
+        "view:look_angle": 25.1,
+        "sat:orbit_state": "ascending",
+        "sat:relative_orbit": 142,
+        "e2s:tip_trigger": "HAZARD-ZA-COASTAL-01 (Tugela Basin & Durban Coastal Cutoff-Low Orographic Flood Inflow)",
+        "e2s:flood_sigma0_threshold_db": -16.5,
+        "e2s:min_sigma0_vv_db": -28.86,
+        "e2s:inundated_area_km2": 18.5,
+        "catalyst:aps_ztd_mean_m": 2.2831,
+        "catalyst:aps_fringes_removed": 10.42,
+        "catalyst:uncorrected_rmse_rad": 15.7448,
+        "catalyst:corrected_rmse_rad": 0.1789,
+        "catalyst:rmse_reduction_pct": 98.86,
+        "tasking:priority": "URGENT_PRIORITY_1",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-SYNSPECTIVE-STRIX4-DRAKENSBERG-002",
+      "bbox": [
+        28.4,
+        -29.8,
+        29.8,
+        -28.4
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              28.4,
+              -29.8
+            ],
+            [
+              29.8,
+              -29.8
+            ],
+            [
+              29.8,
+              -28.4
+            ],
+            [
+              28.4,
+              -28.4
+            ],
+            [
+              28.4,
+              -29.8
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-13T00:00:00Z",
+        "platform": "StriX-4",
+        "constellation": "Synspective-StriX",
+        "instruments": [
+          "StriX-SAR-X"
+        ],
+        "sar:instrument_mode": "StripMap",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV",
+          "VH"
+        ],
+        "sar:product_type": "SLC-InSAR",
+        "sar:resolution_range": 3.0,
+        "sar:resolution_azimuth": 3.0,
+        "view:incidence_angle": 34.1,
+        "view:look_angle": 30.2,
+        "sat:orbit_state": "descending",
+        "sat:relative_orbit": 91,
+        "e2s:tip_trigger": "HAZARD-ZA-ESCARPMENT-02 (Drakensberg Escarpment 3482m High-Relief Slope Coherence Loss gamma < 0.32)",
+        "e2s:coherence_threshold": 0.32,
+        "e2s:min_coherence_gamma": 0.08,
+        "e2s:high_risk_slope_area_km2": 826.78,
+        "catalyst:aps_ztd_mean_m": 2.2831,
+        "catalyst:aps_fringes_removed": 10.42,
+        "catalyst:uncorrected_rmse_rad": 15.7448,
+        "catalyst:corrected_rmse_rad": 0.1789,
+        "catalyst:rmse_reduction_pct": 98.86,
+        "tasking:priority": "HIGH_PRIORITY_ESCARPMENT_CUE",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-CATALYST-INSAR-X-CAPEFOLD-003",
+      "bbox": [
+        20.5,
+        -34.2,
+        23.5,
+        -33.0
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              20.5,
+              -34.2
+            ],
+            [
+              23.5,
+              -34.2
+            ],
+            [
+              23.5,
+              -33.0
+            ],
+            [
+              20.5,
+              -33.0
+            ],
+            [
+              20.5,
+              -34.2
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-13T00:00:00Z",
+        "platform": "CATALYST-InSAR-X",
+        "constellation": "Virtual-X-Band-Stack",
+        "instruments": [
+          "SAR-X"
+        ],
+        "sar:instrument_mode": "StripMap-RepeatPass",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV"
+        ],
+        "sar:product_type": "DInSAR-APS",
+        "sar:resolution_range": 3.0,
+        "sar:resolution_azimuth": 3.0,
+        "view:incidence_angle": 34.1,
+        "sat:orbit_state": "ascending",
+        "sat:relative_orbit": 53,
+        "e2s:tip_trigger": "CATALYST-APS-03 (Cape Fold Belt & Swartberg High-Relief Tropospheric Phase Screen Correction)",
+        "catalyst:carrier_frequency_ghz": 9.65,
+        "catalyst:aps_fringes_removed": 10.42,
+        "catalyst:rmse_reduction_pct": 98.86,
+        "tasking:priority": "ROUTINE_DEFORMATION_MONITORING",
+        "tasking:status": "VALIDATED_STACK"
+      }
+    }
+  ]
+}

@@ -1,0 +1,226 @@
+{
+  "type": "FeatureCollection",
+  "stac_version": "1.0.0",
+  "title": "OD-EARTH2-MEXICO Mexico Hidden Terrain Weather-to-SAR Tip-and-Cue Tasking Orders",
+  "description": "Operational STAC v1.0.0 SAR constellation tasking schedule and CATALYST X-Band Tropospheric Phase Screen (APS) correction manifest for Sierra Madre Occidental, Copper Canyon, and Trans-Mexican Volcanic Belt.",
+  "features": [
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-ICEYE-X38-MEXICO-COPPER-CANYON-001",
+      "bbox": [
+        -109.8,
+        25.5,
+        -106.5,
+        29.2
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -109.8,
+              25.5
+            ],
+            [
+              -106.5,
+              25.5
+            ],
+            [
+              -106.5,
+              29.2
+            ],
+            [
+              -109.8,
+              29.2
+            ],
+            [
+              -109.8,
+              25.5
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-13T00:00:00Z",
+        "platform": "ICEYE-X38",
+        "constellation": "ICEYE",
+        "instruments": [
+          "SAR-X"
+        ],
+        "sar:instrument_mode": "Spotlight",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV"
+        ],
+        "sar:product_type": "SLC",
+        "sar:resolution_range": 0.5,
+        "sar:resolution_azimuth": 0.5,
+        "view:incidence_angle": 28.4,
+        "view:look_angle": 25.1,
+        "sat:orbit_state": "ascending",
+        "sat:relative_orbit": 142,
+        "e2s:tip_trigger": "HAZARD-MEX-01 (Copper Canyon Orographic Flash Flood & R\u00edo Fuerte Inflow)",
+        "e2s:flood_sigma0_threshold_db": -16.5,
+        "e2s:min_sigma0_vv_db": -22.03,
+        "e2s:inundated_area_km2": 2947.66,
+        "catalyst:aps_ztd_mean_m": 2.2752,
+        "catalyst:aps_fringes_removed": 17.33,
+        "catalyst:uncorrected_rmse_rad": 30.7128,
+        "catalyst:corrected_rmse_rad": 0.2319,
+        "catalyst:rmse_reduction_pct": 99.24,
+        "tasking:priority": "URGENT_PRIORITY_1",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-SYNSPECTIVE-STRIX3-MEXICO-VOLCANIC-BELT-002",
+      "bbox": [
+        -100.5,
+        18.2,
+        -96.5,
+        20.2
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -100.5,
+              18.2
+            ],
+            [
+              -96.5,
+              18.2
+            ],
+            [
+              -96.5,
+              20.2
+            ],
+            [
+              -100.5,
+              20.2
+            ],
+            [
+              -100.5,
+              18.2
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-13T00:00:00Z",
+        "platform": "StriX-3",
+        "constellation": "Synspective-StriX",
+        "instruments": [
+          "StriX-SAR-X"
+        ],
+        "sar:instrument_mode": "StripMap",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV",
+          "VH"
+        ],
+        "sar:product_type": "SLC-InSAR",
+        "sar:resolution_range": 3.0,
+        "sar:resolution_azimuth": 3.0,
+        "view:incidence_angle": 34.1,
+        "view:look_angle": 30.2,
+        "sat:orbit_state": "descending",
+        "sat:relative_orbit": 89,
+        "e2s:tip_trigger": "HAZARD-MEX-02 (Trans-Mexican Volcanic Belt Severe Orographic Lahar & Slope Coherence Loss)",
+        "e2s:coherence_threshold": 0.32,
+        "e2s:min_coherence_gamma": 0.06,
+        "e2s:high_risk_slope_area_km2": 1158.07,
+        "catalyst:aps_ztd_mean_m": 2.1018,
+        "catalyst:aps_fringes_removed": 17.59,
+        "catalyst:uncorrected_rmse_rad": 23.5187,
+        "catalyst:corrected_rmse_rad": 0.2302,
+        "catalyst:rmse_reduction_pct": 99.02,
+        "tasking:priority": "EMERGENCY_MONSOON_CUE",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-CATALYST-INSAR-MEXICO-SIERRA-MADRE-003",
+      "bbox": [
+        -108.5,
+        24.2,
+        -104.5,
+        28.5
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -108.5,
+              24.2
+            ],
+            [
+              -104.5,
+              24.2
+            ],
+            [
+              -104.5,
+              28.5
+            ],
+            [
+              -108.5,
+              28.5
+            ],
+            [
+              -108.5,
+              24.2
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-13T00:00:00Z",
+        "platform": "CATALYST-INSAR-STACK",
+        "constellation": "X-Band-Virtual-Constellation",
+        "instruments": [
+          "SAR-X"
+        ],
+        "sar:instrument_mode": "Differential-Repeat-Pass",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV"
+        ],
+        "sar:product_type": "APS-Corrected-Interferogram",
+        "view:incidence_angle": 34.1,
+        "sat:orbit_state": "ascending",
+        "sat:relative_orbit": 142,
+        "e2s:tip_trigger": "HAZARD-MEX-03 (Sierra Madre Occidental High-Relief Tropospheric Phase Screen Correction)",
+        "catalyst:aps_ztd_mean_m": 2.2752,
+        "catalyst:aps_fringes_removed": 17.33,
+        "catalyst:rmse_reduction_pct": 99.24,
+        "tasking:priority": "ROUTINE_CALIBRATION",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    }
+  ]
+}

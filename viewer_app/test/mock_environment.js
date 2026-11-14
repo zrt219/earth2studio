@@ -158,9 +158,17 @@ export function createMockDOM() {
   register('fly-global', 'button');
   register('fly-italy', 'button');
   register('fly-japan', 'button');
+  register('fly-south-africa', 'button');
+  register('fly-mexico', 'button');
+  register('fly-russia', 'button');
   register('fly-americas', 'button');
   register('fly-arctic', 'button');
   register('fly-antarctic', 'button');
+  register('city-select-italy', 'select');
+  register('city-select-japan', 'select');
+  register('city-select-south-africa', 'select');
+  register('city-select-mexico', 'select');
+  register('city-select-russia', 'select');
   register('btn-camera-reset-hud', 'button');
   register('btn-camera-reset', 'button');
   register('cam-recenter', 'button');

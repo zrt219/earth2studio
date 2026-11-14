@@ -36,6 +36,14 @@ import hazardAlerts from './hazardAlerts.js';
 import sarTasking from './sarTasking.js';
 import citySelector from './citySelector.js';
 import explainerToolbar from './explainerToolbar.js';
+import runsCatalog, {
+  RUNS_CATALOG,
+  RUN_CATEGORIES,
+  CATEGORY_THEMES,
+  getRunCatalog,
+  getRunById,
+  getRunsByCategory
+} from './runsCatalog.js';
 
 // =============================================================================
 // 1. UTILITIES & SECURITY SANITIZATION
@@ -272,7 +280,7 @@ export function showPopup(rawPoiData, screenPos) {
   const titleEl = document.getElementById('popup-title');
   const bodyEl = document.getElementById('popup-body');
 
-  const isSar = Boolean(poiData.isSarSatellite || poiData.isSarSwath || poiData.operator === 'ICEYE' || poiData.operator === 'Synspective');
+  const isSar = Boolean(poiData.isSarSatellite || poiData.isSarSwath || poiData.operator === 'ICEYE' || poiData.operator === 'Synspective' || poiData.operator === 'CATALYST');
   const isCity = !isSar && Boolean(poiData.isTargetCity || poiData.type === 'target_city');
   const isStation = !isSar && !isCity && Boolean(poiData.increment !== undefined || poiData.wmoId || poiData.type?.includes('Sounding'));
   const isHazard = !isSar && !isCity && !isStation && Boolean(poiData.isHazardAlert || poiData.type === 'hazard_alert' || poiData.severity);
@@ -475,6 +483,702 @@ export function closeShortcutsModal() {
     modal.style.display = 'none';
     modal.classList.add('hidden');
   }
+}
+
+// =============================================================================
+// 4b. 3D TWIN SCIENTIFIC RUN GALLERY MODAL & LIGHTBOX
+// =============================================================================
+
+let activeRunCategoryFilter = 'ALL';
+let activeRunSearchQuery = '';
+let activeLightboxRun = null;
+let activeStacRun = null;
+let activeStacJsonText = '';
+
+/**
+ * Opens 3D Twin Run Gallery modal and renders run cards
+ */
+export function openRunsModal() {
+  if (typeof document === 'undefined') return;
+
+  // Dismiss any active popup first
+  hidePopup();
+
+  const modal = document.getElementById('runs-modal');
+  if (!modal) return;
+
+  modal.style.display = 'flex';
+  modal.classList.remove('hidden');
+
+  renderRunsGallery(activeRunCategoryFilter);
+}
+
+/**
+ * Closes 3D Twin Run Gallery modal
+ */
+export function closeRunsModal() {
+  if (typeof document === 'undefined') return;
+  const modal = document.getElementById('runs-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+  }
+}
+
+/**
+ * Opens high-resolution publication figure lightbox modal for a run
+ *
+ * @param {string|number} runIdOrNumber
+ */
+export function openRunLightbox(runIdOrNumber) {
+  if (typeof document === 'undefined') return;
+  const run = getRunById(runIdOrNumber);
+  if (!run) return;
+  activeLightboxRun = run;
+
+  const modal = document.getElementById('run-lightbox-modal');
+  if (!modal) return;
+
+  const titleEl = document.getElementById('lightbox-title');
+  const badgeEl = document.getElementById('lightbox-badge');
+  const metaEl = document.getElementById('lightbox-meta');
+  const imgEl = document.getElementById('lightbox-img');
+  const hashEl = document.getElementById('lightbox-hash');
+  const downloadLink = document.getElementById('lightbox-download-link');
+  const flyBtn = document.getElementById('lightbox-fly-btn');
+
+  const fig = run.primary_figure || (run.figures && run.figures[0]) || {};
+  const theme = CATEGORY_THEMES[run.category] || {
+    color: '#38bdf8',
+    bg: 'rgba(56, 189, 248, 0.12)',
+    border: 'rgba(56, 189, 248, 0.35)'
+  };
+
+  if (titleEl) titleEl.textContent = run.title;
+  if (badgeEl) {
+    badgeEl.textContent = `${run.category.toUpperCase()} · RUN ${String(run.run_number).padStart(2, '0')}`;
+    badgeEl.style.color = theme.color;
+    badgeEl.style.background = theme.bg;
+    badgeEl.style.borderColor = theme.border;
+  }
+  if (metaEl) {
+    metaEl.textContent = `${fig.title || run.title} — ${fig.description || run.physics_regime}`;
+  }
+  if (imgEl) {
+    imgEl.src = fig.viewer_path || `/runs/${run.run_id}/${run.primary_figure_name}`;
+    imgEl.alt = run.title;
+    imgEl.onerror = () => {
+      imgEl.onerror = null;
+      imgEl.src = `/${run.primary_figure_name}`;
+    };
+  }
+  if (hashEl) {
+    hashEl.textContent = fig.sha256 ? `SHA-256: ${fig.sha256} (${Math.round((fig.size_bytes || 0) / 1024)} KB)` : '';
+  }
+  if (downloadLink) {
+    downloadLink.href = fig.viewer_path || `/runs/${run.run_id}/${run.primary_figure_name}`;
+  }
+  if (flyBtn) {
+    flyBtn.onclick = () => {
+      flyToRun(run);
+    };
+  }
+
+  modal.style.display = 'flex';
+  modal.classList.remove('hidden');
+}
+
+/**
+ * Closes publication figure lightbox modal
+ */
+export function closeRunLightbox() {
+  if (typeof document === 'undefined') return;
+  const modal = document.getElementById('run-lightbox-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+  }
+  activeLightboxRun = null;
+}
+
+/**
+ * Immediately flies the 3D globe camera to a specific run's synoptic theater
+ *
+ * @param {object|string|number} runOrId
+ */
+export function flyToRun(runOrId) {
+  const run = typeof runOrId === 'object' && runOrId ? runOrId : getRunById(runOrId);
+  if (!run || !run.camera_target) return;
+
+  const lat = Number(run.camera_target.lat);
+  const lon = Number(run.camera_target.lon);
+  const dist = Number(run.camera_distance || 8.5);
+
+  // Stop auto-spin if active
+  setSpinState(false);
+
+  // Trigger camera flight via externalCallbacks
+  if (typeof externalCallbacks.flyToLatLon === 'function') {
+    externalCallbacks.flyToLatLon(lat, lon, dist);
+  }
+
+  // Update HUD quick-run carousel active indicator
+  updateActiveQuickRunChip(run.run_id);
+
+  // Close modals
+  closeRunLightbox();
+  closeRunsModal();
+  closeStacInspector();
+
+  // Show toast notification
+  if (typeof document !== 'undefined') {
+    const toast = document.getElementById('share-toast');
+    if (toast) {
+      toast.textContent = `🎯 Flying globe camera to Run ${String(run.run_number).padStart(2, '0')}: ${run.title}`;
+      toast.classList.remove('hidden');
+      toast.style.display = 'block';
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => {
+          toast.classList.add('hidden');
+          toast.style.display = 'none';
+        }, 300);
+      }, 2800);
+    }
+  }
+}
+
+/**
+ * 1-Click Swath & Orbit Activation:
+ * Enables the SAR radar layer, activates and highlights the run's swath footprint,
+ * and navigates camera to the theater with telemetry.
+ *
+ * @param {string|number} runIdOrNumber
+ * @returns {object|null}
+ */
+export function activateRunSwath(runIdOrNumber) {
+  const run = typeof runIdOrNumber === 'object' && runIdOrNumber ? runIdOrNumber : getRunById(runIdOrNumber);
+  if (!run) return null;
+
+  // Ensure SAR tasking layer is active
+  if (typeof sarTasking.setSarTaskingVisibility === 'function') {
+    sarTasking.setSarTaskingVisibility(true);
+  }
+  if (typeof sarTasking.loadHiddenTerrainSwaths === 'function') {
+    sarTasking.loadHiddenTerrainSwaths();
+  }
+  if (typeof document !== 'undefined') {
+    const sarBtn = document.getElementById('layer-sar-tasking');
+    if (sarBtn) {
+      sarBtn.classList.add('active-btn');
+      sarBtn.setAttribute('aria-pressed', 'true');
+    }
+  }
+
+  // Highlight the swath in sarTasking
+  let swathResult = null;
+  if (typeof sarTasking.highlightSwathForRun === 'function') {
+    swathResult = sarTasking.highlightSwathForRun(run.run_id || run.run_number);
+  }
+
+  // Fly camera to target
+  flyToRun(run);
+
+  // Show feedback toast
+  if (typeof document !== 'undefined') {
+    const toast = document.getElementById('share-toast');
+    if (toast) {
+      const sensor = (run.satellites_and_sensors && run.satellites_and_sensors[0]) || 'SAR Constellation';
+      toast.textContent = `🛰️ Activated Swath & Orbit: Run ${String(run.run_number).padStart(2, '0')} (${sensor})`;
+      toast.classList.remove('hidden');
+      toast.style.display = 'block';
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => {
+          toast.classList.add('hidden');
+          toast.style.display = 'none';
+        }, 300);
+      }, 3200);
+    }
+  }
+
+  return swathResult;
+}
+
+/**
+ * Opens OGC STAC v1.0.0 Tasking Order Inspector Modal for a run
+ *
+ * @param {string|number} runIdOrNumber
+ */
+export async function openStacInspector(runIdOrNumber) {
+  if (typeof document === 'undefined') return;
+  const run = typeof runIdOrNumber === 'object' && runIdOrNumber ? runIdOrNumber : getRunById(runIdOrNumber);
+  if (!run) return;
+  activeStacRun = run;
+
+  const modal = document.getElementById('stac-modal');
+  if (!modal) return;
+
+  const titleEl = document.getElementById('stac-modal-title');
+  const subtitleEl = document.getElementById('stac-modal-subtitle');
+  const badgeEl = document.getElementById('stac-modal-run-badge');
+  const metaBar = document.getElementById('stac-modal-meta-bar');
+  const codeEl = document.getElementById('stac-json-content');
+  const hashEl = document.getElementById('stac-modal-hash');
+  const downloadBtn = document.getElementById('stac-download-btn');
+
+  if (titleEl) titleEl.textContent = `📋 STAC v1.0.0 Tasking Orders: ${run.title}`;
+  if (badgeEl) badgeEl.textContent = `RUN ${String(run.run_number).padStart(2, '0')}`;
+  if (subtitleEl) subtitleEl.textContent = `OGC STAC Collection for ${run.region || run.title} · ${run.physics_regime}`;
+
+  const stacFile = (run.files || []).find(f => f.type === 'stac_orders') || {};
+  if (hashEl) {
+    hashEl.textContent = stacFile.sha256 ? `SHA-256: ${stacFile.sha256} (${Math.round((stacFile.size_bytes || 0) / 1024)} KB)` : '';
+  }
+
+  // Meta bar chips
+  if (metaBar) {
+    const sensor = (run.satellites_and_sensors && run.satellites_and_sensors[0]) || 'SAR X-Band';
+    const lat = run.camera_target?.lat ?? 0;
+    const lon = run.camera_target?.lon ?? 0;
+    const coords = `${lat >= 0 ? lat.toFixed(2) + '°N' : Math.abs(lat).toFixed(2) + '°S'}, ${lon >= 0 ? lon.toFixed(2) + '°E' : Math.abs(lon).toFixed(2) + '°W'}`;
+    metaBar.innerHTML = `
+      <span class="run-tag" style="color:#34d399; border-color:rgba(52,211,153,0.3);">🛰️ ${sanitizeHTML(sensor)}</span>
+      <span class="run-tag" style="color:#38bdf8; border-color:rgba(56,189,248,0.3);">📍 Target: ${sanitizeHTML(coords)}</span>
+      <span class="run-tag" style="color:#fbbf24; border-color:rgba(251,191,36,0.3);">📐 OGC STAC v1.0.0</span>
+      <span class="run-tag" style="color:#a78bfa; border-color:rgba(167,139,250,0.3);">📡 Stripmap / ScanSAR</span>
+    `;
+  }
+
+  if (downloadBtn) {
+    downloadBtn.href = stacFile.viewer_path || `/runs/${run.run_id}/${stacFile.filename || 'stac_orders.geojson'}`;
+    downloadBtn.download = stacFile.filename || `${run.run_id}_stac_orders.geojson`;
+  }
+
+  if (codeEl) {
+    codeEl.textContent = 'Loading STAC tasking orders...';
+  }
+
+  let stacData = null;
+  const filePath = stacFile.viewer_path || (stacFile.filename ? `/runs/${run.run_id}/${stacFile.filename}` : null);
+  if (typeof fetch === 'function' && filePath) {
+    try {
+      const resp = await fetch(filePath);
+      if (resp.ok) {
+        stacData = await resp.json();
+      }
+    } catch (err) {
+      // Offline fallback
+    }
+  }
+
+  if (!stacData) {
+    const lat = run.camera_target?.lat ?? 0;
+    const lon = run.camera_target?.lon ?? 0;
+    stacData = {
+      type: 'FeatureCollection',
+      stac_version: '1.0.0',
+      stac_extensions: [
+        'https://stac-extensions.github.io/sar/v1.0.0/schema.json',
+        'https://stac-extensions.github.io/sat/v1.0.0/schema.json'
+      ],
+      description: `OGC STAC v1.0.0 tasking order collection for ${run.title}`,
+      features: [
+        {
+          type: 'Feature',
+          stac_version: '1.0.0',
+          id: `ORDER-${run.run_id.toUpperCase()}-01`,
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[
+              [Number((lon - 0.75).toFixed(4)), Number((lat - 0.75).toFixed(4))],
+              [Number((lon + 0.75).toFixed(4)), Number((lat - 0.75).toFixed(4))],
+              [Number((lon + 0.75).toFixed(4)), Number((lat + 0.75).toFixed(4))],
+              [Number((lon - 0.75).toFixed(4)), Number((lat + 0.75).toFixed(4))],
+              [Number((lon - 0.75).toFixed(4)), Number((lat - 0.75).toFixed(4))]
+            ]]
+          },
+          properties: {
+            datetime: '2026-11-14T00:00:00Z',
+            platform: (run.satellites_and_sensors && run.satellites_and_sensors[0]) || 'ICEYE-X38',
+            constellation: 'X-Band SAR Constellation',
+            'sar:instrument_mode': 'Stripmap',
+            'sar:frequency_band': 'X',
+            'sar:center_frequency': 9.65,
+            'sar:polarizations': ['VV'],
+            'sat:orbit_state': 'descending',
+            'view:incidence_angle': 29.8,
+            'earth2:physics_regime': run.physics_regime,
+            'earth2:aps_rmse_reduction_pct': run.metrics?.aps_rmse_reduction_pct || 98.7
+          }
+        }
+      ]
+    };
+  }
+
+  activeStacJsonText = JSON.stringify(stacData, null, 2);
+  if (codeEl) {
+    codeEl.textContent = activeStacJsonText;
+  }
+
+  modal.style.display = 'flex';
+  modal.classList.remove('hidden');
+}
+
+/**
+ * Closes STAC Tasking Order Inspector Modal
+ */
+export function closeStacInspector() {
+  if (typeof document === 'undefined') return;
+  const modal = document.getElementById('stac-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+  }
+  activeStacRun = null;
+}
+
+/**
+ * Copies the currently loaded STAC GeoJSON to the system clipboard
+ */
+export function copyStacJson() {
+  if (!activeStacJsonText && typeof document !== 'undefined') {
+    const codeEl = document.getElementById('stac-json-content');
+    if (codeEl) activeStacJsonText = codeEl.textContent;
+  }
+  if (!activeStacJsonText) return;
+
+  try {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(activeStacJsonText).catch(() => {});
+    }
+  } catch (err) {}
+
+  if (typeof document !== 'undefined') {
+    const toast = document.getElementById('share-toast');
+    if (toast) {
+      toast.textContent = '📋 STAC v1.0.0 GeoJSON copied to clipboard!';
+      toast.classList.remove('hidden');
+      toast.style.display = 'block';
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => {
+          toast.classList.add('hidden');
+          toast.style.display = 'none';
+        }, 300);
+      }, 2200);
+    }
+  }
+}
+
+/**
+ * Initializes the Lightbox Before/After Phase Split Slider
+ */
+export function initSplitComparisonSlider() {
+  if (typeof document === 'undefined') return;
+  const toggleBtnFigure = document.getElementById('lightbox-view-figure');
+  const toggleBtnSplit = document.getElementById('lightbox-view-split');
+  const figureImg = document.getElementById('lightbox-img');
+  const splitContainer = document.getElementById('lightbox-split-container');
+  const sliderInput = document.getElementById('split-slider-input');
+  const splitAfter = document.getElementById('split-image-after');
+  const splitDivider = document.getElementById('split-divider');
+
+  if (toggleBtnFigure && toggleBtnSplit && figureImg && splitContainer) {
+    toggleBtnFigure.addEventListener('click', () => {
+      toggleBtnFigure.classList.add('active');
+      toggleBtnSplit.classList.remove('active');
+      figureImg.classList.remove('hidden');
+      figureImg.style.display = 'block';
+      splitContainer.classList.add('hidden');
+      splitContainer.style.display = 'none';
+    });
+
+    toggleBtnSplit.addEventListener('click', () => {
+      toggleBtnSplit.classList.add('active');
+      toggleBtnFigure.classList.remove('active');
+      figureImg.classList.add('hidden');
+      figureImg.style.display = 'none';
+      splitContainer.classList.remove('hidden');
+      splitContainer.style.display = 'block';
+
+      // Load image for split comparison
+      const beforeImg = document.getElementById('lightbox-img-before');
+      const afterImg = document.getElementById('lightbox-img-after');
+      if (activeLightboxRun && beforeImg && afterImg) {
+        const fig = activeLightboxRun.primary_figure || {};
+        const url = fig.viewer_path || `/runs/${activeLightboxRun.run_id}/${activeLightboxRun.primary_figure_name}`;
+        beforeImg.src = url;
+        afterImg.src = url;
+      }
+    });
+  }
+
+  if (sliderInput && splitAfter && splitDivider) {
+    sliderInput.addEventListener('input', (e) => {
+      const val = Number(e.target.value) || 50;
+      splitAfter.style.width = `${val}%`;
+      splitDivider.style.left = `${val}%`;
+    });
+  }
+}
+
+/**
+ * Renders the compact Bottom HUD Quick-Run Carousel chips
+ */
+export function renderHudQuickRuns() {
+  if (typeof document === 'undefined') return;
+  const container = document.getElementById('quick-runs-scroll');
+  if (!container) return;
+
+  const runs = getRunCatalog();
+  container.innerHTML = runs.map((run) => {
+    const theme = CATEGORY_THEMES[run.category] || { icon: '🌐' };
+    const shortTitle = run.title.split('—')[0].replace(/Run \d+:\s*/i, '').trim();
+    return `
+      <button class="quick-run-chip" data-run-id="${sanitizeHTML(run.run_id)}" title="${sanitizeHTML(run.title)} (${sanitizeHTML(run.category)})">
+        <span>${theme.icon}</span>
+        <span>${String(run.run_number).padStart(2, '0')}. ${sanitizeHTML(shortTitle)}</span>
+      </button>
+    `;
+  }).join('');
+
+  container.querySelectorAll('.quick-run-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const runId = chip.getAttribute('data-run-id');
+      if (runId) {
+        flyToRun(runId);
+        updateActiveQuickRunChip(runId);
+      }
+    });
+  });
+}
+
+/**
+ * Highlights active quick-run chip in the bottom HUD
+ *
+ * @param {string|number} runIdOrNumber
+ */
+export function updateActiveQuickRunChip(runIdOrNumber) {
+  if (typeof document === 'undefined') return;
+  const run = typeof runIdOrNumber === 'object' && runIdOrNumber ? runIdOrNumber : getRunById(runIdOrNumber);
+  const runId = run ? run.run_id : runIdOrNumber;
+  const chips = document.querySelectorAll('.quick-run-chip');
+  chips.forEach((c) => {
+    const isAct = c.getAttribute('data-run-id') === runId;
+    c.classList.toggle('active', isAct);
+  });
+}
+
+/**
+ * Initializes the real-time search input listener in the Run Gallery modal
+ */
+export function initRunsSearch() {
+  if (typeof document === 'undefined') return;
+  const searchInput = document.getElementById('runs-search-input');
+  const clearBtn = document.getElementById('runs-search-clear');
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      activeRunSearchQuery = (e.target.value || '').trim();
+      if (clearBtn) {
+        clearBtn.style.display = activeRunSearchQuery.length > 0 ? 'block' : 'none';
+      }
+      renderRunsGallery(activeRunCategoryFilter);
+    });
+  }
+
+  if (clearBtn && searchInput) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      activeRunSearchQuery = '';
+      clearBtn.style.display = 'none';
+      renderRunsGallery(activeRunCategoryFilter);
+      searchInput.focus();
+    });
+  }
+}
+
+/**
+ * Renders run cards grid inside Run Gallery modal filtered by category and search query
+ *
+ * @param {string} filterCategory - 'ALL' | 'Baseline Pillars' | 'Hidden Terrains' | 'Multi-Band & Deep Hazards' | 'Global Synoptic Theaters'
+ */
+export function renderRunsGallery(filterCategory = 'ALL') {
+  if (typeof document === 'undefined') return;
+  activeRunCategoryFilter = filterCategory;
+
+  const grid = document.getElementById('runs-grid');
+  if (!grid) return;
+
+  // Update filter buttons active state
+  const filterBtns = document.querySelectorAll('.runs-filter-btn');
+  filterBtns.forEach((btn) => {
+    const cat = btn.getAttribute('data-category') || 'ALL';
+    const isAct = cat.toUpperCase() === filterCategory.toUpperCase() ||
+      (filterCategory === 'ALL' && cat.toUpperCase() === 'ALL');
+    btn.classList.toggle('active', isAct);
+    btn.setAttribute('aria-selected', String(isAct));
+  });
+
+  let runs = getRunsByCategory(filterCategory);
+
+  // Apply multi-token live search filter
+  if (activeRunSearchQuery) {
+    const tokens = activeRunSearchQuery.toLowerCase().split(/\s+/).filter(Boolean);
+    runs = runs.filter((run) => {
+      const searchable = [
+        run.title,
+        run.category,
+        run.physics_regime,
+        run.region,
+        run.run_id,
+        run.primary_figure_name,
+        ...(run.satellites_and_sensors || []),
+        ...(run.keywords || []),
+        JSON.stringify(run.metrics || {}),
+        `run ${run.run_number}`
+      ].join(' ').toLowerCase();
+
+      return tokens.every(tok => searchable.includes(tok));
+    });
+  }
+
+  const countBadge = document.getElementById('runs-active-count');
+  if (countBadge) {
+    countBadge.textContent = `${runs.length} ${runs.length === 1 ? 'Run' : 'Runs'}`;
+  }
+
+  const summaryEl = document.getElementById('runs-search-summary');
+  if (summaryEl) {
+    if (activeRunSearchQuery) {
+      summaryEl.textContent = `Showing ${runs.length} of 11 runs for "${activeRunSearchQuery}"`;
+    } else {
+      summaryEl.textContent = `Showing ${runs.length} ${runs.length === 1 ? 'run' : 'runs'}`;
+    }
+  }
+
+  if (runs.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; padding: 40px 20px; text-align: center; color: #94a3b8;">
+        <div style="font-size: 2rem; margin-bottom: 8px;">🔍</div>
+        <div style="font-size: 0.95rem; font-weight: 600; color: #f1f5f9;">No runs match "${sanitizeHTML(activeRunSearchQuery)}"</div>
+        <div style="font-size: 0.75rem; margin-top: 4px;">Try searching for a country (e.g. Mexico, Italy), sensor (ICEYE, StriX), hazard (volcano, flood, subsidence), or clearing the filter.</div>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = runs.map((run) => {
+    const theme = CATEGORY_THEMES[run.category] || {
+      icon: '🌐',
+      color: '#38bdf8',
+      bg: 'rgba(56, 189, 248, 0.12)',
+      border: 'rgba(56, 189, 248, 0.35)',
+      glow: 'rgba(56, 189, 248, 0.25)'
+    };
+    const fig = run.primary_figure || {};
+    const imgUrl = fig.viewer_path || `/runs/${run.run_id}/${run.primary_figure_name}`;
+    const fallbackUrl = `/${run.primary_figure_name}`;
+    const lat = run.camera_target?.lat ?? 0;
+    const lon = run.camera_target?.lon ?? 0;
+    const coordStr = `${lat >= 0 ? lat.toFixed(2) + '°N' : Math.abs(lat).toFixed(2) + '°S'}, ${lon >= 0 ? lon.toFixed(2) + '°E' : Math.abs(lon).toFixed(2) + '°W'}`;
+    const runNumStr = `RUN ${String(run.run_number).padStart(2, '0')}`;
+
+    // Sensors pills
+    const sensors = (run.satellites_and_sensors || []).slice(0, 3);
+    const sensorChips = sensors.map((s) => {
+      const shortName = s.split(' ')[0] || s;
+      return `<span class="run-tag">${sanitizeHTML(shortName)}</span>`;
+    }).join('');
+
+    // Summary metrics chips
+    let metricPill = '';
+    if (run.metrics) {
+      if (run.metrics.aps_rmse_reduction_pct) {
+        metricPill = `<span class="run-tag" style="color:#38bdf8; border-color:rgba(56,189,248,0.3);">APS -${run.metrics.aps_rmse_reduction_pct}%</span>`;
+      } else if (run.metrics.downscaling_resolution_deg) {
+        metricPill = `<span class="run-tag" style="color:#34d399; border-color:rgba(52,211,153,0.3);">${run.metrics.downscaling_resolution_deg}° Downscaling</span>`;
+      } else if (run.metrics.x_band_freq_ghz) {
+        metricPill = `<span class="run-tag" style="color:#fbbf24; border-color:rgba(251,191,36,0.3);">X/C/L Multi-Band</span>`;
+      } else if (run.metrics.witwatersrand_max_subsidence_cm) {
+        metricPill = `<span class="run-tag" style="color:#f87171; border-color:rgba(248,113,113,0.3);">Subsidence ${run.metrics.witwatersrand_max_subsidence_cm}cm</span>`;
+      }
+    }
+
+    return `
+      <article class="run-card" data-run-id="${sanitizeHTML(run.run_id)}" data-run-number="${run.run_number}" style="border-top: 2px solid ${theme.color};">
+        <div class="run-card-thumb-wrap" data-action="inspect" title="Click to inspect high-resolution publication figure">
+          <img src="${imgUrl}" alt="${sanitizeHTML(run.title)}" loading="lazy" onerror="this.onerror=null; this.src='${fallbackUrl}'" />
+          <div class="run-thumb-overlay">
+            <span class="run-thumb-zoom-badge">🔍 High-Res Figure</span>
+            <span style="font-family: monospace; font-size: 0.62rem; color: #94a3b8;">${fig.size_bytes ? Math.round(fig.size_bytes / 1024) + ' KB' : ''}</span>
+          </div>
+        </div>
+        <div class="run-card-body">
+          <div class="run-card-top-row">
+            <span class="run-cat-pill" style="color:${theme.color}; background:${theme.bg}; border:1px solid ${theme.border};">
+              ${theme.icon} ${sanitizeHTML(run.category)}
+            </span>
+            <span class="run-num-badge">${runNumStr}</span>
+          </div>
+          <h3 class="run-card-title">${sanitizeHTML(run.title)}</h3>
+          <p class="run-card-desc">${sanitizeHTML(run.physics_regime)}</p>
+          <div class="run-card-tags">
+            ${metricPill}
+            ${sensorChips}
+          </div>
+          <div class="run-card-footer">
+            <span class="run-card-coords" title="Synoptic Theater Boresight Target">📍 ${coordStr}</span>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="btn-fly-theater" data-action="fly" data-run-id="${sanitizeHTML(run.run_id)}" aria-label="Fly camera to ${sanitizeHTML(run.title)}">
+                🎯 Fly
+              </button>
+              <button class="btn-activate-swath" data-action="swath" data-run-id="${sanitizeHTML(run.run_id)}" aria-label="Activate swath for ${sanitizeHTML(run.title)}">
+                🛰️ Swath
+              </button>
+              <button class="btn-inspect-stac" data-action="stac" data-run-id="${sanitizeHTML(run.run_id)}" aria-label="Inspect STAC order for ${sanitizeHTML(run.title)}">
+                📋 STAC
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  // Attach event listeners for cards in grid
+  grid.querySelectorAll('.run-card').forEach((card) => {
+    const runId = card.getAttribute('data-run-id');
+    const thumb = card.querySelector('.run-card-thumb-wrap');
+    if (thumb) {
+      thumb.addEventListener('click', () => openRunLightbox(runId));
+    }
+    const flyBtn = card.querySelector('.btn-fly-theater');
+    if (flyBtn) {
+      flyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        flyToRun(runId);
+      });
+    }
+    const swathBtn = card.querySelector('.btn-activate-swath');
+    if (swathBtn) {
+      swathBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        activateRunSwath(runId);
+      });
+    }
+    const stacBtn = card.querySelector('.btn-inspect-stac');
+    if (stacBtn) {
+      stacBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openStacInspector(runId);
+      });
+    }
+  });
 }
 
 /**
@@ -1058,10 +1762,12 @@ function syncLayerButtonsForVersion(versionId) {
  */
 export function setSpinState(isSpinning) {
   isSpinningState = Boolean(isSpinning);
-  const btnSpin = document.getElementById('toggle-spin');
-  if (btnSpin) {
-    btnSpin.innerText = isSpinningState ? '⏸ Pause Rotation' : '▶ Resume Rotation';
-    btnSpin.setAttribute?.('aria-pressed', String(isSpinningState));
+  if (typeof document !== 'undefined') {
+    const btnSpin = document.getElementById('toggle-spin');
+    if (btnSpin) {
+      btnSpin.innerText = isSpinningState ? '⏸ Pause Rotation' : '▶ Resume Rotation';
+      btnSpin.setAttribute?.('aria-pressed', String(isSpinningState));
+    }
   }
   if (studyData?.setLayerVisibility) {
     studyData.setLayerVisibility('rotation', isSpinningState);
@@ -1079,9 +1785,11 @@ export function getSpinState() {
  */
 export function setReliefState(active) {
   isReliefActiveState = Boolean(active);
-  const btnRelief = document.getElementById('toggle-relief');
-  if (btnRelief) {
-    setButtonState(btnRelief, isReliefActiveState);
+  if (typeof document !== 'undefined') {
+    const btnRelief = document.getElementById('toggle-relief');
+    if (btnRelief) {
+      setButtonState(btnRelief, isReliefActiveState);
+    }
   }
   if (activeGlobe && activeGlobe.material) {
     activeGlobe.material.bumpScale = isReliefActiveState ? 0.18 : 0.0;
@@ -1274,6 +1982,63 @@ export function initUI(globe, camera, renderer, layers3D) {
     btnShare.addEventListener('click', copyShareLink);
   }
 
+  // 2c. 3D Twin Run Gallery Modal & Lightbox
+  const btnToolbarRuns = document.getElementById('btn-toolbar-runs');
+  const btnCloseRuns = document.getElementById('runs-modal-close');
+  const modalRuns = document.getElementById('runs-modal');
+  const btnCloseLightbox = document.getElementById('lightbox-close-btn');
+  const modalLightbox = document.getElementById('run-lightbox-modal');
+
+  if (btnToolbarRuns) {
+    btnToolbarRuns.addEventListener('click', openRunsModal);
+  }
+  if (btnCloseRuns) {
+    btnCloseRuns.addEventListener('click', closeRunsModal);
+  }
+  if (modalRuns) {
+    modalRuns.addEventListener('click', (e) => {
+      if (e.target === modalRuns) closeRunsModal();
+    });
+  }
+  if (btnCloseLightbox) {
+    btnCloseLightbox.addEventListener('click', closeRunLightbox);
+  }
+  if (modalLightbox) {
+    modalLightbox.addEventListener('click', (e) => {
+      if (e.target === modalLightbox) closeRunLightbox();
+    });
+  }
+
+  // 2d. STAC Tasking Order Inspector Modal
+  const btnCloseStac = document.getElementById('stac-modal-close');
+  const modalStac = document.getElementById('stac-modal');
+  const btnCopyStac = document.getElementById('stac-copy-btn');
+  if (btnCloseStac) {
+    btnCloseStac.addEventListener('click', closeStacInspector);
+  }
+  if (modalStac) {
+    modalStac.addEventListener('click', (e) => {
+      if (e.target === modalStac) closeStacInspector();
+    });
+  }
+  if (btnCopyStac) {
+    btnCopyStac.addEventListener('click', copyStacJson);
+  }
+
+  // 2e. Initialize Interactive Controls: Search, Split Slider, and HUD Quick-Run Carousel
+  initRunsSearch();
+  initSplitComparisonSlider();
+  renderHudQuickRuns();
+
+  // Category filter tabs
+  const filterBtns = document.querySelectorAll('.runs-filter-btn');
+  filterBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const cat = btn.getAttribute('data-category') || 'ALL';
+      renderRunsGallery(cat);
+    });
+  });
+
   // 3. POI Popup Close Button
   const popupClose = document.getElementById('popup-close');
   if (popupClose) {
@@ -1284,11 +2049,17 @@ export function initUI(globe, camera, renderer, layers3D) {
   if (typeof window !== 'undefined') {
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        const stacEl = document.getElementById('stac-modal');
+        const lightboxEl = document.getElementById('run-lightbox-modal');
+        const runsEl = document.getElementById('runs-modal');
         const shortcutsEl = document.getElementById('shortcuts-modal');
         const modalEl = document.getElementById('comparison-modal');
         const explainerEl = document.getElementById('explainer-drawer');
         const popupEl = document.getElementById('poi-popup-card') || document.getElementById('poi-popup');
 
+        const isStacOpen = stacEl && (stacEl.style.display === 'flex' || !stacEl.classList.contains('hidden'));
+        const isLightboxOpen = lightboxEl && (lightboxEl.style.display === 'flex' || !lightboxEl.classList.contains('hidden'));
+        const isRunsOpen = runsEl && (runsEl.style.display === 'flex' || !runsEl.classList.contains('hidden'));
         const isShortcutsOpen = shortcutsEl && (shortcutsEl.style.display === 'flex' || !shortcutsEl.classList.contains('hidden'));
         const isModalOpen = modalEl && (modalEl.style.display === 'flex' || !modalEl.classList.contains('hidden'));
         const isExplainerDrawerOpen =
@@ -1296,7 +2067,13 @@ export function initUI(globe, camera, renderer, layers3D) {
           (explainerEl && (explainerEl.style.display === 'flex' || !explainerEl.classList.contains('hidden')));
         const isPopupOpen = popupEl && (popupEl.style.display === 'block' || !popupEl.classList.contains('hidden'));
 
-        if (isShortcutsOpen) {
+        if (isStacOpen) {
+          closeStacInspector();
+        } else if (isLightboxOpen) {
+          closeRunLightbox();
+        } else if (isRunsOpen) {
+          closeRunsModal();
+        } else if (isShortcutsOpen) {
           closeShortcutsModal();
         } else if (isModalOpen) {
           closeComparisonModal();
@@ -1304,6 +2081,14 @@ export function initUI(globe, camera, renderer, layers3D) {
           explainerToolbar.closeExplainer();
         } else if (isPopupOpen) {
           hidePopup();
+        }
+      } else if ((e.key === 'g' || e.key === 'G') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const tag = e.target?.tagName?.toLowerCase();
+        if (tag !== 'input' && tag !== 'textarea' && tag !== 'select') {
+          const runsEl = document.getElementById('runs-modal');
+          const isRunsOpen = runsEl && (runsEl.style.display === 'flex' || !runsEl.classList.contains('hidden'));
+          if (isRunsOpen) closeRunsModal();
+          else openRunsModal();
         }
       }
     });
@@ -1450,9 +2235,9 @@ export function initUI(globe, camera, renderer, layers3D) {
 
   if (btnExportStac) {
     btnExportStac.addEventListener('click', () => {
-      const stacOrder = sarTasking.exportStacTaskingOrder(true);
+      const stacOrder = sarTasking.exportStacTaskingOrder(true, { includeHiddenTerrain: true });
       if (apsStatusLine && stacOrder?.features) {
-        apsStatusLine.innerText = `STAC v1.0.0 EXPORTED: ${stacOrder.features.length} Tasking Orders (ICEYE-X38 & StriX-3)`;
+        apsStatusLine.innerText = `STAC v1.0.0 EXPORTED: ${stacOrder.features.length} Tasking Orders (Global Multi-Constellation)`;
         apsStatusLine.style.color = '#38bdf8';
       }
     });
@@ -1652,6 +2437,20 @@ export default {
   updateTrajectoryCallout,
   openShortcutsModal,
   closeShortcutsModal,
+  openRunsModal,
+  closeRunsModal,
+  openRunLightbox,
+  closeRunLightbox,
+  flyToRun,
+  activateRunSwath,
+  openStacInspector,
+  closeStacInspector,
+  copyStacJson,
+  renderRunsGallery,
+  renderHudQuickRuns,
+  updateActiveQuickRunChip,
+  initRunsSearch,
+  initSplitComparisonSlider,
   copyShareLink,
   updatePerfTelemetry,
   initUI

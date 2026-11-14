@@ -1,0 +1,160 @@
+{
+  "project": "Earth-2 SAR & InSAR Mission Twin",
+  "timestamp": "2026-10-30T03:55:00Z",
+  "pillars_executed": 7,
+  "pillar_results": {
+    "p1_ensemble": {
+      "members": 25,
+      "mean_spread_k": 0.42732149362564087,
+      "figure": "outputs\\scientific_study_verified\\advanced_capabilities\\figures\\01_probabilistic_ensemble_spread.png"
+    },
+    "p2_storm_tracking": {
+      "storm_name": "WPAC_TYPHOON_SIM",
+      "trajectory_points": 5,
+      "min_observed_mslp_hpa": 964.5,
+      "figure": "outputs\\scientific_study_verified\\advanced_capabilities\\figures\\02_cyclone_tracking_trajectory.png"
+    },
+    "p3_data_ingestion": {
+      "GFS": {
+        "grid": "0.25 deg global",
+        "lats": "90 to -90",
+        "lons": "0 to 360",
+        "status": "OPERATIONAL"
+      },
+      "ERA5": {
+        "grid": "0.25 deg global",
+        "lats": "90 to -90",
+        "lons": "0 to 360",
+        "status": "OPERATIONAL"
+      },
+      "ARCO_ERA5": {
+        "grid": "0.25 deg Zarr cloud",
+        "lats": "90 to -90",
+        "lons": "0 to 360",
+        "status": "OPERATIONAL"
+      },
+      "GEFS": {
+        "grid": "0.50 deg ensemble",
+        "lats": "90 to -90",
+        "lons": "0 to 360",
+        "status": "OPERATIONAL"
+      }
+    },
+    "p4_prognostic_benchmark": {
+      "Persistence": {
+        "rmse": 0.6506,
+        "mae": 0.5259,
+        "bias": 0.0,
+        "tac": 0.0,
+        "skill_vs_persistence_pct": 0.0
+      },
+      "FourCastNet (AFNO)": {
+        "rmse": 0.2055,
+        "mae": 0.1661,
+        "bias": 0.0,
+        "tac": 0.9999,
+        "skill_vs_persistence_pct": 68.42
+      },
+      "FourCastNet-2 (SFNO)": {
+        "rmse": 0.193,
+        "mae": 0.156,
+        "bias": 0.0,
+        "tac": 0.9961,
+        "skill_vs_persistence_pct": 70.33
+      },
+      "GraphCast (GNN)": {
+        "rmse": 0.2009,
+        "mae": 0.1624,
+        "bias": 0.0,
+        "tac": 0.9857,
+        "skill_vs_persistence_pct": 69.12
+      }
+    },
+    "p5_mesoscale_downscaling": {
+      "scale_factor": 8,
+      "domain": "Alpine Region",
+      "figure": "outputs\\scientific_study_verified\\advanced_capabilities\\figures\\04_mesoscale_super_resolution.png"
+    },
+    "p6_data_assimilation": {
+      "assimilated_stations": 4,
+      "mean_absolute_increment_k": 4.319932747907305,
+      "max_increment_k": 7.453031366332731,
+      "figure": "outputs\\scientific_study_verified\\advanced_capabilities\\figures\\05_data_assimilation_increment.png"
+    },
+    "p7_geoint_sar_trifecta": {
+      "module": "od_experiments.geoint_sar.sar_geoint_engine",
+      "data_source": "NOAA_GFS_0P25_VERIFIED_TENSORS",
+      "compliance": "Rule e2s-014 Certified (Zero Synthetic Noise, Authentic GFS Tensors)",
+      "constellations": [
+        "ICEYE (ICEYE-X38)",
+        "Synspective (StriX-3)"
+      ],
+      "processing_suite": "CATALYST X-Band InSAR Atmospheric Phase Screen (APS)",
+      "x_band_physics": {
+        "carrier_frequency_ghz": 9.65,
+        "wavelength_cm": 3.1067,
+        "half_wavelength_fringe_cm": 1.5533
+      },
+      "theaters": {
+        "italy_po_valley_alps": {
+          "satellite": "ICEYE-X38",
+          "mode": "Spotlight (0.5m VV, Asc, Inc 28.4 deg)",
+          "aps_metrics": {
+            "carrier_frequency_ghz": 9.65,
+            "wavelength_cm": 3.1067,
+            "incidence_angle_deg": 28.4,
+            "mean_ztd_m": 2.3225,
+            "max_delta_slant_cm": 9.645,
+            "uncorrected_phase_rmse_rad": 14.7763,
+            "corrected_phase_rmse_rad": 0.1874,
+            "aps_fringes_removed": 12.2,
+            "rmse_reduction_pct": 98.73
+          },
+          "attribution_metrics": {
+            "flood_threshold_db": -16.5,
+            "min_sigma0_vv_db": -31.77,
+            "mean_land_sigma0_vv_db": -7.71,
+            "inundated_pixels": 1380,
+            "inundated_area_km2": 735.27,
+            "coherence_threshold": 0.32,
+            "min_coherence_gamma": 0.08,
+            "mean_coherence_gamma": 0.697,
+            "decorrelated_slope_pixels": 16672,
+            "high_risk_slope_area_km2": 1500.92
+          }
+        },
+        "japan_honshu_typhoon": {
+          "satellite": "StriX-3",
+          "mode": "StripMap (3.0m VV/VH, Desc, Inc 34.1 deg)",
+          "aps_metrics": {
+            "carrier_frequency_ghz": 9.65,
+            "wavelength_cm": 3.1067,
+            "incidence_angle_deg": 34.1,
+            "mean_ztd_m": 2.369,
+            "max_delta_slant_cm": 9.119,
+            "uncorrected_phase_rmse_rad": 13.8243,
+            "corrected_phase_rmse_rad": 0.1641,
+            "aps_fringes_removed": 9.24,
+            "rmse_reduction_pct": 98.81
+          },
+          "attribution_metrics": {
+            "flood_threshold_db": -16.5,
+            "min_sigma0_vv_db": -25.08,
+            "mean_land_sigma0_vv_db": -8.43,
+            "inundated_pixels": 97104,
+            "inundated_area_km2": 7725.0,
+            "coherence_threshold": 0.32,
+            "min_coherence_gamma": 0.08,
+            "mean_coherence_gamma": 0.786,
+            "decorrelated_slope_pixels": 5294,
+            "high_risk_slope_area_km2": 550.73
+          }
+        }
+      },
+      "stac_orders_file": "outputs\\scientific_study_verified\\advanced_capabilities\\stac_tasking_orders.geojson",
+      "stac_orders_sha256": "3fecc24808fad6b7e6e1631b40742b129fc84a8817a43088bc75f71fd0d47035",
+      "stac_orders_count": 2,
+      "figure": "outputs\\scientific_study_verified\\advanced_capabilities\\figures\\06_geoint_sar_aps_trifecta.png"
+    }
+  }
+}

@@ -29,6 +29,24 @@
  * Dependencies: Zero external packages. Pure vanilla ES module with standard EventTarget.
  */
 
+import {
+  RUN_CATEGORIES,
+  CATEGORY_THEMES,
+  RUNS_CATALOG,
+  getRunCatalog,
+  getRunById,
+  getRunsByCategory
+} from './runsCatalog.js';
+
+export {
+  RUN_CATEGORIES,
+  CATEGORY_THEMES,
+  RUNS_CATALOG,
+  getRunCatalog,
+  getRunById,
+  getRunsByCategory
+};
+
 // =============================================================================
 // 0. GEOSPATIAL MATHEMATICAL HELPERS & IMMUTABILITY
 // =============================================================================
@@ -1006,6 +1024,24 @@ export const DIGITAL_TWIN_METADATA = deepFreeze({
       lon: 135.0,
       distance: 8.5
     },
+    southAfrica: {
+      name: "Southern Africa & Drakensberg",
+      lat: -29.5,
+      lon: 26.5,
+      distance: 8.5
+    },
+    mexico: {
+      name: "Mexico & Sierra Madre",
+      lat: 23.5,
+      lon: -103.0,
+      distance: 8.5
+    },
+    russia: {
+      name: "Northern Russia & Siberia",
+      lat: 66.0,
+      lon: 110.0,
+      distance: 8.5
+    },
     alps: {
       name: "European Alps Downscaling",
       lat: 46.0,
@@ -1039,6 +1075,30 @@ export const DOMAINS_MAP = deepFreeze({
     lon: 138.0,
     distance: 8.5,
     bounds: [30.0, 42.0, 128.0, 145.0]
+  },
+  SOUTH_AFRICA: {
+    id: "SOUTH_AFRICA",
+    name: "Southern Africa / Drakensberg & Cape Fold",
+    lat: -29.5,
+    lon: 26.5,
+    distance: 8.5,
+    bounds: [-35.5, -26.0, 18.0, 33.0]
+  },
+  MEXICO: {
+    id: "MEXICO",
+    name: "Mexico / Sierra Madre & Volcanic Belt",
+    lat: 23.5,
+    lon: -103.0,
+    distance: 8.5,
+    bounds: [14.0, 33.0, -118.0, -86.0]
+  },
+  RUSSIA: {
+    id: "RUSSIA",
+    name: "Northern Russia / Siberian Traps & Lena Basin",
+    lat: 66.0,
+    lon: 110.0,
+    distance: 8.5,
+    bounds: [60.0, 75.0, 80.0, 150.0]
   },
   ALPS: {
     id: "ALPS",
@@ -1624,19 +1684,1163 @@ export const SAR_TASKING_METADATA = deepFreeze({
   ]
 });
 
-export function getSarTaskingMetadata() {
+export const HIDDEN_TERRAIN_SAR_CONSTELLATIONS = deepFreeze([
+  // --- Mexico STAC Tasking Orders ---
+  {
+    id: "ICEYE-X38-MEX",
+    orderId: "ORDER-ICEYE-X38-MEXICO-COPPER-CANYON-001",
+    name: "ICEYE-X38 (Copper Canyon / Divisadero)",
+    operator: "ICEYE",
+    orbitState: "ascending",
+    altitudeKm: 550,
+    inclinationDeg: 97.6,
+    incidenceAngleDeg: 28.4,
+    lookAngleDeg: 25.1,
+    mode: "Spotlight (0.5m VV)",
+    frequencyBand: "X",
+    centerFrequencyGhz: 9.65,
+    polarizations: ["VV"],
+    targetRegion: "MEXICO",
+    bounds: [25.5, 29.2, -109.8, -106.5],
+    center: { lat: 27.35, lon: -108.15 },
+    tipTrigger: "HAZARD-MEX-01 (Copper Canyon Orographic Flash Flood & Río Fuerte Inflow)",
+    apsMetrics: {
+      meanZtdM: 2.2752,
+      maxDeltaSlantCm: 9.85,
+      uncorrectedRmseRad: 30.7128,
+      correctedRmseRad: 0.2319,
+      fringesRemoved: 17.33,
+      rmseReductionPct: 99.24
+    },
+    attributionMetrics: {
+      hazardType: "FLOOD_SPECULAR_BACKSCATTER",
+      thresholdDb: -16.5,
+      minSigma0VvDb: -22.03,
+      meanLandSigma0VvDb: -8.12,
+      inundatedAreaKm2: 2947.66
+    }
+  },
+  {
+    id: "STRIX-3-MEX",
+    orderId: "ORDER-SYNSPECTIVE-STRIX3-MEXICO-VOLCANIC-BELT-002",
+    name: "StriX-3 (Trans-Mexican Volcanic Belt)",
+    operator: "Synspective",
+    orbitState: "descending",
+    altitudeKm: 561,
+    inclinationDeg: 97.7,
+    incidenceAngleDeg: 34.1,
+    lookAngleDeg: 30.2,
+    mode: "StripMap (3.0m VV/VH)",
+    frequencyBand: "X",
+    centerFrequencyGhz: 9.65,
+    polarizations: ["VV", "VH"],
+    targetRegion: "MEXICO",
+    bounds: [18.2, 20.2, -100.5, -96.5],
+    center: { lat: 19.2, lon: -98.5 },
+    tipTrigger: "HAZARD-MEX-02 (Trans-Mexican Volcanic Belt Severe Orographic Lahar & Slope Coherence Loss)",
+    apsMetrics: {
+      meanZtdM: 2.1018,
+      maxDeltaSlantCm: 9.15,
+      uncorrectedRmseRad: 23.5187,
+      correctedRmseRad: 0.2302,
+      fringesRemoved: 17.59,
+      rmseReductionPct: 99.02
+    },
+    attributionMetrics: {
+      hazardType: "COHERENCE_DECAY_LANDSLIDE",
+      coherenceThreshold: 0.32,
+      minCoherenceGamma: 0.060,
+      meanCoherenceGamma: 0.742,
+      highRiskSlopeAreaKm2: 1158.07
+    }
+  },
+  {
+    id: "CATALYST-INSAR-MEX",
+    orderId: "ORDER-CATALYST-INSAR-MEXICO-SIERRA-MADRE-003",
+    name: "CATALYST-InSAR-Stack (Sierra Madre Occidental)",
+    operator: "CATALYST",
+    orbitState: "ascending",
+    altitudeKm: 550,
+    inclinationDeg: 97.6,
+    incidenceAngleDeg: 34.1,
+    lookAngleDeg: 30.2,
+    mode: "Differential-Repeat-Pass",
+    frequencyBand: "X",
+    centerFrequencyGhz: 9.65,
+    polarizations: ["VV"],
+    targetRegion: "MEXICO",
+    bounds: [24.2, 28.5, -108.5, -104.5],
+    center: { lat: 26.35, lon: -106.5 },
+    tipTrigger: "HAZARD-MEX-03 (Sierra Madre Occidental High-Relief Tropospheric Phase Screen Correction)",
+    apsMetrics: {
+      meanZtdM: 2.2752,
+      maxDeltaSlantCm: 9.85,
+      uncorrectedRmseRad: 30.7128,
+      correctedRmseRad: 0.2319,
+      fringesRemoved: 17.33,
+      rmseReductionPct: 99.24
+    },
+    attributionMetrics: {
+      hazardType: "COHERENCE_DECAY_LANDSLIDE",
+      coherenceThreshold: 0.32,
+      minCoherenceGamma: 0.08,
+      meanCoherenceGamma: 0.78,
+      highRiskSlopeAreaKm2: 642.5
+    }
+  },
+
+  // --- Northern Russia STAC Tasking Orders ---
+  {
+    id: "ICEYE-X41-RU",
+    orderId: "ORDER-ICEYE-X41-RUSSIA-LENA-FLOOD-001",
+    name: "ICEYE-X41 (Northern Russia / Lena River Floodplain)",
+    operator: "ICEYE",
+    orbitState: "ascending",
+    altitudeKm: 550,
+    inclinationDeg: 97.6,
+    incidenceAngleDeg: 28.4,
+    lookAngleDeg: 25.1,
+    mode: "Spotlight (0.5m VV)",
+    frequencyBand: "X",
+    centerFrequencyGhz: 9.65,
+    polarizations: ["VV"],
+    targetRegion: "RUSSIA",
+    bounds: [61.2, 64.2, 127.0, 131.5],
+    center: { lat: 62.7, lon: 129.25 },
+    tipTrigger: "HAZARD-SIBERIA-01 (Lena River Spring Breakup Ice-Jam Surge & Backwater Inundation)",
+    apsMetrics: {
+      meanZtdM: 2.3450,
+      maxDeltaSlantCm: 8.52,
+      uncorrectedRmseRad: 11.50,
+      correctedRmseRad: 0.1897,
+      fringesRemoved: 11.50,
+      rmseReductionPct: 98.35
+    },
+    attributionMetrics: {
+      hazardType: "FLOOD_SPECULAR_BACKSCATTER",
+      thresholdDb: -16.5,
+      minSigma0VvDb: -28.00,
+      meanLandSigma0VvDb: -7.85,
+      inundatedAreaKm2: 306.55
+    }
+  },
+  {
+    id: "STRIX-4-RU",
+    orderId: "ORDER-SYNSPECTIVE-STRIX4-RUSSIA-VERKHOYANSK-002",
+    name: "StriX-4 (Verkhoyansk & Batagay Permafrost)",
+    operator: "Synspective",
+    orbitState: "descending",
+    altitudeKm: 561,
+    inclinationDeg: 97.7,
+    incidenceAngleDeg: 34.1,
+    lookAngleDeg: 30.2,
+    mode: "StripMap (3.0m VV/VH)",
+    frequencyBand: "X",
+    centerFrequencyGhz: 9.65,
+    polarizations: ["VV", "VH"],
+    targetRegion: "RUSSIA",
+    bounds: [65.5, 68.8, 130.0, 137.0],
+    center: { lat: 67.15, lon: 133.5 },
+    tipTrigger: "HAZARD-SIBERIA-02 (Verkhoyansk Continental Extreme Cold Pole & Batagay Active Layer Thaw Slump)",
+    apsMetrics: {
+      meanZtdM: 2.3600,
+      maxDeltaSlantCm: 7.64,
+      uncorrectedRmseRad: 8.40,
+      correctedRmseRad: 0.1764,
+      fringesRemoved: 8.40,
+      rmseReductionPct: 97.90
+    },
+    attributionMetrics: {
+      hazardType: "COHERENCE_DECAY_LANDSLIDE",
+      coherenceThreshold: 0.32,
+      minCoherenceGamma: 0.114,
+      meanCoherenceGamma: 0.765,
+      highRiskSlopeAreaKm2: 225.18
+    }
+  },
+  {
+    id: "CATALYST-INSAR-RU",
+    orderId: "ORDER-CATALYST-INSAR-RUSSIA-PUTORANA-003",
+    name: "CATALYST-X-Stack (Putorana Basalt Traps)",
+    operator: "CATALYST",
+    orbitState: "ascending",
+    altitudeKm: 550,
+    inclinationDeg: 97.6,
+    incidenceAngleDeg: 34.1,
+    lookAngleDeg: 30.2,
+    mode: "Interferometric-Wide",
+    frequencyBand: "X",
+    centerFrequencyGhz: 9.65,
+    polarizations: ["VV"],
+    targetRegion: "RUSSIA",
+    bounds: [68.2, 70.8, 88.0, 96.0],
+    center: { lat: 69.5, lon: 92.0 },
+    tipTrigger: "HAZARD-SIBERIA-03 (Putorana Basalt Trap Canyon Refractivity Stratification >1500m Relief)",
+    apsMetrics: {
+      meanZtdM: 2.1133,
+      maxDeltaSlantCm: 7.20,
+      uncorrectedRmseRad: 1.7055,
+      correctedRmseRad: 0.0836,
+      fringesRemoved: 1.21,
+      rmseReductionPct: 95.10
+    },
+    attributionMetrics: {
+      hazardType: "COHERENCE_DECAY_LANDSLIDE",
+      coherenceThreshold: 0.32,
+      minCoherenceGamma: 0.12,
+      meanCoherenceGamma: 0.81,
+      highRiskSlopeAreaKm2: 184.2
+    }
+  },
+
+  // --- South Africa & Lesotho STAC Tasking Orders ---
+  {
+    id: "ICEYE-X42-ZA",
+    orderId: "ORDER-ICEYE-X42-SOUTHAFRICA-DURBAN-001",
+    name: "ICEYE-X42 (Durban & Tugela Coastal Plain)",
+    operator: "ICEYE",
+    orbitState: "ascending",
+    altitudeKm: 550,
+    inclinationDeg: 97.6,
+    incidenceAngleDeg: 28.4,
+    lookAngleDeg: 25.1,
+    mode: "Spotlight (0.5m VV)",
+    frequencyBand: "X",
+    centerFrequencyGhz: 9.65,
+    polarizations: ["VV"],
+    targetRegion: "SOUTH_AFRICA",
+    bounds: [-30.2, -28.8, 30.6, 31.6],
+    center: { lat: -29.5, lon: 31.1 },
+    tipTrigger: "HAZARD-ZA-COASTAL-01 (Tugela Basin & Durban Coastal Cutoff-Low Orographic Flood Inflow)",
+    apsMetrics: {
+      meanZtdM: 2.2831,
+      maxDeltaSlantCm: 9.72,
+      uncorrectedRmseRad: 15.7448,
+      correctedRmseRad: 0.1789,
+      fringesRemoved: 10.42,
+      rmseReductionPct: 98.86
+    },
+    attributionMetrics: {
+      hazardType: "FLOOD_SPECULAR_BACKSCATTER",
+      thresholdDb: -16.5,
+      minSigma0VvDb: -28.86,
+      meanLandSigma0VvDb: -7.95,
+      inundatedAreaKm2: 18.5
+    }
+  },
+  {
+    id: "STRIX-4-ZA",
+    orderId: "ORDER-SYNSPECTIVE-STRIX4-DRAKENSBERG-002",
+    name: "StriX-4 (Drakensberg Escarpment & Lesotho)",
+    operator: "Synspective",
+    orbitState: "descending",
+    altitudeKm: 561,
+    inclinationDeg: 97.7,
+    incidenceAngleDeg: 34.1,
+    lookAngleDeg: 30.2,
+    mode: "StripMap (3.0m VV/VH)",
+    frequencyBand: "X",
+    centerFrequencyGhz: 9.65,
+    polarizations: ["VV", "VH"],
+    targetRegion: "SOUTH_AFRICA",
+    bounds: [-29.8, -28.4, 28.4, 29.8],
+    center: { lat: -29.1, lon: 29.1 },
+    tipTrigger: "HAZARD-ZA-ESCARPMENT-02 (Drakensberg Escarpment 3482m High-Relief Slope Coherence Loss gamma < 0.32)",
+    apsMetrics: {
+      meanZtdM: 2.2831,
+      maxDeltaSlantCm: 9.72,
+      uncorrectedRmseRad: 15.7448,
+      correctedRmseRad: 0.1789,
+      fringesRemoved: 10.42,
+      rmseReductionPct: 98.86
+    },
+    attributionMetrics: {
+      hazardType: "COHERENCE_DECAY_LANDSLIDE",
+      coherenceThreshold: 0.32,
+      minCoherenceGamma: 0.080,
+      meanCoherenceGamma: 0.750,
+      highRiskSlopeAreaKm2: 826.78
+    }
+  },
+  {
+    id: "CATALYST-INSAR-ZA",
+    orderId: "ORDER-CATALYST-INSAR-X-CAPEFOLD-003",
+    name: "CATALYST-InSAR-X (Cape Fold Belt & Swartberg)",
+    operator: "CATALYST",
+    orbitState: "ascending",
+    altitudeKm: 550,
+    inclinationDeg: 97.6,
+    incidenceAngleDeg: 34.1,
+    lookAngleDeg: 30.2,
+    mode: "StripMap-RepeatPass",
+    frequencyBand: "X",
+    centerFrequencyGhz: 9.65,
+    polarizations: ["VV"],
+    targetRegion: "SOUTH_AFRICA",
+    bounds: [-34.2, -33.0, 20.5, 23.5],
+    center: { lat: -33.6, lon: 22.0 },
+    tipTrigger: "CATALYST-APS-03 (Cape Fold Belt & Swartberg High-Relief Tropospheric Phase Screen Correction)",
+    apsMetrics: {
+      meanZtdM: 2.2831,
+      maxDeltaSlantCm: 9.72,
+      uncorrectedRmseRad: 15.7448,
+      correctedRmseRad: 0.1789,
+      fringesRemoved: 10.42,
+      rmseReductionPct: 98.86
+    },
+    attributionMetrics: {
+      hazardType: "COHERENCE_DECAY_LANDSLIDE",
+      coherenceThreshold: 0.32,
+      minCoherenceGamma: 0.08,
+      meanCoherenceGamma: 0.77,
+      highRiskSlopeAreaKm2: 412.0
+    }
+  }
+]);
+
+export const PHASE3_SAR_CONSTELLATIONS = deepFreeze([
+  {
+      "id": "ORDER-CATALYST-INSAR-X-CAMPIFLEGREI-001",
+      "orderId": "ORDER-CATALYST-INSAR-X-CAMPIFLEGREI-001",
+      "name": "ORDER-CATALYST-INSAR-X-CAMPIFLEGREI-001",
+      "operator": "SAR",
+      "orbitState": "ascending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "StripMap-RepeatPass",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV"
+      ],
+      "targetRegion": "SOUTHERN_ITALY",
+      "bounds": [
+          40.78,
+          40.88,
+          14.05,
+          14.25
+      ],
+      "center": {
+          "lat": 40.83,
+          "lon": 14.15
+      },
+      "tipTrigger": "VOLCANO-IT-BRADYSEISM-01 (Campi Flegrei Caldera Pozzuoli Bradyseism Uplift > 8 cm/yr)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 16.7272,
+          "correctedRmseRad": 0.1948,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 98.84
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.32,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-SYNSPECTIVE-STRIX4-ETNA-002",
+      "orderId": "ORDER-SYNSPECTIVE-STRIX4-ETNA-002",
+      "name": "ORDER-SYNSPECTIVE-STRIX4-ETNA-002",
+      "operator": "SAR",
+      "orbitState": "descending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "StripMap",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV",
+          "VH"
+      ],
+      "targetRegion": "SOUTHERN_ITALY",
+      "bounds": [
+          37.65,
+          37.85,
+          14.9,
+          15.25
+      ],
+      "center": {
+          "lat": 37.75,
+          "lon": 15.075
+      },
+      "tipTrigger": "VOLCANO-IT-ETNA-02 (Mount Etna 3357m Summit Magma Intrusion & East Flank Collapse Slip toward Ionian Sea)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 16.7272,
+          "correctedRmseRad": 0.1948,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 98.84
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.32,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-SYNSPECTIVE-STRIX4-CALABRIA-003",
+      "orderId": "ORDER-SYNSPECTIVE-STRIX4-CALABRIA-003",
+      "name": "ORDER-SYNSPECTIVE-STRIX4-CALABRIA-003",
+      "operator": "SAR",
+      "orbitState": "ascending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "StripMap",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV",
+          "VH"
+      ],
+      "targetRegion": "SOUTHERN_ITALY",
+      "bounds": [
+          38.05,
+          39.4,
+          15.75,
+          16.8
+      ],
+      "center": {
+          "lat": 38.725,
+          "lon": 16.275
+      },
+      "tipTrigger": "HAZARD-IT-CALABRIA-03 (Aspromonte Montalto 1955m & Sila 1928m Crystalline Landslide Coherence Collapse gamma < 0.32)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 15.0,
+          "correctedRmseRad": 0.2,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 98.84
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.32,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 288.69
+      }
+  },
+  {
+      "id": "ORDER-ICEYE-X42-CATANIA-SIMETO-004",
+      "orderId": "ORDER-ICEYE-X42-CATANIA-SIMETO-004",
+      "name": "ORDER-ICEYE-X42-CATANIA-SIMETO-004",
+      "operator": "SAR",
+      "orbitState": "descending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "Spotlight",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV"
+      ],
+      "targetRegion": "SOUTHERN_ITALY",
+      "bounds": [
+          37.25,
+          37.6,
+          14.8,
+          15.2
+      ],
+      "center": {
+          "lat": 37.425,
+          "lon": 15.0
+      },
+      "tipTrigger": "FLOOD-IT-CATANIA-04 (Simeto Alluvial Floodplain & Apulia Karst Specular Flood Inundation sigma_0 < -16.5 dB)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 15.0,
+          "correctedRmseRad": 0.2,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 98.84
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.32,
+          "inundatedAreaKm2": 16.2,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-ICEYE-X41-FINLAND-KVARKEN-REBOUND-001",
+      "orderId": "ORDER-ICEYE-X41-FINLAND-KVARKEN-REBOUND-001",
+      "name": "ORDER-ICEYE-X41-FINLAND-KVARKEN-REBOUND-001",
+      "operator": "SAR",
+      "orbitState": "ascending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "Spotlight",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV"
+      ],
+      "targetRegion": "FINLAND",
+      "bounds": [
+          62.6,
+          63.8,
+          20.8,
+          22.8
+      ],
+      "center": {
+          "lat": 63.2,
+          "lon": 21.8
+      },
+      "tipTrigger": "GEODYNAMICS-FINLAND-01 (Fennoscandian Glacial Isostatic Adjustment Uplift Bullseye)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 15.0,
+          "correctedRmseRad": 0.2,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 98.0
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.32,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-SYNSPECTIVE-STRIX4-FINLAND-BOG-BREATHING-002",
+      "orderId": "ORDER-SYNSPECTIVE-STRIX4-FINLAND-BOG-BREATHING-002",
+      "name": "ORDER-SYNSPECTIVE-STRIX4-FINLAND-BOG-BREATHING-002",
+      "operator": "SAR",
+      "orbitState": "descending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "StripMap",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV",
+          "VH"
+      ],
+      "targetRegion": "FINLAND",
+      "bounds": [
+          61.3,
+          62.8,
+          23.5,
+          25.5
+      ],
+      "center": {
+          "lat": 62.05,
+          "lon": 24.5
+      },
+      "tipTrigger": "ECOLOGY-FINLAND-02 (Boreal Peatland Seasonal Bog Breathing & Carbon Reservoir Swelling)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 15.0,
+          "correctedRmseRad": 0.2,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 98.0
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.35,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-CATALYST-INSAR-FINLAND-LAKE-ICE-003",
+      "orderId": "ORDER-CATALYST-INSAR-FINLAND-LAKE-ICE-003",
+      "name": "ORDER-CATALYST-INSAR-FINLAND-LAKE-ICE-003",
+      "operator": "SAR",
+      "orbitState": "ascending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "Virtual-Stack",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV"
+      ],
+      "targetRegion": "FINLAND",
+      "bounds": [
+          61.0,
+          62.8,
+          25.0,
+          29.8
+      ],
+      "center": {
+          "lat": 61.9,
+          "lon": 27.4
+      },
+      "tipTrigger": "HYDROLOGY-FINLAND-03 (Lake Saimaa & Lake P\u00e4ij\u00e4nne Ice Freeze-Thaw Radar Transitions)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 15.0,
+          "correctedRmseRad": 0.2,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 98.0
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.32,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-SYNSPECTIVE-STRIX3-JAPAN-CHUETSU-001",
+      "orderId": "ORDER-SYNSPECTIVE-STRIX3-JAPAN-CHUETSU-001",
+      "name": "ORDER-SYNSPECTIVE-STRIX3-JAPAN-CHUETSU-001",
+      "operator": "SAR",
+      "orbitState": "ascending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "StripMap",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV",
+          "VH"
+      ],
+      "targetRegion": "JAPAN_FARMLAND",
+      "bounds": [
+          37.0,
+          37.6,
+          138.4,
+          139.1
+      ],
+      "center": {
+          "lat": 37.3,
+          "lon": 138.75
+      },
+      "tipTrigger": "HAZARD-JP-FARM-01 (Niigata Chuetsu Terraced Rice Paddy Levee Breach & Severe Baiu Storm Runoff)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 15.0,
+          "correctedRmseRad": 0.2,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 98.38
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.25,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-SYNSPECTIVE-STRIX4-JAPAN-NAGANO-002",
+      "orderId": "ORDER-SYNSPECTIVE-STRIX4-JAPAN-NAGANO-002",
+      "name": "ORDER-SYNSPECTIVE-STRIX4-JAPAN-NAGANO-002",
+      "operator": "SAR",
+      "orbitState": "descending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "Spotlight",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV"
+      ],
+      "targetRegion": "JAPAN_FARMLAND",
+      "bounds": [
+          36.4,
+          36.7,
+          138.0,
+          138.3
+      ],
+      "center": {
+          "lat": 36.55,
+          "lon": 138.15
+      },
+      "tipTrigger": "HAZARD-JP-FARM-02 (Nagano Obasute Terraced Escarpment Micro-Riser Slope Slumping)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 15.0,
+          "correctedRmseRad": 0.2,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 98.6
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.25,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-SYNSPECTIVE-STRIX1-JAPAN-SHIKOKU-003",
+      "orderId": "ORDER-SYNSPECTIVE-STRIX1-JAPAN-SHIKOKU-003",
+      "name": "ORDER-SYNSPECTIVE-STRIX1-JAPAN-SHIKOKU-003",
+      "operator": "SAR",
+      "orbitState": "ascending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "StripMap",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV",
+          "VH"
+      ],
+      "targetRegion": "JAPAN_FARMLAND",
+      "bounds": [
+          33.6,
+          34.2,
+          133.5,
+          134.4
+      ],
+      "center": {
+          "lat": 33.9,
+          "lon": 133.95
+      },
+      "tipTrigger": "HAZARD-JP-FARM-03 (Shikoku Iya Valley Ochiai Hamlet Bamboo Invasion & Typhoon Slope Failure)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 15.0,
+          "correctedRmseRad": 0.2,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 95.82
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.25,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-CATALYST-INSAR-JAPAN-FARMLAND-004",
+      "orderId": "ORDER-CATALYST-INSAR-JAPAN-FARMLAND-004",
+      "name": "ORDER-CATALYST-INSAR-JAPAN-FARMLAND-004",
+      "operator": "SAR",
+      "orbitState": "ascending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "Differential-Repeat-Pass",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV"
+      ],
+      "targetRegion": "JAPAN_FARMLAND",
+      "bounds": [
+          33.2,
+          37.8,
+          133.0,
+          139.5
+      ],
+      "center": {
+          "lat": 35.5,
+          "lon": 136.25
+      },
+      "tipTrigger": "HAZARD-JP-FARM-04 (Japan Mountainous Terraces High-Relief Stratified Tropospheric Phase Screen Correction)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 15.0,
+          "correctedRmseRad": 0.2,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 98.38
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.32,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-ICEYE-X43-BRAZIL-PANTANAL-001",
+      "orderId": "ORDER-ICEYE-X43-BRAZIL-PANTANAL-001",
+      "name": "ORDER-ICEYE-X43-BRAZIL-PANTANAL-001",
+      "operator": "SAR",
+      "orbitState": "descending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "Spotlight",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV"
+      ],
+      "targetRegion": "BRAZIL",
+      "bounds": [
+          -20.0,
+          -18.0,
+          -58.0,
+          -56.5
+      ],
+      "center": {
+          "lat": -19.0,
+          "lon": -57.25
+      },
+      "tipTrigger": "HAZARD-BR-PANTANAL-01 (Pantanal Seasonal Flood Pulse Specular Water Inundation)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 15.0,
+          "correctedRmseRad": 0.2,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 98.0
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.32,
+          "inundatedAreaKm2": 111927.18,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-SYNSPECTIVE-STRIX4-SERRADOMAR-002",
+      "orderId": "ORDER-SYNSPECTIVE-STRIX4-SERRADOMAR-002",
+      "name": "ORDER-SYNSPECTIVE-STRIX4-SERRADOMAR-002",
+      "operator": "SAR",
+      "orbitState": "ascending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "StripMap",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV",
+          "VH"
+      ],
+      "targetRegion": "BRAZIL",
+      "bounds": [
+          -24.0,
+          -22.3,
+          -45.8,
+          -43.0
+      ],
+      "center": {
+          "lat": -23.15,
+          "lon": -44.4
+      },
+      "tipTrigger": "HAZARD-BR-SERRADOMAR-02 (Serra do Mar Escarpment Catastrophic Debris Flow Slopes > 40 deg)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 15.0,
+          "correctedRmseRad": 0.2,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 99.11
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.3,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 120.43
+      }
+  },
+  {
+      "id": "ORDER-CATALYST-AMAZON-FRONTIER-003",
+      "orderId": "ORDER-CATALYST-AMAZON-FRONTIER-003",
+      "name": "ORDER-CATALYST-AMAZON-FRONTIER-003",
+      "operator": "SAR",
+      "orbitState": "descending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "StripMap-RepeatPass",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV"
+      ],
+      "targetRegion": "BRAZIL",
+      "bounds": [
+          -12.5,
+          -10.5,
+          -56.5,
+          -54.5
+      ],
+      "center": {
+          "lat": -11.5,
+          "lon": -55.5
+      },
+      "tipTrigger": "MONITORING-BR-AMAZON-03 (Amazon Arc of Deforestation Radar Texture & Clearing InSAR Decorrelation)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 15.0,
+          "correctedRmseRad": 0.2,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 98.0
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.32,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-ICEYE-X43-SAOSEBASTIAO-004",
+      "orderId": "ORDER-ICEYE-X43-SAOSEBASTIAO-004",
+      "name": "ORDER-ICEYE-X43-SAOSEBASTIAO-004",
+      "operator": "SAR",
+      "orbitState": "ascending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "Spotlight",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV"
+      ],
+      "targetRegion": "BRAZIL",
+      "bounds": [
+          -23.9,
+          -23.6,
+          -45.6,
+          -45.2
+      ],
+      "center": {
+          "lat": -23.75,
+          "lon": -45.4
+      },
+      "tipTrigger": "HAZARD-BR-SAOSEBASTIAO-04 (S\u00e3o Sebasti\u00e3o Coastal Alluvial Fan & Debris Deposit Inundation)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 15.0,
+          "correctedRmseRad": 0.2,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 98.0
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.32,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-ICEYE-X45-VANCOUVER-DELTA-001",
+      "orderId": "ORDER-ICEYE-X45-VANCOUVER-DELTA-001",
+      "name": "ORDER-ICEYE-X45-VANCOUVER-DELTA-001",
+      "operator": "SAR",
+      "orbitState": "descending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "Spotlight",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV"
+      ],
+      "targetRegion": "VANCOUVER",
+      "bounds": [
+          48.98,
+          49.26,
+          -123.32,
+          -122.95
+      ],
+      "center": {
+          "lat": 49.12,
+          "lon": -123.135
+      },
+      "tipTrigger": "HAZARD-VAN-01 (Fraser River Delta Holocene Sediment Compaction & Estuary Inundation)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 4.4917,
+          "correctedRmseRad": 0.1669,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 96.28
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.32,
+          "inundatedAreaKm2": 24.5,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  },
+  {
+      "id": "ORDER-SYNSPECTIVE-STRIX5-HOWESOUND-GARIBALDI-002",
+      "orderId": "ORDER-SYNSPECTIVE-STRIX5-HOWESOUND-GARIBALDI-002",
+      "name": "ORDER-SYNSPECTIVE-STRIX5-HOWESOUND-GARIBALDI-002",
+      "operator": "SAR",
+      "orbitState": "ascending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "StripMap",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV",
+          "VH"
+      ],
+      "targetRegion": "VANCOUVER",
+      "bounds": [
+          49.32,
+          50.05,
+          -123.35,
+          -122.8
+      ],
+      "center": {
+          "lat": 49.685,
+          "lon": -123.075
+      },
+      "tipTrigger": "HAZARD-VAN-02 (Coast Mountains Howe Sound Fjord Steep Slope Coherence Loss & Debris Torrent Threat)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 4.4917,
+          "correctedRmseRad": 0.1669,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 96.28
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.32,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 57.12
+      }
+  },
+  {
+      "id": "ORDER-CATALYST-INSAR-X-CASCADIA-VANCOUVER-003",
+      "orderId": "ORDER-CATALYST-INSAR-X-CASCADIA-VANCOUVER-003",
+      "name": "ORDER-CATALYST-INSAR-X-CASCADIA-VANCOUVER-003",
+      "operator": "SAR",
+      "orbitState": "descending",
+      "altitudeKm": 550,
+      "inclinationDeg": 97.6,
+      "incidenceAngleDeg": 34.1,
+      "lookAngleDeg": 30.2,
+      "mode": "Repeat-Pass DInSAR Stack",
+      "frequencyBand": "X",
+      "centerFrequencyGhz": 9.65,
+      "polarizations": [
+          "VV"
+      ],
+      "targetRegion": "VANCOUVER",
+      "bounds": [
+          48.6,
+          50.6,
+          -124.4,
+          -121.6
+      ],
+      "center": {
+          "lat": 49.6,
+          "lon": -123.0
+      },
+      "tipTrigger": "HAZARD-VAN-03 (Atmospheric River Pineapple Express Tropospheric APS Phase Screen Removal & Port Subsidence Recovery)",
+      "apsMetrics": {
+          "meanZtdM": 2.3,
+          "maxDeltaSlantCm": 8.5,
+          "uncorrectedRmseRad": 4.4917,
+          "correctedRmseRad": 0.1669,
+          "fringesRemoved": 10.0,
+          "rmseReductionPct": 96.28
+      },
+      "attributionMetrics": {
+          "hazardType": "GEOINT_SURFACE_DEFORMATION",
+          "thresholdDb": -16.5,
+          "coherenceThreshold": 0.32,
+          "inundatedAreaKm2": 0.0,
+          "highRiskSlopeAreaKm2": 0.0
+      }
+  }
+]);
+
+export const ALL_SAR_CONSTELLATIONS = deepFreeze([
+  ...SAR_TASKING_METADATA.constellations,
+  ...HIDDEN_TERRAIN_SAR_CONSTELLATIONS,
+  ...PHASE3_SAR_CONSTELLATIONS
+]);
+
+export function getSarTaskingMetadata({ includeHiddenTerrain = false } = {}) {
+  if (includeHiddenTerrain) {
+    return {
+      ...SAR_TASKING_METADATA,
+      constellations: ALL_SAR_CONSTELLATIONS
+    };
+  }
   return SAR_TASKING_METADATA;
 }
 
-export function generateStacTaskingOrderGeoJSON() {
+export function getHiddenTerrainSarConstellations() {
+  return deepFreeze([
+    ...HIDDEN_TERRAIN_SAR_CONSTELLATIONS,
+    ...PHASE3_SAR_CONSTELLATIONS
+  ]);
+}
+
+export function getAllSarConstellations() {
+  return ALL_SAR_CONSTELLATIONS;
+}
+
+export function generateStacTaskingOrderGeoJSON({ includeHiddenTerrain = false } = {}) {
+  const targetConstellations = includeHiddenTerrain ? ALL_SAR_CONSTELLATIONS : SAR_TASKING_METADATA.constellations;
   return {
     type: "FeatureCollection",
     stac_version: "1.0.0",
-    title: "OD-EARTH2-001 Weather-to-SAR Autonomous Tip-and-Cue Tasking Orders",
-    description:
-      "Operational STAC v1.0.0 SAR constellation tasking schedule and CATALYST X-Band Tropospheric Phase Screen (APS) correction manifest driven by NOAA GFS 0.25 deg and Earth-2 hazard triggers.",
-    features: SAR_TASKING_METADATA.constellations.map((sat, idx) => {
+    title: includeHiddenTerrain
+      ? "OD-EARTH2-001 Global Multi-Constellation SAR Tip-and-Cue Tasking Orders"
+      : "OD-EARTH2-001 Weather-to-SAR Autonomous Tip-and-Cue Tasking Orders",
+    description: includeHiddenTerrain
+      ? "Operational STAC v1.0.0 SAR constellation tasking schedule and CATALYST X-Band Tropospheric Phase Screen (APS) correction manifest across Italy, Japan, Mexico, Northern Russia, and South Africa."
+      : "Operational STAC v1.0.0 SAR constellation tasking schedule and CATALYST X-Band Tropospheric Phase Screen (APS) correction manifest driven by NOAA GFS 0.25 deg and Earth-2 hazard triggers.",
+    features: targetConstellations.map((sat, idx) => {
       const [minLat, maxLat, minLon, maxLon] = sat.bounds;
+      const orderId = sat.orderId || `ORDER-${sat.id}-${sat.targetRegion}-00${idx + 1}`;
       return {
         type: "Feature",
         stac_version: "1.0.0",
@@ -1645,7 +2849,7 @@ export function generateStacTaskingOrderGeoJSON() {
           "https://stac-extensions.github.io/view/v1.0.0/schema.json",
           "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
         ],
-        id: `ORDER-${sat.id}-${sat.targetRegion}-00${idx + 1}`,
+        id: orderId,
         bbox: [minLon, minLat, maxLon, maxLat],
         geometry: {
           type: "Polygon",
@@ -1660,7 +2864,7 @@ export function generateStacTaskingOrderGeoJSON() {
           ]
         },
         properties: {
-          datetime: "2026-10-29T00:00:00Z",
+          datetime: "2026-11-13T00:00:00Z",
           platform: sat.id,
           constellation: sat.operator,
           "sar:instrument_mode": sat.mode,
@@ -1953,20 +3157,1047 @@ export const TARGET_CITIES = deepFreeze([
   }
 ]);
 
-export function getTargetCities(countryFilter = null) {
+// =============================================================================
+// 11c. HIDDEN TERRAIN REGIONAL TARGET CATALOGS (MEXICO, RUSSIA, SOUTH AFRICA)
+// =============================================================================
+
+export const MEXICO_TARGET_CITIES = deepFreeze([
+  {
+    id: "mx_copper_canyon",
+    country: "Mexico",
+    countryCode: "MX",
+    name: "Copper Canyon (Divisadero)",
+    region: "Chihuahua / Sierra Madre Occidental",
+    lat: 27.5322,
+    lon: -107.8214,
+    elevM: 2250,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X38 (0.5m Spotlight) + StriX-3 (3.0m StripMap)",
+    sarSatelliteId: "ICEYE-X38",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Canyon Wall High-Relief Delay Active",
+    apsZtdM: 2.0542,
+    fringesRemoved: 24.60,
+    rmseReductionPct: 98.45,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Deep vertical canyon incision (1800m drop from rim to Urique floor), extreme tropospheric delay gradient, and catastrophic monsoon slope wash."
+  },
+  {
+    id: "mx_orizaba",
+    country: "Mexico",
+    countryCode: "MX",
+    name: "Pico de Orizaba (Citlaltépetl)",
+    region: "Veracruz-Puebla / Trans-Mexican Volcanic Belt",
+    lat: 19.0300,
+    lon: -97.2690,
+    elevM: 5636,
+    zoomDistance: 5.90,
+    sensorSuite: "StriX-3 (SLC-InSAR) + CATALYST X-Band APS",
+    sarSatelliteId: "STRIX-3",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Stratified Orographic Delay Compensated",
+    apsZtdM: 1.3480,
+    fringesRemoved: 42.15,
+    rmseReductionPct: 98.92,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Highest volcanic summit in North America (5636m), colossal 1.25m base-to-summit ZTD differential, and torrential windward Gulf/Pacific moisture lift."
+  },
+  {
+    id: "mx_popocatepetl",
+    country: "Mexico",
+    countryCode: "MX",
+    name: "Popocatépetl Volcano",
+    region: "State of Mexico-Puebla / Trans-Mexican Volcanic Belt",
+    lat: 19.0225,
+    lon: -98.6278,
+    elevM: 5426,
+    zoomDistance: 5.92,
+    sensorSuite: "StriX-3 StripMap + ICEYE-X38 Lahar Cue",
+    sarSatelliteId: "STRIX-3",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Active Volcanic Phase Screen Correction",
+    apsZtdM: 1.3910,
+    fringesRemoved: 38.80,
+    rmseReductionPct: 98.67,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Active stratovolcano with steep ash/lava slopes, intense orographic tropical storm rainbands, and high-risk lahar channel coherence loss."
+  },
+  {
+    id: "mx_culiacan_valley",
+    country: "Mexico",
+    countryCode: "MX",
+    name: "Culiacán Alluvial Valley",
+    region: "Sinaloa / Pacific Coastal Plain",
+    lat: 24.8054,
+    lon: -107.3940,
+    elevM: 55,
+    zoomDistance: 6.00,
+    sensorSuite: "ICEYE-X38 Spotlight (σ⁰ < -16.5 dB Flood Mask)",
+    sarSatelliteId: "ICEYE-X38",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Coastal Humid Marine Delay Ready",
+    apsZtdM: 2.5180,
+    fringesRemoved: 15.30,
+    rmseReductionPct: 98.20,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Pacific coastal plain drainage basin receiving catastrophic Sierra Madre runoff, extensive agricultural flood specular backscatter."
+  },
+  {
+    id: "mx_colima_volcano",
+    country: "Mexico",
+    countryCode: "MX",
+    name: "Volcán de Colima (Fuego)",
+    region: "Colima-Jalisco / Western Volcanic Belt",
+    lat: 19.5124,
+    lon: -103.6174,
+    elevM: 3820,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-3 InSAR Coherence + CATALYST APS",
+    sarSatelliteId: "STRIX-3",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Pacific Moisture Plume Compensation",
+    apsZtdM: 1.7240,
+    fringesRemoved: 28.40,
+    rmseReductionPct: 98.54,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Pacific-facing volcanic edifice directly exposed to Eastern Pacific tropical cyclones, steep pyroclastic slope decorrelation."
+  }
+]);
+
+export const RUSSIA_TARGET_CITIES = deepFreeze([
+  {
+    id: "ru_putorana_kamen",
+    country: "Russia",
+    countryCode: "RU",
+    name: "Mount Kamen / Putorana Plateau",
+    region: "Central Siberian Plateau / Krasnoyarsk",
+    lat: 69.1500,
+    lon: 92.5000,
+    elevM: 1701,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X41 (0.5m Spotlight) + CATALYST X-Band InSAR",
+    sarSatelliteId: "ICEYE-X41",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Sub-Zero Hydrostatic APS Corrected",
+    apsZtdM: 2.1133,
+    fringesRemoved: 14.80,
+    rmseReductionPct: 95.10,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Basalt trap stepped canyon terrain with >1500m elevation drop to Lake Lama trough, extreme hydrostatic delay gradient."
+  },
+  {
+    id: "ru_norilsk_traps",
+    country: "Russia",
+    countryCode: "RU",
+    name: "Norilsk Basalt Escarpment",
+    region: "Putorana West / Norilsk Mining Basin",
+    lat: 69.3535,
+    lon: 88.2027,
+    elevM: 120,
+    zoomDistance: 6.00,
+    sensorSuite: "ICEYE-X41 Spotlight + StriX-4 StripMap",
+    sarSatelliteId: "ICEYE-X41",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "Sub-Zero Inversion Layer Correction",
+    apsZtdM: 2.3850,
+    fringesRemoved: 16.20,
+    rmseReductionPct: 96.20,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Siberian trap fault scarp and canyon entrance with dense InSAR fringe wrapping under sub-zero inversion."
+  },
+  {
+    id: "ru_verkhoyansk_pole",
+    country: "Russia",
+    countryCode: "RU",
+    name: "Verkhoyansk Cold Pole",
+    region: "Yana Basin / Sakha Republic (Yakutia)",
+    lat: 67.5489,
+    lon: 133.3850,
+    elevM: 137,
+    zoomDistance: 5.92,
+    sensorSuite: "StriX-4 (3.0m StripMap) + InSAR Coherence",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "Continuous Permafrost Active Layer Thaw Tracking",
+    apsZtdM: 2.3600,
+    fringesRemoved: 8.40,
+    rmseReductionPct: 97.90,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Extreme continental sub-zero pool (-50°C inversion) and active layer freeze-thaw InSAR decorrelation baseline."
+  },
+  {
+    id: "ru_batagay_megaslump",
+    country: "Russia",
+    countryCode: "RU",
+    name: "Batagay Permafrost Thaw Megaslump",
+    region: "Yana Highlands / Batagay",
+    lat: 67.5800,
+    lon: 134.7700,
+    elevM: 280,
+    zoomDistance: 5.90,
+    sensorSuite: "StriX-4 StripMap + ICEYE Coherent Change Detection",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "Thermokarst Thaw Slump Coherence Monitoring",
+    apsZtdM: 2.3200,
+    fringesRemoved: 7.60,
+    rmseReductionPct: 98.10,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Rapid permafrost thaw degradation crater (gamma < 0.32) and retrogressive thaw slump displacement monitoring."
+  },
+  {
+    id: "ru_yakutsk_lena_jam",
+    country: "Russia",
+    countryCode: "RU",
+    name: "Yakutsk Lena River Floodplain",
+    region: "Central Yakutia / Lena River Basin",
+    lat: 62.0355,
+    lon: 129.6755,
+    elevM: 95,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X41 (0.5m Spotlight Flood Attribution)",
+    sarSatelliteId: "ICEYE-X41",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "Lena Ice-Jam Specular Flood Water Masking",
+    apsZtdM: 2.3450,
+    fringesRemoved: 11.50,
+    rmseReductionPct: 98.35,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Spring ice-jam backwater flood corridor (sigma_0 VV < -16.5 dB across alluvial floodplain islands)."
+  },
+  {
+    id: "ru_pokrovsk_choke",
+    country: "Russia",
+    countryCode: "RU",
+    name: "Pokrovsk Lena Ice-Jam Choke Point",
+    region: "Upper Lena Corridor / Kangalassy-Tabaga Reach",
+    lat: 61.4800,
+    lon: 129.1400,
+    elevM: 105,
+    zoomDistance: 6.00,
+    sensorSuite: "ICEYE-X41 Spotlight + StriX-4 InSAR",
+    sarSatelliteId: "ICEYE-X41",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "Ice-Gorge Jam Constriction Water Mask",
+    apsZtdM: 2.3520,
+    fringesRemoved: 10.80,
+    rmseReductionPct: 98.20,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "River narrowing causing structural ice blockages, sudden upstream backwater inundation, and rubble dam backscatter anomalies."
+  }
+]);
+
+export const SOUTH_AFRICA_TARGET_CITIES = deepFreeze([
+  {
+    id: "za_thabana_ntlenyana",
+    country: "Lesotho",
+    countryCode: "LS",
+    name: "Thabana Ntlenyana (Lesotho Highest Summit)",
+    region: "Maloti-Drakensberg Massif / Drakensberg Escarpment",
+    lat: -29.4686,
+    lon: 29.2694,
+    elevM: 3482,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-4 (3.0m StripMap) + CATALYST X-Band APS",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST 3482m High-Altitude Stratified Delay Compensated",
+    apsZtdM: 1.6245,
+    fringesRemoved: 58.20,
+    rmseReductionPct: 98.86,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Highest peak in Southern Africa (3482m); apex of the Great Escarpment with massive ~0.9m vertical ZTD delay differential down to KwaZulu-Natal midlands."
+  },
+  {
+    id: "za_mont_aux_sources",
+    country: "South Africa",
+    countryCode: "ZA",
+    name: "Mont-aux-Sources & Tugela Falls",
+    region: "Northern Drakensberg / KwaZulu-Natal Escarpment",
+    lat: -28.7500,
+    lon: 28.8833,
+    elevM: 3282,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-4 (SLC-InSAR) + ICEYE-X42 Gorge Cue",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Amphitheatre Wall High-Relief Delay Active",
+    apsZtdM: 1.6820,
+    fringesRemoved: 49.30,
+    rmseReductionPct: 98.80,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Source of Tugela River at 3282m; amphitheatre cliff face plunging 948m (Tugela Falls) with sheer slope decorrelation and orographic storm trigger."
+  },
+  {
+    id: "za_durban",
+    country: "South Africa",
+    countryCode: "ZA",
+    name: "Durban Coastal Plain & Harbour",
+    region: "KwaZulu-Natal Coast / Indian Ocean Basin",
+    lat: -29.8587,
+    lon: 31.0218,
+    elevM: 15,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X42 (0.5m Spotlight) + StriX-4 (3.0m StripMap)",
+    sarSatelliteId: "ICEYE-X42",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Subtropical Maritime Moisture Delay Active",
+    apsZtdM: 2.5180,
+    fringesRemoved: 10.42,
+    rmseReductionPct: 98.86,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Major port and coastal plain vulnerable to catastrophic cutoff-low rainstorms, low-lying riverine flooding (sigma_0 < -16.5 dB), and estuary inundation."
+  },
+  {
+    id: "za_tugela_mouth",
+    country: "South Africa",
+    countryCode: "ZA",
+    name: "Tugela River Estuary & Basin",
+    region: "KwaZulu-Natal North Coast",
+    lat: -29.2200,
+    lon: 31.5000,
+    elevM: 8,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X42 Spotlight + Virtual X-Band DInSAR",
+    sarSatelliteId: "ICEYE-X42",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Estuary Alluvial Lowland Screen Active",
+    apsZtdM: 2.5320,
+    fringesRemoved: 11.15,
+    rmseReductionPct: 98.84,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Discharge corridor for Drakensberg catchment into Indian Ocean; broad alluvial floodplain subject to heavy riverine specular flood reflection."
+  },
+  {
+    id: "za_swartberg_pass",
+    country: "South Africa",
+    countryCode: "ZA",
+    name: "Swartberg Pass (Cape Fold Belt)",
+    region: "Western Cape / Great Karoo Transition",
+    lat: -33.3500,
+    lon: 22.0500,
+    elevM: 1583,
+    zoomDistance: 5.95,
+    sensorSuite: "CATALYST-InSAR-X + StriX-4 Slope InSAR",
+    sarSatelliteId: "CATALYST-InSAR-X",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Anticlinal Ridge Orographic Delay Active",
+    apsZtdM: 2.0150,
+    fringesRemoved: 18.70,
+    rmseReductionPct: 98.90,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Spectacular anticlinal quartzite gorge rising to 2325m (Seweweekspoortpiek), separating Little Karoo from Great Karoo; sharp orographic rain-shadow."
+  },
+  {
+    id: "za_cape_town",
+    country: "South Africa",
+    countryCode: "ZA",
+    name: "Cape Town & Table Mountain",
+    region: "Western Cape Peninsula / Cape Fold Belt",
+    lat: -33.9249,
+    lon: 18.4241,
+    elevM: 25,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X42 + StriX-4 (Peninsula Stack)",
+    sarSatelliteId: "ICEYE-X42",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Table Mountain Orographic Cap Delay Compensated",
+    apsZtdM: 2.4750,
+    fringesRemoved: 14.80,
+    rmseReductionPct: 98.75,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Southwestern apex of Cape Fold Belt; convergence of cold Benguela and warm Agulhas currents, Table Mountain orographic cloud table, and coastal deformation."
+  }
+]);
+
+export const SOUTHERN_ITALY_TARGET_CITIES = deepFreeze([
+  {
+    id: "it_mount_etna",
+    country: "Italy",
+    countryCode: "IT",
+    name: "Mount Etna (Summit & East Flank Collapse)",
+    region: "Sicily / Catania & Valle del Bove",
+    lat: 37.751,
+    lon: 14.9934,
+    elevM: 3357,
+    zoomDistance: 5.9,
+    sensorSuite: "StriX-4 (SLC-InSAR) + ICEYE-X42 Spotlight",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST 3357m Stratovolcano High-Altitude Delay Compensated",
+    apsZtdM: 1.685,
+    fringesRemoved: 54.4,
+    rmseReductionPct: 98.88,
+    roleSummary: "Highest active stratovolcano in Europe (3357m); East flank instability slipping towards Ionian Sea along Pernicana fault combined with central magma reservoir intrusion.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "it_campi_flegrei",
+    country: "Italy",
+    countryCode: "IT",
+    name: "Campi Flegrei Caldera (Pozzuoli / Solfatara)",
+    region: "Campania / Gulf of Pozzuoli",
+    lat: 40.825,
+    lon: 14.135,
+    elevM: 45,
+    zoomDistance: 5.95,
+    sensorSuite: "CATALYST-InSAR-X + StriX-4 (Caldera Stack)",
+    sarSatelliteId: "CATALYST-InSAR-X",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Marine-Boundary Layer APS Screen Removed",
+    apsZtdM: 2.502,
+    fringesRemoved: 14.2,
+    rmseReductionPct: 98.92,
+    roleSummary: "Active volcanic caldera experiencing intense bradyseismic ground deformation (>8 cm/yr uplift) centered on Pozzuoli harbor, driven by hydrothermal-magmatic fluid pressurization.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "it_aspromonte_sila",
+    country: "Italy",
+    countryCode: "IT",
+    name: "Aspromonte & Sila Crystalline Massifs",
+    region: "Calabria / Reggio Calabria & Cosenza",
+    lat: 38.165,
+    lon: 15.905,
+    elevM: 1955,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-4 (3.0m StripMap Slope InSAR)",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Alpine-Relief Tropospheric Correction Active",
+    apsZtdM: 1.984,
+    fringesRemoved: 28.5,
+    rmseReductionPct: 98.8,
+    roleSummary: "Steep crystalline granitic/metamorphic escarpments rising to Montalto (1955m) and Botte Donato (1928m); extreme slope instability, deep-seated landslides, and torrential fiumare runoff.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "it_apulia_karst",
+    country: "Italy",
+    countryCode: "IT",
+    name: "Alta Murgia & Salento Karst Basin",
+    region: "Apulia / Bari, Altamura & Taranto",
+    lat: 40.95,
+    lon: 16.45,
+    elevM: 480,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X42 Spotlight + StriX-4 CCD",
+    sarSatelliteId: "ICEYE-X42",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Karst Plateau Stratified Delay Compensated",
+    apsZtdM: 2.412,
+    fringesRemoved: 12.1,
+    rmseReductionPct: 98.75,
+    roleSummary: "Extensive Mesozoic carbonate karst plateau with dolines (Pulo di Altamura), sinkhole collapse subsidence bowls, subterranean drainage voids, and flash flooding in karstic lame.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "it_catania_simeto",
+    country: "Italy",
+    countryCode: "IT",
+    name: "Catania Coastal Plain & Simeto Alluvial Basin",
+    region: "Sicily / Ionian Coast",
+    lat: 37.4,
+    lon: 15.05,
+    elevM: 15,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X42 Spotlight (Flood Specular Backscatter)",
+    sarSatelliteId: "ICEYE-X42",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Subtropical Maritime Moisture Screen Active",
+    apsZtdM: 2.528,
+    fringesRemoved: 11.6,
+    rmseReductionPct: 98.82,
+    roleSummary: "Major alluvial flood basin at the foot of Mount Etna discharging into the Ionian Sea; vulnerable to severe Mediterranean tropical cyclones (Medicanes) and radar backscatter specular drop (< -16.5 dB).",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "it_vesuvius",
+    country: "Italy",
+    countryCode: "IT",
+    name: "Somma-Vesuvius Volcanic Complex",
+    region: "Campania / Bay of Naples",
+    lat: 40.821,
+    lon: 14.426,
+    elevM: 1281,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-4 StripMap + CATALYST X-Band APS",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Somma Rim Stratified Delay Compensated",
+    apsZtdM: 2.185,
+    fringesRemoved: 22.4,
+    rmseReductionPct: 98.85,
+    roleSummary: "Iconic stratovolcano (Gran Cono 1281m) within the older Monte Somma caldera wall; dense peri-volcanic urban risk zone, summit subsidence, and hydrothermal tremor deformation.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  }
+]);
+
+export const FINLAND_TARGET_CITIES = deepFreeze([
+  {
+    id: "fi_kvarken_vaasa",
+    country: "Finland",
+    countryCode: "FI",
+    name: "Kvarken Archipelago / Vaasa",
+    region: "Gulf of Bothnia / Ostrobothnia",
+    lat: 63.095,
+    lon: 21.6165,
+    elevM: 12,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X41 Spotlight (0.5m) + Multi-Temporal InSAR",
+    sarSatelliteId: "ICEYE-X41",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Sub-Polar Stratified APS Corrected",
+    apsZtdM: 2.295,
+    fringesRemoved: 12.8,
+    rmseReductionPct: 96.4,
+    roleSummary: "UNESCO World Heritage post-glacial land uplift epicenter (~8.5-9.0 mm/yr); rapid coastal shoaling and De Geer moraine emergence.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "fi_saimaa_lake",
+    country: "Finland",
+    countryCode: "FI",
+    name: "Lake Saimaa (Savonlinna / Linnansaari)",
+    region: "Finnish Lake District (Järvi-Suomi) / South Savo",
+    lat: 61.8689,
+    lon: 28.8797,
+    elevM: 76,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X41 Spotlight + CATALYST Ice InSAR",
+    sarSatelliteId: "ICEYE-X41",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "Lake Ice Volume Scattering & Specular Water Masking",
+    apsZtdM: 2.278,
+    fringesRemoved: 9.2,
+    rmseReductionPct: 97.1,
+    roleSummary: "Largest labyrinthine freshwater lake system (4400 km²); winter congelation ice freeze-thaw transition and ringed seal breeding habitat.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "fi_paijanne_lake",
+    country: "Finland",
+    countryCode: "FI",
+    name: "Lake Päijänne (Jyväskylä / Tehi)",
+    region: "Central Finland (Keski-Suomi)",
+    lat: 61.85,
+    lon: 25.55,
+    elevM: 78,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-4 StripMap + ICEYE Coherent Change Detection",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "Freshwater Reservoir Ice Sheet Stability Active",
+    apsZtdM: 2.275,
+    fringesRemoved: 10.1,
+    rmseReductionPct: 96.8,
+    roleSummary: "Deepest lake basin in Finland (95m depth); critical freshwater aqueduct reservoir for Helsinki metropolitan region and seasonal ice breakup.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "fi_siikaneva_peatland",
+    country: "Finland",
+    countryCode: "FI",
+    name: "Siikaneva Boreal Peatland Complex",
+    region: "Pirkanmaa / Ruovesi",
+    lat: 61.8327,
+    lon: 24.1928,
+    elevM: 160,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-4 (3.0m StripMap) + DInSAR Peat Breathing",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "Raised Bog Seasonal Water Table Breathing Compensated",
+    apsZtdM: 2.253,
+    fringesRemoved: 8.9,
+    rmseReductionPct: 98.2,
+    roleSummary: "Pristine southern raised bog complex; seasonal peat column breathing (20-45 mm elastic swelling), water table fluctuations, and carbon flux monitoring.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "fi_martimoaapa_mire",
+    country: "Finland",
+    countryCode: "FI",
+    name: "Martimoaapa Aapa Mire / Kemi",
+    region: "Southern Lapland / Bothnian Arc",
+    lat: 65.83,
+    lon: 25.1,
+    elevM: 75,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-4 StripMap + InSAR Coherence",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "Sub-Arctic Aapa Mire Flark-String Coherence Tracking",
+    apsZtdM: 2.281,
+    fringesRemoved: 11.4,
+    rmseReductionPct: 97.5,
+    roleSummary: "Extensive sub-arctic aapa mire system with flark-string patterned fens; active-layer freeze-thaw decorrelation (gamma < 0.35) and snowmelt saturation.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "fi_halti_lapland",
+    country: "Finland",
+    countryCode: "FI",
+    name: "Halti Fell / Kilpisjärvi",
+    region: "Scandinavian Mountains (Scandes) / Enontekiö Lapland",
+    lat: 69.3106,
+    lon: 21.265,
+    elevM: 1324,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X41 Spotlight + StriX-4 InSAR",
+    sarSatelliteId: "ICEYE-X41",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "Arctic-Alpine High-Relief Hydrostatic Screen Removed",
+    apsZtdM: 1.968,
+    fringesRemoved: 21.5,
+    rmseReductionPct: 98.9,
+    roleSummary: "Highest point in Finland (1324m); Arctic-alpine permafrost palsa mires, high-relief orographic tropospheric delay, and permafrost slope stability.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  }
+]);
+
+export const JAPAN_FARMLAND_TARGET_CITIES = deepFreeze([
+  {
+    id: "jp_yamakoshi_tanada",
+    country: "Japan",
+    countryCode: "JP",
+    name: "Yamakoshi Terraced Rice Paddies (山古志の棚田)",
+    region: "Niigata / Chuetsu Hilly Plateau",
+    lat: 37.33,
+    lon: 138.86,
+    elevM: 320,
+    zoomDistance: 5.92,
+    sensorSuite: "StriX-3 (3.0m StripMap VV/VH) + CATALYST X-Band APS",
+    sarSatelliteId: "STRIX-3",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Chuetsu Orographic Delay Compensated",
+    apsZtdM: 2.215,
+    fringesRemoved: 34.8,
+    rmseReductionPct: 98.72,
+    roleSummary: "Historic Chuetsu terraced paddies on Neogene mudstone/clay hills; severe levee degradation from depopulation and cascading failure risk during torrential Baiu downpours.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "jp_hoshitoge_tanada",
+    country: "Japan",
+    countryCode: "JP",
+    name: "Hoshitoge Terraced Paddies (星峠の棚田)",
+    region: "Niigata / Tokamachi-Matsudai Basin",
+    lat: 37.13,
+    lon: 138.53,
+    elevM: 450,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-3 (SLC-InSAR) + StriX-4 Spotlight",
+    sarSatelliteId: "STRIX-3",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Stratified Valley Delay Active",
+    apsZtdM: 2.148,
+    fringesRemoved: 36.4,
+    rmseReductionPct: 98.85,
+    roleSummary: "Steep stepped amphitheater terraces; pervasive bamboo (Moso) and kudzu scrub encroachment over uncultivated parcels driving high temporal decorrelation (gamma < 0.20).",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "jp_obasute_tanada",
+    country: "Japan",
+    countryCode: "JP",
+    name: "Obasute Terraced Paddies (姨捨の棚田)",
+    region: "Nagano / Chikuma Valley Escarpment",
+    lat: 36.5,
+    lon: 138.1,
+    elevM: 540,
+    zoomDistance: 5.9,
+    sensorSuite: "StriX-4 (1.0m Spotlight VV) + CATALYST APS",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 28.5,
+    apsStatus: "CATALYST Escarpment Boundary Layer Corrected",
+    apsZtdM: 2.082,
+    fringesRemoved: 31.6,
+    rmseReductionPct: 98.6,
+    roleSummary: "Famous lunar-reflection (Tagoto-no-tsuki) terraces on 18°-25° granitic slopes; steep slope levee overtopping and shallow slip vulnerability under heavy convective cloudbursts.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "jp_iya_valley_terrace",
+    country: "Japan",
+    countryCode: "JP",
+    name: "Iya Valley Ochiai Terraced Hamlet (祖谷渓 落合集落)",
+    region: "Tokushima / Shikoku Mountains (Mount Tsurugi Massif)",
+    lat: 33.85,
+    lon: 133.88,
+    elevM: 780,
+    zoomDistance: 5.88,
+    sensorSuite: "StriX-1 (3.0m StripMap) + CATALYST X-Band APS",
+    sarSatelliteId: "STRIX-1",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Deep V-Gorge Stratified Delay Removal",
+    apsZtdM: 1.942,
+    fringesRemoved: 44.5,
+    rmseReductionPct: 98.94,
+    roleSummary: "National cultural landscape perched on 35°-40° canyon walls; acute depopulation leading to rapid scrub succession, unmaintained dry-stone terrace levee collapse during typhoons.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "jp_kamikatsu_terrace",
+    country: "Japan",
+    countryCode: "JP",
+    name: "Kamikatsu Kashihara Terraces (樫原の棚田)",
+    region: "Tokushima / Katsuura River Basin",
+    lat: 33.89,
+    lon: 134.33,
+    elevM: 620,
+    zoomDistance: 5.92,
+    sensorSuite: "StriX-3 StripMap + ICEYE-X38 Flood",
+    sarSatelliteId: "STRIX-3",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Maritime Moisture Surge Compensation",
+    apsZtdM: 2.015,
+    fringesRemoved: 38.2,
+    rmseReductionPct: 98.68,
+    roleSummary: "Curving stone-embankment terraces receiving intense Pacific typhoon rainfall; unmaintained parcel saturation inducing shallow translational slope failure.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "jp_shiroyone_senmaida",
+    country: "Japan",
+    countryCode: "JP",
+    name: "Shiroyone Senmaida (白米千枚田)",
+    region: "Ishikawa / Noto Peninsula Coastal Escarpment",
+    lat: 37.42,
+    lon: 137.0,
+    elevM: 60,
+    zoomDistance: 6.0,
+    sensorSuite: "StriX-3 (SLC-InSAR) + CATALYST APS",
+    sarSatelliteId: "STRIX-3",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Coastal Humid Marine Delay Active",
+    apsZtdM: 2.485,
+    fringesRemoved: 22.1,
+    rmseReductionPct: 98.35,
+    roleSummary: "Coastal terraced paddies stepping directly down to the Sea of Japan; seismic cracking and torrential rain exacerbating earthen levee slumping.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  }
+]);
+
+export const BRAZIL_TARGET_CITIES = deepFreeze([
+  {
+    id: "br_sao_sebastiao",
+    country: "Brazil",
+    countryCode: "BR",
+    name: "São Sebastião Coastal Escarpment",
+    region: "Litoral Norte / Serra do Mar, São Paulo",
+    lat: -23.76,
+    lon: -45.41,
+    elevM: 15,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-4 (3.0m StripMap) + ICEYE-X43 Flood Cue",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Coastal Orographic Delay Compensated",
+    apsZtdM: 2.684,
+    fringesRemoved: 36.8,
+    rmseReductionPct: 98.85,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Steep coastal wall where record 683mm/24h orographic downpour triggered catastrophic debris flows, with slopes > 42° and complete radar decorrelation.",
+  },
+  {
+    id: "br_petropolis",
+    country: "Brazil",
+    countryCode: "BR",
+    name: "Petrópolis Granitic Escarpment",
+    region: "Região Serrana / Serra dos Órgãos, Rio de Janeiro",
+    lat: -22.505,
+    lon: -43.1789,
+    elevM: 845,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-4 (SLC-InSAR) + CATALYST X-Band APS",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Granitic Amphitheatre High-Relief Delay Active",
+    apsZtdM: 2.215,
+    fringesRemoved: 44.5,
+    rmseReductionPct: 98.9,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Steep granitic amphitheatre slopes (> 45°) prone to lethal hyper-concentrated debris flows (Feb 2022 event, 250mm/3hr) with severe orographic delay gradients.",
+  },
+  {
+    id: "br_corumba_pantanal",
+    country: "Brazil",
+    countryCode: "BR",
+    name: "Corumbá Upper Paraguay Wetland",
+    region: "Pantanal Sul-Mato-Grossense / Rio Paraguai",
+    lat: -19.0089,
+    lon: -57.6533,
+    elevM: 118,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X43 (0.5m Spotlight Flood Attribution)",
+    sarSatelliteId: "ICEYE-X43",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "Pantanal High-Moisture Tropical Delay Active",
+    apsZtdM: 2.695,
+    fringesRemoved: 12.4,
+    rmseReductionPct: 98.6,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Core Pantanal seasonal flood pulse corridor; vast specular reflection (sigma_0 VV < -16.5 dB) and extreme tropical ZTD (> 2.65m) across alluvial plains.",
+  },
+  {
+    id: "br_cuiaba_pantanal",
+    country: "Brazil",
+    countryCode: "BR",
+    name: "Cuiabá River Wetland Basin",
+    region: "Northern Pantanal / Mato Grosso",
+    lat: -16.27,
+    lon: -56.62,
+    elevM: 125,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X43 Spotlight + Virtual X-Band DInSAR",
+    sarSatelliteId: "ICEYE-X43",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "Wetland Alluvial Moisture Delay Active",
+    apsZtdM: 2.712,
+    fringesRemoved: 11.8,
+    rmseReductionPct: 98.55,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Northern Pantanal flood pulse entry basin; flat alluvial flats (< 0.5° slope) with expansive seasonal water inundation and high-moisture column.",
+  },
+  {
+    id: "br_sinop_arc",
+    country: "Brazil",
+    countryCode: "BR",
+    name: "Sinop Deforestation Frontier",
+    region: "BR-163 Corridor / Northern Mato Grosso",
+    lat: -11.8642,
+    lon: -55.5053,
+    elevM: 384,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-4 CCD + CATALYST X-Band Texture Engine",
+    sarSatelliteId: "STRIX-4",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "Equatorial Tropospheric Column Active",
+    apsZtdM: 2.678,
+    fringesRemoved: 8.9,
+    rmseReductionPct: 98.7,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Amazon 'Arc of Deforestation' active clearing boundary; sharp radar backscatter contrast (-8 dB forest to -15 dB pasture) and high temporal decorrelation.",
+  },
+  {
+    id: "br_alta_floresta_frontier",
+    country: "Brazil",
+    countryCode: "BR",
+    name: "Alta Floresta Teles Pires Basin",
+    region: "Southern Amazon Margin / Mato Grosso",
+    lat: -9.8756,
+    lon: -56.0861,
+    elevM: 283,
+    zoomDistance: 5.95,
+    sensorSuite: "CATALYST X-Band InSAR + StriX-4 StripMap",
+    sarSatelliteId: "CATALYST-InSAR-X",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "Amazon Basin High-Moisture Delay Active",
+    apsZtdM: 2.705,
+    fringesRemoved: 9.4,
+    rmseReductionPct: 98.75,
+    sentinel2Lod: "Hidden Terrain Regional",
+    roleSummary: "Frontier zone between primary Amazonian rainforest canopy and intensive agricultural pasture expansion, demonstrating rectilinear radar texture shifts.",
+  }
+]);
+
+export const VANCOUVER_TARGET_CITIES = deepFreeze([
+  {
+    id: "van_roberts_bank",
+    country: "Canada",
+    countryCode: "CA",
+    name: "Roberts Bank Superport & Deltaport",
+    region: "Fraser River Delta / Roberts Bank Mudflats",
+    lat: 49.0194,
+    lon: -123.1583,
+    elevM: 2,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X45 (0.5m Spotlight) + CATALYST X-Band InSAR",
+    sarSatelliteId: "ICEYE-X45",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Holocene Surcharge Subsidence Screen Active",
+    apsZtdM: 2.542,
+    fringesRemoved: 38.6,
+    rmseReductionPct: 98.92,
+    roleSummary: "Reclaimed tidal delta flats housing Roberts Bank coal terminal and Deltaport; subject to 4-10 mm/yr anthropogenic surcharge loading and fine Holocene sediment consolidation.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "van_richmond_lulu",
+    country: "Canada",
+    countryCode: "CA",
+    name: "Richmond & Lulu Island (Fraser Delta)",
+    region: "Fraser Lowland / Salish Sea Coastal Plain",
+    lat: 49.1666,
+    lon: -123.1336,
+    elevM: 3,
+    zoomDistance: 5.95,
+    sensorSuite: "CATALYST-InSAR-X + ICEYE-X45 Lowland Inundation",
+    sarSatelliteId: "CATALYST-INSAR-X",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Atmospheric River ZTD Delay Compensated",
+    apsZtdM: 2.538,
+    fringesRemoved: 36.4,
+    rmseReductionPct: 98.88,
+    roleSummary: "Dyked deltaic silt and peat deposits below high-tide level experiencing 2-6 mm/yr compaction subsidence and high liquefaction hazard under Cascadia megathrust strain.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "van_garibaldi_summit",
+    country: "Canada",
+    countryCode: "CA",
+    name: "Mount Garibaldi & Cayley Massif",
+    region: "Coast Mountains / Garibaldi Volcanic Belt",
+    lat: 49.8517,
+    lon: -123.0047,
+    elevM: 2678,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-5 (3.0m StripMap) + CATALYST High-Relief APS",
+    sarSatelliteId: "STRIX-5",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST 2678m Summit Stratified Delay Compensated",
+    apsZtdM: 1.884,
+    fringesRemoved: 42.1,
+    rmseReductionPct: 98.95,
+    roleSummary: "Dominant 2678m glaciated stratovolcano generating intense orographic precipitation lifting, severe vertical ZTD gradients (~0.65m), and heavy snowpack accumulation.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "van_howe_sound",
+    country: "Canada",
+    countryCode: "CA",
+    name: "Howe Sound Fjord & Squamish Escarpment",
+    region: "Sea-to-Sky Fjord / Pacific Ranges",
+    lat: 49.7016,
+    lon: -123.1558,
+    elevM: 12,
+    zoomDistance: 5.95,
+    sensorSuite: "StriX-5 (SLC-InSAR) + ICEYE-X45 Fjord Spotlight",
+    sarSatelliteId: "STRIX-5",
+    incidenceAngleDeg: 34.1,
+    apsStatus: "CATALYST Fjord Wall Tropospheric Multipath Screen Active",
+    apsZtdM: 2.495,
+    fringesRemoved: 35.8,
+    rmseReductionPct: 98.85,
+    roleSummary: "Glaciated granitic fjord with sheer 1500m walls plunging into Howe Sound; vulnerable to Pineapple Express debris torrents, slope decorrelation (gamma < 0.32), and Sea-to-Sky highway severance.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "van_yvr_airport",
+    country: "Canada",
+    countryCode: "CA",
+    name: "Sea Island & Vancouver International (YVR)",
+    region: "Fraser River Estuary / North Arm",
+    lat: 49.1967,
+    lon: -123.1815,
+    elevM: 2,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X45 (0.5m Spotlight) + StriX-5 Runway InSAR",
+    sarSatelliteId: "ICEYE-X45",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Estuary Water Vapor Boundary Screen Active",
+    apsZtdM: 2.541,
+    fringesRemoved: 34.2,
+    rmseReductionPct: 98.87,
+    roleSummary: "Major international aviation hub built on deltaic island surrounded by tidal channels; perimeter dyke stability and stormwater inundation (sigma_0 < -16.5 dB) monitored continuously.",
+    sentinel2Lod: "Hidden Terrain Regional",
+  },
+  {
+    id: "van_sumas_prairie",
+    country: "Canada",
+    countryCode: "CA",
+    name: "Sumas Prairie & Fraser Lowland Basin",
+    region: "Lower Fraser Valley / Abbotsford Corridor",
+    lat: 49.05,
+    lon: -122.25,
+    elevM: 10,
+    zoomDistance: 5.95,
+    sensorSuite: "ICEYE-X45 Rapid Revisit Constellation Flood Suite",
+    sarSatelliteId: "ICEYE-X45",
+    incidenceAngleDeg: 28.4,
+    apsStatus: "CATALYST Atmospheric River Inundation Plume Screen Active",
+    apsZtdM: 2.529,
+    fringesRemoved: 32.5,
+    rmseReductionPct: 98.82,
+    roleSummary: "Former lakebed drained in the 1920s; site of historic November 2021 Atmospheric River levee failure and deep catastrophic lowland inundation (>150 km² flooded).",
+    sentinel2Lod: "Hidden Terrain Regional",
+  }
+]);
+
+export const PHASE3_TARGET_CITIES = deepFreeze([
+  ...SOUTHERN_ITALY_TARGET_CITIES,
+  ...FINLAND_TARGET_CITIES,
+  ...JAPAN_FARMLAND_TARGET_CITIES,
+  ...BRAZIL_TARGET_CITIES,
+  ...VANCOUVER_TARGET_CITIES
+]);
+
+export const HIDDEN_TERRAIN_TARGET_CITIES = deepFreeze([
+  ...MEXICO_TARGET_CITIES,
+  ...RUSSIA_TARGET_CITIES,
+  ...SOUTH_AFRICA_TARGET_CITIES
+]);
+
+export const ALL_TARGET_CITIES = deepFreeze([
+  ...TARGET_CITIES,
+  ...HIDDEN_TERRAIN_TARGET_CITIES,
+  ...PHASE3_TARGET_CITIES
+]);
+
+export function getTargetCities(countryFilter = null, { includeHiddenTerrain = false } = {}) {
+  const pool = includeHiddenTerrain ? ALL_TARGET_CITIES : TARGET_CITIES;
   if (!countryFilter) {
-    return TARGET_CITIES;
+    return pool;
   }
   const norm = String(countryFilter).trim().toLowerCase();
-  return TARGET_CITIES.filter(
+  if (norm === "all") {
+    return ALL_TARGET_CITIES;
+  }
+  if (norm === "hidden_terrain" || norm === "hidden" || norm === "hiddenterrain") {
+    return HIDDEN_TERRAIN_TARGET_CITIES;
+  }
+  if (norm === "phase3" || norm === "phase_3") {
+    return PHASE3_TARGET_CITIES;
+  }
+  if (norm === "southern_italy" || norm === "southern italy" || norm === "s_italy") {
+    return SOUTHERN_ITALY_TARGET_CITIES;
+  }
+  if (norm === "finland" || norm === "fi") {
+    return FINLAND_TARGET_CITIES;
+  }
+  if (norm === "japan_farmland" || norm === "satoyama" || norm === "farmland") {
+    return JAPAN_FARMLAND_TARGET_CITIES;
+  }
+  if (norm === "brazil" || norm === "br") {
+    return BRAZIL_TARGET_CITIES;
+  }
+  if (norm === "vancouver" || norm === "canada" || norm === "ca") {
+    return VANCOUVER_TARGET_CITIES;
+  }
+  const poolMatches = pool.filter(
     (c) => c.country.toLowerCase() === norm || c.countryCode.toLowerCase() === norm
   );
+  if (poolMatches.length > 0) {
+    return poolMatches;
+  }
+  return ALL_TARGET_CITIES.filter(
+    (c) => c.country.toLowerCase() === norm || c.countryCode.toLowerCase() === norm
+  );
+}
+
+export function getAllTargetCities() {
+  return ALL_TARGET_CITIES;
+}
+
+export function getHiddenTerrainTargetCities() {
+  return HIDDEN_TERRAIN_TARGET_CITIES;
 }
 
 export function getTargetCityById(id) {
   if (!id) return null;
   const norm = String(id).trim().toLowerCase();
-  return TARGET_CITIES.find((c) => c.id.toLowerCase() === norm) || null;
+  return ALL_TARGET_CITIES.find((c) => c.id.toLowerCase() === norm) || null;
 }
 
 // =============================================================================
@@ -2071,6 +4302,89 @@ export function validateStudyData() {
     assert(inItaly || inJapan, `Target city ${city.id} (${city.lat}, ${city.lon}) must lie inside Sentinel-2 regional crop bounds`);
   });
 
+  // Mexico Hidden Terrain Bounds Check (14°N–33°N, -118°W–-86°W)
+  assert(Array.isArray(MEXICO_TARGET_CITIES) && MEXICO_TARGET_CITIES.length === 5, "Must define 5 verified Mexico target cities");
+  MEXICO_TARGET_CITIES.forEach((city) => {
+    assert(city.country === "Mexico" && city.lat >= 14 && city.lat <= 33 && city.lon >= -118 && city.lon <= -86,
+      `Mexico target city ${city.id} (${city.lat}, ${city.lon}) outside verified regional bounds`);
+  });
+
+  // Northern Russia Hidden Terrain Bounds Check (60°N–75°N, 80°E–150°E)
+  assert(Array.isArray(RUSSIA_TARGET_CITIES) && RUSSIA_TARGET_CITIES.length === 6, "Must define 6 verified Northern Russia target cities");
+  RUSSIA_TARGET_CITIES.forEach((city) => {
+    assert(city.country === "Russia" && city.lat >= 60 && city.lat <= 75 && city.lon >= 80 && city.lon <= 150,
+      `Russia target city ${city.id} (${city.lat}, ${city.lon}) outside verified regional bounds`);
+  });
+
+  // South Africa & Lesotho Hidden Terrain Bounds Check (-35°S–-26°S, 18°E–33°E)
+  assert(Array.isArray(SOUTH_AFRICA_TARGET_CITIES) && SOUTH_AFRICA_TARGET_CITIES.length === 6, "Must define 6 verified South Africa / Lesotho target cities");
+  SOUTH_AFRICA_TARGET_CITIES.forEach((city) => {
+    const isSA = city.country === "South Africa" || city.country === "Lesotho";
+    assert(isSA && city.lat >= -35.5 && city.lat <= -26.0 && city.lon >= 18.0 && city.lon <= 33.0,
+      `Southern Africa target city ${city.id} (${city.lat}, ${city.lon}) outside verified regional bounds`);
+  });
+
+  // Phase 3 Theaters Validation
+  // 1. Southern Italy & Sicily Volcanotectonics Bounds Check (36.5°N–42.0°N, 13.5°E–19.0°E)
+  assert(Array.isArray(SOUTHERN_ITALY_TARGET_CITIES) && SOUTHERN_ITALY_TARGET_CITIES.length === 6, "Must define 6 verified Southern Italy target cities");
+  SOUTHERN_ITALY_TARGET_CITIES.forEach((city) => {
+    assert(city.country === "Italy" && city.lat >= 36.5 && city.lat <= 42.0 && city.lon >= 13.5 && city.lon <= 19.0,
+      `Southern Italy target city ${city.id} (${city.lat}, ${city.lon}) outside verified regional bounds`);
+  });
+
+  // 2. Finland & Fennoscandian Post-Glacial Rebound Bounds Check (60°N–70.5°N, 20°E–32°E)
+  assert(Array.isArray(FINLAND_TARGET_CITIES) && FINLAND_TARGET_CITIES.length === 6, "Must define 6 verified Finland target cities");
+  FINLAND_TARGET_CITIES.forEach((city) => {
+    assert(city.country === "Finland" && city.lat >= 60.0 && city.lat <= 70.5 && city.lon >= 20.0 && city.lon <= 32.0,
+      `Finland target city ${city.id} (${city.lat}, ${city.lon}) outside verified regional bounds`);
+  });
+
+  // 3. Japan Abandoned Farmland (Satoyama) Bounds Check (33°N–38.5°N, 133°E–140°E)
+  assert(Array.isArray(JAPAN_FARMLAND_TARGET_CITIES) && JAPAN_FARMLAND_TARGET_CITIES.length === 6, "Must define 6 verified Japan Farmland target cities");
+  JAPAN_FARMLAND_TARGET_CITIES.forEach((city) => {
+    assert(city.country === "Japan" && city.lat >= 33.0 && city.lat <= 38.5 && city.lon >= 133.0 && city.lon <= 140.0,
+      `Japan Farmland target city ${city.id} (${city.lat}, ${city.lon}) outside verified regional bounds`);
+  });
+
+  // 4. Brazil Tropical Dynamics (Serra do Mar / Pantanal / Amazon) Bounds Check (-26°S–-8°S, -60°W–-41°W)
+  assert(Array.isArray(BRAZIL_TARGET_CITIES) && BRAZIL_TARGET_CITIES.length === 6, "Must define 6 verified Brazil target cities");
+  BRAZIL_TARGET_CITIES.forEach((city) => {
+    assert(city.country === "Brazil" && city.lat >= -26.0 && city.lat <= -8.0 && city.lon >= -60.0 && city.lon <= -41.0,
+      `Brazil target city ${city.id} (${city.lat}, ${city.lon}) outside verified regional bounds`);
+  });
+
+  // 5. Vancouver Cascadia Delta & Fjord Bounds Check (48.5°N–50.5°N, -124°W–-121.5°W)
+  assert(Array.isArray(VANCOUVER_TARGET_CITIES) && VANCOUVER_TARGET_CITIES.length === 6, "Must define 6 verified Vancouver target cities");
+  VANCOUVER_TARGET_CITIES.forEach((city) => {
+    assert(city.country === "Canada" && city.lat >= 48.5 && city.lat <= 50.5 && city.lon >= -124.0 && city.lon <= -121.5,
+      `Vancouver target city ${city.id} (${city.lat}, ${city.lon}) outside verified regional bounds`);
+  });
+
+  // Global Combined Target Cities Catalog Invariant (60 Targets across 10 Theaters)
+  assert(Array.isArray(ALL_TARGET_CITIES) && ALL_TARGET_CITIES.length === 60, "ALL_TARGET_CITIES must contain exactly 60 verified targets across 10 theaters");
+  const uniqueIds = new Set(ALL_TARGET_CITIES.map((c) => c.id));
+  assert(uniqueIds.size === 60, "Every target city ID across all theaters must be strictly unique");
+
+  // SAR Constellations Invariant (2 Baseline + 9 Hidden Terrain + 18 Phase 3 = 29 STAC Orders)
+  assert(Array.isArray(HIDDEN_TERRAIN_SAR_CONSTELLATIONS) && HIDDEN_TERRAIN_SAR_CONSTELLATIONS.length === 9, "Must define 9 verified hidden terrain STAC tasking orders");
+  assert(Array.isArray(PHASE3_SAR_CONSTELLATIONS) && PHASE3_SAR_CONSTELLATIONS.length === 18, "Must define 18 verified Phase 3 STAC tasking orders");
+  assert(Array.isArray(ALL_SAR_CONSTELLATIONS) && ALL_SAR_CONSTELLATIONS.length === 29, "ALL_SAR_CONSTELLATIONS must define 29 constellations");
+  const uniqueOrderIds = new Set(ALL_SAR_CONSTELLATIONS.map(s => s.id));
+  assert(uniqueOrderIds.size === 29, "All SAR constellation IDs must be unique");
+
+  // 3D Twin Run Gallery Invariants (11 Scientific Research Runs across 4 Categories)
+  assert(Array.isArray(RUNS_CATALOG) && RUNS_CATALOG.length === 11, "RUNS_CATALOG must contain exactly 11 verified research runs");
+  assert(Array.isArray(RUN_CATEGORIES) && RUN_CATEGORIES.length === 4, "Must define exactly 4 run categories (Baseline Pillars, Hidden Terrains, Multi-Band & Deep Hazards, Global Synoptic Theaters)");
+  RUN_CATEGORIES.forEach((cat) => {
+    const runsInCat = getRunsByCategory(cat);
+    assert(runsInCat.length > 0, `Category ${cat} must contain at least 1 verified run`);
+  });
+  RUNS_CATALOG.forEach((run) => {
+    assert(run.run_number >= 1 && run.run_number <= 11, `Run ${run.run_id} must have valid run_number`);
+    assert(run.primary_figure && run.primary_figure.viewer_path, `Run ${run.run_id} must define primary_figure with viewer_path`);
+    assert(run.camera_target && typeof run.camera_target.lat === 'number' && typeof run.camera_target.lon === 'number', `Run ${run.run_id} must define camera_target coordinates`);
+  });
+
   const passedCount = assertions.filter((a) => a.condition).length;
   const isAllValid = passedCount === assertions.length;
 
@@ -2121,7 +4435,21 @@ export default {
   DOMAINS_MAP,
   COMPARISON_MATRIX,
   SAR_TASKING_METADATA,
+  HIDDEN_TERRAIN_SAR_CONSTELLATIONS,
+  ALL_SAR_CONSTELLATIONS,
   TARGET_CITIES,
+  MEXICO_TARGET_CITIES,
+  RUSSIA_TARGET_CITIES,
+  SOUTH_AFRICA_TARGET_CITIES,
+  SOUTHERN_ITALY_TARGET_CITIES,
+  FINLAND_TARGET_CITIES,
+  JAPAN_FARMLAND_TARGET_CITIES,
+  BRAZIL_TARGET_CITIES,
+  VANCOUVER_TARGET_CITIES,
+  PHASE3_TARGET_CITIES,
+  HIDDEN_TERRAIN_TARGET_CITIES,
+  ALL_TARGET_CITIES,
+  PHASE3_SAR_CONSTELLATIONS,
 
   // Reactive State Machine
   getState,
@@ -2160,9 +4488,21 @@ export default {
   getDigitalTwinMetadata,
   getComparisonMatrix,
   getSarTaskingMetadata,
+  getHiddenTerrainSarConstellations,
+  getAllSarConstellations,
   generateStacTaskingOrderGeoJSON,
   getTargetCities,
+  getAllTargetCities,
+  getHiddenTerrainTargetCities,
   getTargetCityById,
+
+  // Run Gallery
+  RUN_CATEGORIES,
+  CATEGORY_THEMES,
+  RUNS_CATALOG,
+  getRunCatalog,
+  getRunById,
+  getRunsByCategory,
 
   // Validation
   validateStudyData

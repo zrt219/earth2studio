@@ -1,0 +1,288 @@
+{
+  "type": "FeatureCollection",
+  "stac_version": "1.0.0",
+  "title": "OD-EARTH2-BRAZIL Brazil Tropical Dynamics Weather-to-SAR Tasking Orders",
+  "description": "Operational STAC v1.0.0 SAR constellation tasking schedule for Brazil Tropical Dynamics: Serra do Mar steep coastal debris flow slopes (Petr\u00f3polis / S\u00e3o Sebasti\u00e3o), Pantanal seasonal flood pulse inundation, and Amazon deforestation frontier radar texture shifts.",
+  "features": [
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-ICEYE-X43-BRAZIL-PANTANAL-001",
+      "bbox": [
+        -58.0,
+        -20.0,
+        -56.5,
+        -18.0
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -58.0,
+              -20.0
+            ],
+            [
+              -56.5,
+              -20.0
+            ],
+            [
+              -56.5,
+              -18.0
+            ],
+            [
+              -58.0,
+              -18.0
+            ],
+            [
+              -58.0,
+              -20.0
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-14T00:00:00Z",
+        "platform": "ICEYE-X43",
+        "constellation": "ICEYE",
+        "instruments": [
+          "SAR-X"
+        ],
+        "sar:instrument_mode": "Spotlight",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV"
+        ],
+        "sar:product_type": "SLC",
+        "sar:resolution_range": 0.5,
+        "sar:resolution_azimuth": 0.5,
+        "view:incidence_angle": 28.4,
+        "view:look_angle": 25.1,
+        "sat:orbit_state": "descending",
+        "sat:relative_orbit": 112,
+        "e2s:tip_trigger": "HAZARD-BR-PANTANAL-01 (Pantanal Seasonal Flood Pulse Specular Water Inundation)",
+        "e2s:flood_sigma0_threshold_db": -16.5,
+        "e2s:min_sigma0_vv_db": -22.0,
+        "e2s:inundated_area_km2": 111927.18,
+        "catalyst:tropical_ztd_max_m": 2.71020245552063,
+        "tasking:priority": "URGENT_PRIORITY_WETLAND",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-SYNSPECTIVE-STRIX4-SERRADOMAR-002",
+      "bbox": [
+        -45.8,
+        -24.0,
+        -43.0,
+        -22.3
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -45.8,
+              -24.0
+            ],
+            [
+              -43.0,
+              -24.0
+            ],
+            [
+              -43.0,
+              -22.3
+            ],
+            [
+              -45.8,
+              -22.3
+            ],
+            [
+              -45.8,
+              -24.0
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-14T00:00:00Z",
+        "platform": "StriX-4",
+        "constellation": "Synspective-StriX",
+        "instruments": [
+          "StriX-SAR-X"
+        ],
+        "sar:instrument_mode": "StripMap",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV",
+          "VH"
+        ],
+        "sar:product_type": "SLC-InSAR",
+        "sar:resolution_range": 3.0,
+        "sar:resolution_azimuth": 3.0,
+        "view:incidence_angle": 34.1,
+        "view:look_angle": 30.2,
+        "sat:orbit_state": "ascending",
+        "sat:relative_orbit": 78,
+        "e2s:tip_trigger": "HAZARD-BR-SERRADOMAR-02 (Serra do Mar Escarpment Catastrophic Debris Flow Slopes > 40 deg)",
+        "e2s:coherence_threshold": 0.3,
+        "e2s:min_coherence_gamma": 0.08,
+        "e2s:high_risk_slope_area_km2": 120.43,
+        "catalyst:aps_ztd_mean_m": 2.309,
+        "catalyst:aps_fringes_removed": 10.46,
+        "catalyst:rmse_reduction_pct": 99.11,
+        "tasking:priority": "EMERGENCY_DEBRIS_FLOW_CUE",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-CATALYST-AMAZON-FRONTIER-003",
+      "bbox": [
+        -56.5,
+        -12.5,
+        -54.5,
+        -10.5
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -56.5,
+              -12.5
+            ],
+            [
+              -54.5,
+              -12.5
+            ],
+            [
+              -54.5,
+              -10.5
+            ],
+            [
+              -56.5,
+              -10.5
+            ],
+            [
+              -56.5,
+              -12.5
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-14T00:00:00Z",
+        "platform": "CATALYST-InSAR-X",
+        "constellation": "Virtual-X-Band-Stack",
+        "instruments": [
+          "SAR-X"
+        ],
+        "sar:instrument_mode": "StripMap-RepeatPass",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV"
+        ],
+        "sar:product_type": "DInSAR-Texture",
+        "sar:resolution_range": 3.0,
+        "sar:resolution_azimuth": 3.0,
+        "view:incidence_angle": 34.1,
+        "sat:orbit_state": "descending",
+        "sat:relative_orbit": 45,
+        "e2s:tip_trigger": "MONITORING-BR-AMAZON-03 (Amazon Arc of Deforestation Radar Texture & Clearing InSAR Decorrelation)",
+        "e2s:forest_mean_sigma0_db": -8.390655949622806,
+        "e2s:cleared_mean_sigma0_db": -13.991803218976441,
+        "e2s:deforested_area_km2": 53471.06,
+        "tasking:priority": "ENVIRONMENTAL_MONITORING",
+        "tasking:status": "VALIDATED_STACK"
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-ICEYE-X43-SAOSEBASTIAO-004",
+      "bbox": [
+        -45.6,
+        -23.9,
+        -45.2,
+        -23.6
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -45.6,
+              -23.9
+            ],
+            [
+              -45.2,
+              -23.9
+            ],
+            [
+              -45.2,
+              -23.6
+            ],
+            [
+              -45.6,
+              -23.6
+            ],
+            [
+              -45.6,
+              -23.9
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-14T00:00:00Z",
+        "platform": "ICEYE-X43",
+        "constellation": "ICEYE",
+        "instruments": [
+          "SAR-X"
+        ],
+        "sar:instrument_mode": "Spotlight",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV"
+        ],
+        "sar:product_type": "SLC",
+        "sar:resolution_range": 0.5,
+        "sar:resolution_azimuth": 0.5,
+        "view:incidence_angle": 28.4,
+        "sat:orbit_state": "ascending",
+        "sat:relative_orbit": 78,
+        "e2s:tip_trigger": "HAZARD-BR-SAOSEBASTIAO-04 (S\u00e3o Sebasti\u00e3o Coastal Alluvial Fan & Debris Deposit Inundation)",
+        "tasking:priority": "URGENT_PRIORITY_COASTAL",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "module": "od_experiments.geoint_sar.japan_abandoned_farmland",
+  "data_source": "NOAA_GFS_0P25_VERIFIED_TENSORS",
+  "compliance": "Rule e2s-014 Certified (Deterministic Physics, Zero Synthetic Noise, Explicit origin='upper')",
+  "study_id": "OD-EARTH2-JAPAN-ABANDONED-FARMLAND",
+  "theaters": {
+    "niigata_chuetsu_nagano": {
+      "bounds": {
+        "lat": [
+          36.2,
+          37.6
+        ],
+        "lon": [
+          137.8,
+          139.2
+        ]
+      },
+      "satellite": "StriX-3 (StripMap 3.0m VV/VH) & StriX-4 (Spotlight 1.0m VV)",
+      "elevation_range_m": [
+        8.0,
+        2270.022705078125
+      ],
+      "aps_metrics": {
+        "carrier_frequency_ghz": 9.65,
+        "wavelength_cm": 3.1067,
+        "incidence_angle_deg": 34.1,
+        "mean_ztd_m": 2.2413,
+        "min_ztd_m": 1.8275,
+        "max_ztd_m": 2.428,
+        "max_delta_slant_cm": 4.79,
+        "uncorrected_phase_rmse_rad": 12.2007,
+        "corrected_phase_rmse_rad": 0.1982,
+        "aps_fringes_removed": 6.03,
+        "rmse_reduction_pct": 98.38
+      },
+      "hazard_metrics": {
+        "coherence_threshold": 0.25,
+        "min_coherence_gamma": 0.06,
+        "mean_coherence_gamma": 0.346,
+        "mean_gamma_maintained_paddies": 0.266,
+        "mean_gamma_abandoned_farmland": 0.073,
+        "abandoned_farmland_area_km2": 39.78,
+        "decorrelated_farmland_area_km2": 47.55,
+        "shallow_failure_and_breach_area_km2": 27.99,
+        "min_sigma0_vv_db": -17.82,
+        "max_sigma0_vh_db": -4.73
+      },
+      "stability_metrics": {
+        "min_factor_of_safety": 0.973,
+        "mean_factor_of_safety": 2.879,
+        "shallow_failure_pixels": 7,
+        "levee_breach_pixels": 119
+      },
+      "precip_max_mm_per_hr": 96.71
+    },
+    "shikoku_mountains_iya": {
+      "bounds": {
+        "lat": [
+          33.5,
+          34.3
+        ],
+        "lon": [
+          133.4,
+          134.6
+        ]
+      },
+      "satellite": "StriX-1 (StripMap 3.0m VV/VH)",
+      "elevation_range_m": [
+        139.56260681152344,
+        1982.0
+      ],
+      "aps_metrics": {
+        "carrier_frequency_ghz": 9.65,
+        "wavelength_cm": 3.1067,
+        "incidence_angle_deg": 34.1,
+        "mean_ztd_m": 2.2047,
+        "min_ztd_m": 1.9191,
+        "max_ztd_m": 2.4099,
+        "max_delta_slant_cm": 3.598,
+        "uncorrected_phase_rmse_rad": 4.5116,
+        "corrected_phase_rmse_rad": 0.1884,
+        "aps_fringes_removed": 3.54,
+        "rmse_reduction_pct": 95.82
+      },
+      "hazard_metrics": {
+        "coherence_threshold": 0.25,
+        "min_coherence_gamma": 0.06,
+        "mean_coherence_gamma": 0.225,
+        "mean_gamma_maintained_paddies": 0.218,
+        "mean_gamma_abandoned_farmland": 0.081,
+        "abandoned_farmland_area_km2": 30.5,
+        "decorrelated_farmland_area_km2": 36.29,
+        "shallow_failure_and_breach_area_km2": 13.99,
+        "min_sigma0_vv_db": -14.9,
+        "max_sigma0_vh_db": -4.52
+      },
+      "stability_metrics": {
+        "min_factor_of_safety": 0.959,
+        "mean_factor_of_safety": 2.364,
+        "shallow_failure_pixels": 9,
+        "levee_breach_pixels": 63
+      },
+      "precip_max_mm_per_hr": 169.2
+    }
+  },
+  "target_cities": [
+    {
+      "id": "jp_yamakoshi_tanada",
+      "country": "Japan",
+      "countryCode": "JP",
+      "name": "Yamakoshi Terraced Rice Paddies (\u5c71\u53e4\u5fd7\u306e\u68da\u7530)",
+      "region": "Niigata / Chuetsu Hilly Plateau",
+      "lat": 37.33,
+      "lon": 138.86,
+      "elevM": 320,
+      "zoomDistance": 5.92,
+      "sensorSuite": "StriX-3 (3.0m StripMap VV/VH) + CATALYST X-Band APS",
+      "sarSatelliteId": "STRIX-3",
+      "incidenceAngleDeg": 34.1,
+      "apsStatus": "CATALYST Chuetsu Orographic Delay Compensated",
+      "apsZtdM": 2.215,
+      "fringesRemoved": 34.8,
+      "rmseReductionPct": 98.72,
+      "roleSummary": "Historic Chuetsu terraced paddies on Neogene mudstone/clay hills; severe levee degradation from depopulation and cascading failure risk during torrential Baiu downpours."
+    },
+    {
+      "id": "jp_hoshitoge_tanada",
+      "country": "Japan",
+      "countryCode": "JP",
+      "name": "Hoshitoge Terraced Paddies (\u661f\u5ce0\u306e\u68da\u7530)",
+      "region": "Niigata / Tokamachi-Matsudai Basin",
+      "lat": 37.13,
+      "lon": 138.53,
+      "elevM": 450,
+      "zoomDistance": 5.95,
+      "sensorSuite": "StriX-3 (SLC-InSAR) + StriX-4 Spotlight",
+      "sarSatelliteId": "STRIX-3",
+      "incidenceAngleDeg": 34.1,
+      "apsStatus": "CATALYST Stratified Valley Delay Active",
+      "apsZtdM": 2.148,
+      "fringesRemoved": 36.4,
+      "rmseReductionPct": 98.85,
+      "roleSummary": "Steep stepped amphitheater terraces; pervasive bamboo (Moso) and kudzu scrub encroachment over uncultivated parcels driving high temporal decorrelation (gamma < 0.20)."
+    },
+    {
+      "id": "jp_obasute_tanada",
+      "country": "Japan",
+      "countryCode": "JP",
+      "name": "Obasute Terraced Paddies (\u59e8\u6368\u306e\u68da\u7530)",
+      "region": "Nagano / Chikuma Valley Escarpment",
+      "lat": 36.5,
+      "lon": 138.1,
+      "elevM": 540,
+      "zoomDistance": 5.9,
+      "sensorSuite": "StriX-4 (1.0m Spotlight VV) + CATALYST APS",
+      "sarSatelliteId": "STRIX-4",
+      "incidenceAngleDeg": 28.5,
+      "apsStatus": "CATALYST Escarpment Boundary Layer Corrected",
+      "apsZtdM": 2.082,
+      "fringesRemoved": 31.6,
+      "rmseReductionPct": 98.6,
+      "roleSummary": "Famous lunar-reflection (Tagoto-no-tsuki) terraces on 18\u00b0-25\u00b0 granitic slopes; steep slope levee overtopping and shallow slip vulnerability under heavy convective cloudbursts."
+    },
+    {
+      "id": "jp_iya_valley_terrace",
+      "country": "Japan",
+      "countryCode": "JP",
+      "name": "Iya Valley Ochiai Terraced Hamlet (\u7956\u8c37\u6e13 \u843d\u5408\u96c6\u843d)",
+      "region": "Tokushima / Shikoku Mountains (Mount Tsurugi Massif)",
+      "lat": 33.85,
+      "lon": 133.88,
+      "elevM": 780,
+      "zoomDistance": 5.88,
+      "sensorSuite": "StriX-1 (3.0m StripMap) + CATALYST X-Band APS",
+      "sarSatelliteId": "STRIX-1",
+      "incidenceAngleDeg": 34.1,
+      "apsStatus": "CATALYST Deep V-Gorge Stratified Delay Removal",
+      "apsZtdM": 1.942,
+      "fringesRemoved": 44.5,
+      "rmseReductionPct": 98.94,
+      "roleSummary": "National cultural landscape perched on 35\u00b0-40\u00b0 canyon walls; acute depopulation leading to rapid scrub succession, unmaintained dry-stone terrace levee collapse during typhoons."
+    },
+    {
+      "id": "jp_kamikatsu_terrace",
+      "country": "Japan",
+      "countryCode": "JP",
+      "name": "Kamikatsu Kashihara Terraces (\u6a2b\u539f\u306e\u68da\u7530)",
+      "region": "Tokushima / Katsuura River Basin",
+      "lat": 33.89,
+      "lon": 134.33,
+      "elevM": 620,
+      "zoomDistance": 5.92,
+      "sensorSuite": "StriX-3 StripMap + ICEYE-X38 Flood",
+      "sarSatelliteId": "STRIX-3",
+      "incidenceAngleDeg": 34.1,
+      "apsStatus": "CATALYST Maritime Moisture Surge Compensation",
+      "apsZtdM": 2.015,
+      "fringesRemoved": 38.2,
+      "rmseReductionPct": 98.68,
+      "roleSummary": "Curving stone-embankment terraces receiving intense Pacific typhoon rainfall; unmaintained parcel saturation inducing shallow translational slope failure."
+    },
+    {
+      "id": "jp_shiroyone_senmaida",
+      "country": "Japan",
+      "countryCode": "JP",
+      "name": "Shiroyone Senmaida (\u767d\u7c73\u5343\u679a\u7530)",
+      "region": "Ishikawa / Noto Peninsula Coastal Escarpment",
+      "lat": 37.42,
+      "lon": 137.0,
+      "elevM": 60,
+      "zoomDistance": 6.0,
+      "sensorSuite": "StriX-3 (SLC-InSAR) + CATALYST APS",
+      "sarSatelliteId": "STRIX-3",
+      "incidenceAngleDeg": 34.1,
+      "apsStatus": "CATALYST Coastal Humid Marine Delay Active",
+      "apsZtdM": 2.485,
+      "fringesRemoved": 22.1,
+      "rmseReductionPct": 98.35,
+      "roleSummary": "Coastal terraced paddies stepping directly down to the Sea of Japan; seismic cracking and torrential rain exacerbating earthen levee slumping."
+    }
+  ],
+  "stac_orders_file": "outputs\\scientific_study_verified\\advanced_capabilities\\stac_japan_farmland_tasking_orders.geojson",
+  "stac_orders_sha256": "855156bd9334421bf720878886780049d9e4cf342585bf625fe2d3d61d59d427",
+  "stac_orders_count": 4,
+  "figure": "outputs\\scientific_study_verified\\advanced_capabilities\\figures\\12_japan_abandoned_farmland.png",
+  "figure_sha256": "29788b7ef4ac07a5807089f30936ab4ed858711d1dbba8a10ff1855725e38928"
+}

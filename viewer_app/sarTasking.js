@@ -82,7 +82,9 @@ function writeLatLonVector3(lat, lon, radius, target) {
  *    for Italy/Po Valley or Synspective StriX coherence loss (gamma < 0.32) for Japan/Honshu.
  */
 function createSarSwathShaderMaterial(satConfig) {
-  const isItaly = satConfig.targetRegion === 'ITALY';
+  const isFlood = satConfig.attributionMetrics?.hazardType === 'FLOOD_SPECULAR_BACKSCATTER' ||
+    satConfig.targetRegion === 'ITALY' ||
+    (satConfig.operator && satConfig.operator.includes('ICEYE'));
 
   const vertexShader = `
     varying vec2 vUv;
@@ -177,7 +179,7 @@ function createSarSwathShaderMaterial(satConfig) {
       uTime: { value: 0.0 },
       uApsCorrected: { value: isApsCorrected ? 1.0 : 0.0 },
       uDisplayMode: { value: displayMode === 'insar_fringes' ? 0.0 : 1.0 },
-      uIsItaly: { value: isItaly ? 1.0 : 0.0 }
+      uIsItaly: { value: isFlood ? 1.0 : 0.0 }
     },
     transparent: true,
     depthWrite: false,
@@ -241,7 +243,16 @@ function createSatelliteAndLookCone(satConfig) {
   const orbitCurve = new THREE.CatmullRomCurve3(orbitPoints);
   const orbitLinePts = orbitCurve.getPoints(64);
   const orbitLineGeom = new THREE.BufferGeometry().setFromPoints(orbitLinePts);
-  const orbitColor = satConfig.targetRegion === 'ITALY' ? 0x38bdf8 : 0xf43f5e;
+  let orbitColor = 0x38bdf8;
+  if (satConfig.targetRegion === 'JAPAN') {
+    orbitColor = 0xf43f5e;
+  } else if (satConfig.targetRegion === 'MEXICO') {
+    orbitColor = 0xf59e0b;
+  } else if (satConfig.targetRegion === 'RUSSIA') {
+    orbitColor = 0x06b6d4;
+  } else if (satConfig.targetRegion === 'SOUTH_AFRICA') {
+    orbitColor = 0x10b981;
+  }
   const orbitLineMat = new THREE.LineBasicMaterial({
     color: orbitColor,
     transparent: true,
@@ -343,9 +354,10 @@ function createSatelliteAndLookCone(satConfig) {
  * Initialize and attach the 3D SAR Tip-and-Cue & CATALYST APS Layer to the Earth globe.
  *
  * @param {THREE.Object3D} globeMesh - Central Earth globe mesh
+ * @param {object} options - Configuration options ({ includeHiddenTerrain })
  * @returns {THREE.Group}
  */
-export function initSarTasking(globeMesh) {
+export function initSarTasking(globeMesh, { includeHiddenTerrain = false } = {}) {
   disposeSarTasking();
   activeGlobe = globeMesh;
 
@@ -360,12 +372,54 @@ export function initSarTasking(globeMesh) {
     sarGroup.add(satGroup);
   });
 
+  if (includeHiddenTerrain) {
+    loadHiddenTerrainSwaths();
+  }
+
   sarGroup.visible = isVisible;
   if (activeGlobe && typeof activeGlobe.add === 'function') {
     activeGlobe.add(sarGroup);
   }
 
   return sarGroup;
+}
+
+/**
+ * Add an individual 3D SAR ground swath footprint and constellation rig to the scene.
+ *
+ * @param {object} satConfig
+ * @returns {THREE.Group|null}
+ */
+export function addSarSwath(satConfig) {
+  if (!sarGroup || !satConfig) return null;
+  const existing = sarGroup.getObjectByName(`sar_constellation_${satConfig.id}`);
+  if (existing) return existing;
+  const satGroup = createSatelliteAndLookCone(satConfig);
+  sarGroup.add(satGroup);
+  return satGroup;
+}
+
+/**
+ * Load and display 3D SAR swath footprints for the new hidden terrain STAC tasking orders
+ * in Mexico, Northern Russia, and South Africa / Lesotho.
+ *
+ * @returns {Array<THREE.Group>}
+ */
+export function loadHiddenTerrainSwaths() {
+  if (!sarGroup) return [];
+  const hiddenConstellations = studyData.getHiddenTerrainSarConstellations
+    ? studyData.getHiddenTerrainSarConstellations()
+    : [];
+  const added = [];
+  hiddenConstellations.forEach(satConfig => {
+    const existing = sarGroup.getObjectByName(`sar_constellation_${satConfig.id}`);
+    if (!existing) {
+      const satGroup = createSatelliteAndLookCone(satConfig);
+      sarGroup.add(satGroup);
+      added.push(satGroup);
+    }
+  });
+  return added;
 }
 
 /**
@@ -497,11 +551,12 @@ export const getSarPickableObjects = getInteractiveSarObjects;
  * Generate and optionally trigger browser download of the STAC v1.0.0 Tasking Order GeoJSON.
  *
  * @param {boolean} triggerDownload
+ * @param {object} options - Options ({ includeHiddenTerrain })
  * @returns {object} STAC v1.0.0 FeatureCollection
  */
-export function exportStacTaskingOrder(triggerDownload = true) {
+export function exportStacTaskingOrder(triggerDownload = true, { includeHiddenTerrain = false } = {}) {
   const stacObj = studyData.generateStacTaskingOrderGeoJSON
-    ? studyData.generateStacTaskingOrderGeoJSON()
+    ? studyData.generateStacTaskingOrderGeoJSON({ includeHiddenTerrain })
     : { type: 'FeatureCollection', stac_version: '1.0.0', features: [] };
 
   if (
@@ -526,6 +581,55 @@ export function exportStacTaskingOrder(triggerDownload = true) {
   }
 
   return stacObj;
+}
+
+/**
+ * Highlights and triggers the SAR ground swath and orbital rig corresponding to a specific run.
+ * Automatically ensures hidden terrain swaths are loaded and visible.
+ *
+ * @param {string|number} runIdOrNumber
+ * @returns {object|null}
+ */
+export function highlightSwathForRun(runIdOrNumber) {
+  if (!sarGroup) return null;
+  setSarTaskingVisibility(true);
+  loadHiddenTerrainSwaths();
+
+  const allConfigs = (studyData.getAllSarConstellations ? studyData.getAllSarConstellations() : []) || [];
+  const runNorm = String(runIdOrNumber).toLowerCase();
+
+  let matchedConfig = allConfigs.find(c => {
+    const id = (c.id || '').toLowerCase();
+    const order = (c.orderId || '').toLowerCase();
+    const region = (c.targetRegion || '').toLowerCase();
+    if (runNorm.includes('mexico') && (id.includes('mexico') || region.includes('mexico') || order.includes('mexico'))) return true;
+    if ((runNorm.includes('russia') || runNorm.includes('putorana')) && (id.includes('russia') || region.includes('russia') || order.includes('russia'))) return true;
+    if ((runNorm.includes('south_africa') || runNorm.includes('drakensberg')) && (id.includes('south_africa') || region.includes('south_africa') || order.includes('south_africa'))) return true;
+    if ((runNorm.includes('italy') || runNorm.includes('etna') || runNorm.includes('bradyseism')) && (id.includes('italy') || region.includes('italy') || order.includes('italy'))) return true;
+    if (runNorm.includes('finland') && (id.includes('finland') || region.includes('finland') || order.includes('finland'))) return true;
+    if ((runNorm.includes('japan') || runNorm.includes('farmland') || runNorm.includes('satoyama')) && (id.includes('japan') || region.includes('japan') || order.includes('japan'))) return true;
+    if (runNorm.includes('brazil') && (id.includes('brazil') || region.includes('brazil') || order.includes('brazil'))) return true;
+    if (runNorm.includes('vancouver') && (id.includes('vancouver') || region.includes('vancouver') || order.includes('vancouver'))) return true;
+    if (runNorm === '1' || runNorm === 'run_01_baseline_advanced_pillars') return id.includes('x38') || id.includes('italy');
+    return false;
+  }) || allConfigs[0];
+
+  if (!matchedConfig) return null;
+
+  const swathObj = sarGroup.getObjectByName(`sar_constellation_${matchedConfig.id}`);
+  if (swathObj) {
+    swathObj.scale.set(1.03, 1.03, 1.03);
+    setTimeout(() => {
+      if (swathObj) swathObj.scale.set(1.0, 1.0, 1.0);
+    }, 1200);
+  }
+
+  return {
+    config: matchedConfig,
+    swathObject: swathObj,
+    type: 'sar_swath',
+    data: matchedConfig
+  };
 }
 
 /**
@@ -559,6 +663,8 @@ export function disposeSarTasking() {
 export default {
   SAR_SHELLS,
   initSarTasking,
+  addSarSwath,
+  loadHiddenTerrainSwaths,
   updateSarTasking,
   setSarTaskingVisibility,
   getSarTaskingVisibility,
@@ -568,6 +674,7 @@ export default {
   getSarDisplayMode,
   getInteractiveSarObjects,
   getSarPickableObjects,
+  highlightSwathForRun,
   exportStacTaskingOrder,
   disposeSarTasking
 };

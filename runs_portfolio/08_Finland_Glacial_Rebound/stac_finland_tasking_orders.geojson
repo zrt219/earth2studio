@@ -1,0 +1,218 @@
+{
+  "type": "FeatureCollection",
+  "stac_version": "1.0.0",
+  "features": [
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-ICEYE-X41-FINLAND-KVARKEN-REBOUND-001",
+      "bbox": [
+        20.8,
+        62.6,
+        22.8,
+        63.8
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              20.8,
+              62.6
+            ],
+            [
+              22.8,
+              62.6
+            ],
+            [
+              22.8,
+              63.8
+            ],
+            [
+              20.8,
+              63.8
+            ],
+            [
+              20.8,
+              62.6
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-14T00:00:00Z",
+        "platform": "ICEYE-X41",
+        "constellation": "ICEYE",
+        "instruments": [
+          "SAR-X"
+        ],
+        "sar:instrument_mode": "Spotlight",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV"
+        ],
+        "sar:product_type": "SLC",
+        "sar:resolution_range": 0.5,
+        "sar:resolution_azimuth": 0.5,
+        "view:incidence_angle": 34.1,
+        "view:look_angle": 30.2,
+        "sat:orbit_state": "ascending",
+        "sat:relative_orbit": 104,
+        "e2s:tip_trigger": "GEODYNAMICS-FINLAND-01 (Fennoscandian Glacial Isostatic Adjustment Uplift Bullseye)",
+        "e2s:max_gia_los_displacement_mm": 7.49,
+        "e2s:aps_fringes_removed": 3.71,
+        "e2s:rmse_reduction_pct": 99.26,
+        "tasking:priority": "HIGH_PRIORITY_CRUSTAL_UPLIFT",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-SYNSPECTIVE-STRIX4-FINLAND-BOG-BREATHING-002",
+      "bbox": [
+        23.5,
+        61.3,
+        25.5,
+        62.8
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              23.5,
+              61.3
+            ],
+            [
+              25.5,
+              61.3
+            ],
+            [
+              25.5,
+              62.8
+            ],
+            [
+              23.5,
+              62.8
+            ],
+            [
+              23.5,
+              61.3
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-14T00:00:00Z",
+        "platform": "StriX-4",
+        "constellation": "Synspective-StriX",
+        "instruments": [
+          "StriX-SAR-X"
+        ],
+        "sar:instrument_mode": "StripMap",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV",
+          "VH"
+        ],
+        "sar:product_type": "SLC-InSAR",
+        "sar:resolution_range": 3.0,
+        "sar:resolution_azimuth": 3.0,
+        "view:incidence_angle": 34.1,
+        "view:look_angle": 30.2,
+        "sat:orbit_state": "descending",
+        "sat:relative_orbit": 72,
+        "e2s:tip_trigger": "ECOLOGY-FINLAND-02 (Boreal Peatland Seasonal Bog Breathing & Carbon Reservoir Swelling)",
+        "e2s:breathing_area_km2": 122139.0,
+        "e2s:max_breathing_mm": 33.0,
+        "e2s:coherence_threshold": 0.35,
+        "e2s:min_peat_coherence": 0.18,
+        "tasking:priority": "PRIORITY_2_PEATLAND_BREATHING",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-CATALYST-INSAR-FINLAND-LAKE-ICE-003",
+      "bbox": [
+        25.0,
+        61.0,
+        29.8,
+        62.8
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              25.0,
+              61.0
+            ],
+            [
+              29.8,
+              61.0
+            ],
+            [
+              29.8,
+              62.8
+            ],
+            [
+              25.0,
+              62.8
+            ],
+            [
+              25.0,
+              61.0
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-14T00:00:00Z",
+        "platform": "CATALYST-InSAR-X",
+        "constellation": "Virtual-Radar-Stack",
+        "instruments": [
+          "CATALYST-SAR"
+        ],
+        "sar:instrument_mode": "Virtual-Stack",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV"
+        ],
+        "sar:product_type": "DInSAR-APS",
+        "sar:resolution_range": 1.0,
+        "sar:resolution_azimuth": 1.0,
+        "view:incidence_angle": 28.4,
+        "view:look_angle": 25.1,
+        "sat:orbit_state": "ascending",
+        "sat:relative_orbit": 45,
+        "e2s:tip_trigger": "HYDROLOGY-FINLAND-03 (Lake Saimaa & Lake P\u00e4ij\u00e4nne Ice Freeze-Thaw Radar Transitions)",
+        "e2s:frozen_ice_area_km2": 4860.0,
+        "e2s:open_water_area_km2": 6516.0,
+        "e2s:backscatter_contrast_db": 14.7,
+        "tasking:priority": "PRIORITY_1_LAKE_ICE_HYDROLOGY",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    }
+  ]
+}

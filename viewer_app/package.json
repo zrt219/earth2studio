@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node test/run_e2e_tests.js"
+    "test": "node test/run_e2e_tests.js && node test/hidden_terrain_targets.test.js && node test/geoint_sar_e2e.test.js && node test/run_gallery.test.js && node test/interactive_runs.test.js"
   },
   "dependencies": {
     "three": "^0.170.0"

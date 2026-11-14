@@ -1,0 +1,296 @@
+{
+  "type": "FeatureCollection",
+  "stac_version": "1.0.0",
+  "title": "OD-EARTH2-JAPAN Japan Abandoned Farmland Satoyama Weather-to-SAR Tip-and-Cue Orders",
+  "description": "Operational STAC v1.0.0 SAR constellation tasking schedule and CATALYST X-Band Tropospheric Phase Screen (APS) correction manifest for mountainous agricultural terraces in Niigata Chuetsu, Nagano Chikuma, and Shikoku Iya Valley.",
+  "features": [
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-SYNSPECTIVE-STRIX3-JAPAN-CHUETSU-001",
+      "bbox": [
+        138.4,
+        37.0,
+        139.1,
+        37.6
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              138.4,
+              37.0
+            ],
+            [
+              139.1,
+              37.0
+            ],
+            [
+              139.1,
+              37.6
+            ],
+            [
+              138.4,
+              37.6
+            ],
+            [
+              138.4,
+              37.0
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-13T00:00:00Z",
+        "platform": "StriX-3",
+        "constellation": "Synspective-StriX",
+        "instruments": [
+          "StriX-SAR-X"
+        ],
+        "sar:instrument_mode": "StripMap",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV",
+          "VH"
+        ],
+        "sar:product_type": "SLC-InSAR",
+        "sar:resolution_range": 3.0,
+        "sar:resolution_azimuth": 3.0,
+        "view:incidence_angle": 34.1,
+        "view:look_angle": 30.2,
+        "sat:orbit_state": "ascending",
+        "sat:relative_orbit": 52,
+        "e2s:tip_trigger": "HAZARD-JP-FARM-01 (Niigata Chuetsu Terraced Rice Paddy Levee Breach & Severe Baiu Storm Runoff)",
+        "e2s:coherence_threshold": 0.25,
+        "e2s:min_coherence_gamma": 0.06,
+        "e2s:abandoned_farmland_area_km2": 39.78,
+        "e2s:shallow_failure_area_km2": 27.99,
+        "catalyst:aps_ztd_mean_m": 2.2413,
+        "catalyst:aps_fringes_removed": 6.03,
+        "catalyst:rmse_reduction_pct": 98.38,
+        "tasking:priority": "URGENT_PRIORITY_1",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-SYNSPECTIVE-STRIX4-JAPAN-NAGANO-002",
+      "bbox": [
+        138.0,
+        36.4,
+        138.3,
+        36.7
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              138.0,
+              36.4
+            ],
+            [
+              138.3,
+              36.4
+            ],
+            [
+              138.3,
+              36.7
+            ],
+            [
+              138.0,
+              36.7
+            ],
+            [
+              138.0,
+              36.4
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-13T00:00:00Z",
+        "platform": "StriX-4",
+        "constellation": "Synspective-StriX",
+        "instruments": [
+          "StriX-SAR-X"
+        ],
+        "sar:instrument_mode": "Spotlight",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV"
+        ],
+        "sar:product_type": "SLC-Spotlight",
+        "sar:resolution_range": 1.0,
+        "sar:resolution_azimuth": 1.0,
+        "view:incidence_angle": 28.5,
+        "view:look_angle": 25.2,
+        "sat:orbit_state": "descending",
+        "sat:relative_orbit": 114,
+        "e2s:tip_trigger": "HAZARD-JP-FARM-02 (Nagano Obasute Terraced Escarpment Micro-Riser Slope Slumping)",
+        "e2s:coherence_threshold": 0.25,
+        "catalyst:aps_ztd_mean_m": 2.2413,
+        "catalyst:aps_fringes_removed": 31.6,
+        "catalyst:rmse_reduction_pct": 98.6,
+        "tasking:priority": "HIGH_RESOLUTION_TARGET",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-SYNSPECTIVE-STRIX1-JAPAN-SHIKOKU-003",
+      "bbox": [
+        133.5,
+        33.6,
+        134.4,
+        34.2
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              133.5,
+              33.6
+            ],
+            [
+              134.4,
+              33.6
+            ],
+            [
+              134.4,
+              34.2
+            ],
+            [
+              133.5,
+              34.2
+            ],
+            [
+              133.5,
+              33.6
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-13T00:00:00Z",
+        "platform": "StriX-1",
+        "constellation": "Synspective-StriX",
+        "instruments": [
+          "StriX-SAR-X"
+        ],
+        "sar:instrument_mode": "StripMap",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV",
+          "VH"
+        ],
+        "sar:product_type": "SLC-InSAR",
+        "sar:resolution_range": 3.0,
+        "sar:resolution_azimuth": 3.0,
+        "view:incidence_angle": 34.1,
+        "view:look_angle": 30.2,
+        "sat:orbit_state": "ascending",
+        "sat:relative_orbit": 29,
+        "e2s:tip_trigger": "HAZARD-JP-FARM-03 (Shikoku Iya Valley Ochiai Hamlet Bamboo Invasion & Typhoon Slope Failure)",
+        "e2s:coherence_threshold": 0.25,
+        "e2s:min_coherence_gamma": 0.06,
+        "e2s:abandoned_farmland_area_km2": 30.5,
+        "e2s:shallow_failure_area_km2": 13.99,
+        "catalyst:aps_ztd_mean_m": 2.2047,
+        "catalyst:aps_fringes_removed": 3.54,
+        "catalyst:rmse_reduction_pct": 95.82,
+        "tasking:priority": "EMERGENCY_TYPHOON_CUE",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/sar/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/sat/v1.0.0/schema.json"
+      ],
+      "id": "ORDER-CATALYST-INSAR-JAPAN-FARMLAND-004",
+      "bbox": [
+        133.0,
+        33.2,
+        139.5,
+        37.8
+      ],
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              133.0,
+              33.2
+            ],
+            [
+              139.5,
+              33.2
+            ],
+            [
+              139.5,
+              37.8
+            ],
+            [
+              133.0,
+              37.8
+            ],
+            [
+              133.0,
+              33.2
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "datetime": "2026-11-13T00:00:00Z",
+        "platform": "CATALYST-INSAR-STACK",
+        "constellation": "X-Band-Virtual-Constellation",
+        "instruments": [
+          "SAR-X"
+        ],
+        "sar:instrument_mode": "Differential-Repeat-Pass",
+        "sar:frequency_band": "X",
+        "sar:center_frequency": 9.65,
+        "sar:polarizations": [
+          "VV"
+        ],
+        "sar:product_type": "APS-Corrected-Interferogram",
+        "view:incidence_angle": 34.1,
+        "sat:orbit_state": "ascending",
+        "sat:relative_orbit": 52,
+        "e2s:tip_trigger": "HAZARD-JP-FARM-04 (Japan Mountainous Terraces High-Relief Stratified Tropospheric Phase Screen Correction)",
+        "catalyst:aps_ztd_mean_m": 2.2413,
+        "catalyst:aps_fringes_removed": 6.03,
+        "catalyst:rmse_reduction_pct": 98.38,
+        "tasking:priority": "ROUTINE_CALIBRATION",
+        "tasking:status": "LOCKED_SLANT_SWATH"
+      }
+    }
+  ]
+}

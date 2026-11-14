@@ -1,0 +1,70 @@
+{
+  "module": "od_experiments.geoint_sar.deep_geophysical_hazards",
+  "description": "Deep Geophysical Hazards Modeling: Witwatersrand gold reef subsidence & fault slip, Popocat\u00e9petl Mogi inflation, Siberian permafrost thaw & cryovolcanic craters.",
+  "compliance": "Rule e2s-014 Certified (Deterministic Physics, 0% Synthetic Noise, Strict origin='upper')",
+  "theaters": {
+    "south_africa_witwatersrand": {
+      "target_location": {
+        "name": "Witwatersrand Basin \u2014 Carletonville Gold Field (Mponeng / Savuka)",
+        "country": "South Africa",
+        "country_code": "ZA",
+        "lat": -26.435,
+        "lon": 27.428,
+        "depth_m": 3800.0,
+        "elevation_m": 1540.0,
+        "hazard_type": "Deep Tabular Reef Mining Subsidence & Induced Fault Slip",
+        "description": "World deepest tabular gold extraction reefs generating multidecimeter subsidence basins and M4+ induced seismic fault slip along Bank Fault."
+      },
+      "max_subsidence_m": 1.9485,
+      "max_fault_displacement_m": 2.4663,
+      "max_tilt_mm_per_m": 1.4689,
+      "insar_fringe_count": 162.71,
+      "wavelength_m": 0.031067
+    },
+    "mexico_popocatepetl": {
+      "target_location": {
+        "name": "Popocat\u00e9petl Stratovolcano Magma Chamber",
+        "country": "Mexico",
+        "country_code": "MX",
+        "lat": 19.0224,
+        "lon": -98.6278,
+        "depth_m": 6000.0,
+        "elevation_m": 5426.0,
+        "hazard_type": "Volcanic Magma Chamber Mogi Source Inflation & Eruptive Precursor",
+        "description": "Active stratovolcano in the Trans-Mexican Volcanic Belt with deep magma chamber overpressure driving axisymmetric crustal inflation."
+      },
+      "chamber_depth_m": 6000.0,
+      "chamber_radius_a_m": 1200.0,
+      "delta_overpressure_pa": 25000000.0,
+      "shear_modulus_g_pa": 12500000000.0,
+      "mogi_formula": "dr = 3*a^3*dP / (4*G) * (r / (r^2 + d^2)^(3/2))",
+      "max_vertical_uplift_cm": 7.2,
+      "max_horizontal_displacement_cm": 2.771,
+      "max_surface_tilt_microrad": 10.304,
+      "chamber_delta_volume_m3": 10857344.21,
+      "x_band_fringes": 4.11
+    },
+    "northern_russia_permafrost_crater": {
+      "target_location": {
+        "name": "Yamal Peninsula Seyakha Cryovolcanic Gas Blowout Crater (GEC-1)",
+        "country": "Russia",
+        "country_code": "RU",
+        "lat": 70.0167,
+        "lon": 70.3833,
+        "depth_m": 40.0,
+        "elevation_m": 28.0,
+        "hazard_type": "Permafrost Thermokarst Thaw & Cryovolcanic Methane Gas Blowout",
+        "description": "Sub-permafrost methane gas overpressurization resulting in pre-blowout pingo mound uplift and explosive crater formation with complete SAR decorrelation."
+      },
+      "stefan_mean_alt_m": 1.04,
+      "mean_thaw_settlement_cm": 47.367,
+      "max_thaw_settlement_cm": 55.147,
+      "pingo_mound_peak_uplift_m": 1.85,
+      "crater_void_depth_m": 38.0,
+      "ejecta_parapet_height_m": 2.4,
+      "sar_decorrelated_area_ha": 2.25
+    }
+  },
+  "figure_path": "outputs\\scientific_study_verified\\advanced_capabilities\\figures\\09_deep_geophysical_hazards.png",
+  "figure_sha256": "660855c05af8545b5eb9d24a543c7721b302f96e1a5ee4d7a12c49062bef29de"
+}

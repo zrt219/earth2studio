@@ -1,0 +1,202 @@
+{
+  "module": "od_experiments.geoint_sar.mexico_terrain",
+  "data_source": "NOAA_GFS_0P25_VERIFIED_TENSORS",
+  "compliance": "Rule e2s-014 Certified (Zero Synthetic Noise, Authentic GFS Tensors)",
+  "study_id": "OD-EARTH2-MEXICO-HIDDEN-TERRAIN",
+  "constellations": [
+    "ICEYE (ICEYE-X38)",
+    "Synspective (StriX-3)",
+    "CATALYST (X-Band InSAR Stack)"
+  ],
+  "theaters": {
+    "sierra_madre_copper_canyon": {
+      "bounds": {
+        "lat": [
+          24.0,
+          30.0
+        ],
+        "lon": [
+          -110.0,
+          -104.0
+        ]
+      },
+      "satellite": "ICEYE-X38",
+      "mode": "Spotlight (0.5m VV, Asc, Inc 28.4 deg)",
+      "elevation_range_m": [
+        35.0828857421875,
+        3316.699951171875
+      ],
+      "aps_metrics": {
+        "carrier_frequency_ghz": 9.65,
+        "wavelength_cm": 3.1067,
+        "incidence_angle_deg": 28.4,
+        "mean_ztd_m": 2.2752,
+        "min_ztd_m": 1.7544,
+        "max_ztd_m": 2.65,
+        "max_delta_slant_cm": 16.101,
+        "uncorrected_phase_rmse_rad": 30.7128,
+        "corrected_phase_rmse_rad": 0.2319,
+        "aps_fringes_removed": 17.33,
+        "rmse_reduction_pct": 99.24
+      },
+      "hazard_metrics": {
+        "flood_threshold_db": -16.5,
+        "min_sigma0_vv_db": -22.03,
+        "mean_land_sigma0_vv_db": -6.96,
+        "inundated_pixels": 6581,
+        "inundated_area_km2": 2947.66,
+        "coherence_threshold": 0.32,
+        "min_coherence_gamma": 0.06,
+        "mean_coherence_gamma": 0.577,
+        "decorrelated_slope_pixels": 2148,
+        "high_risk_slope_area_km2": 532.64
+      },
+      "precip_max_mm_per_hr": 116.16
+    },
+    "trans_mexican_volcanic_belt": {
+      "bounds": {
+        "lat": [
+          18.0,
+          20.8
+        ],
+        "lon": [
+          -104.0,
+          -96.0
+        ]
+      },
+      "satellite": "StriX-3",
+      "mode": "StripMap (3.0m VV/VH, Desc, Inc 34.1 deg)",
+      "elevation_range_m": [
+        5.0,
+        5636.0
+      ],
+      "aps_metrics": {
+        "carrier_frequency_ghz": 9.65,
+        "wavelength_cm": 3.1067,
+        "incidence_angle_deg": 34.1,
+        "mean_ztd_m": 2.1018,
+        "min_ztd_m": 1.2194,
+        "max_ztd_m": 2.5795,
+        "max_delta_slant_cm": 17.908,
+        "uncorrected_phase_rmse_rad": 23.5187,
+        "corrected_phase_rmse_rad": 0.2302,
+        "aps_fringes_removed": 17.59,
+        "rmse_reduction_pct": 99.02
+      },
+      "hazard_metrics": {
+        "flood_threshold_db": -16.5,
+        "min_sigma0_vv_db": -22.98,
+        "mean_land_sigma0_vv_db": -5.72,
+        "inundated_pixels": 1614,
+        "inundated_area_km2": 749.82,
+        "coherence_threshold": 0.32,
+        "min_coherence_gamma": 0.06,
+        "mean_coherence_gamma": 0.396,
+        "decorrelated_slope_pixels": 4538,
+        "high_risk_slope_area_km2": 1158.07
+      },
+      "precip_max_mm_per_hr": 288.57
+    }
+  },
+  "target_cities": [
+    {
+      "id": "mx_copper_canyon",
+      "country": "Mexico",
+      "countryCode": "MX",
+      "name": "Copper Canyon (Divisadero)",
+      "region": "Chihuahua / Sierra Madre Occidental",
+      "lat": 27.5322,
+      "lon": -107.8214,
+      "elevM": 2250,
+      "zoomDistance": 5.95,
+      "sensorSuite": "ICEYE-X38 (0.5m Spotlight) + StriX-3 (3.0m StripMap)",
+      "sarSatelliteId": "ICEYE-X38",
+      "incidenceAngleDeg": 28.4,
+      "apsStatus": "CATALYST Canyon Wall High-Relief Delay Active",
+      "apsZtdM": 2.0542,
+      "fringesRemoved": 24.6,
+      "rmseReductionPct": 98.45,
+      "roleSummary": "Deep vertical canyon incision (1800m drop from rim to Urique floor), extreme tropospheric delay gradient, and catastrophic monsoon slope wash."
+    },
+    {
+      "id": "mx_orizaba",
+      "country": "Mexico",
+      "countryCode": "MX",
+      "name": "Pico de Orizaba (Citlalt\u00e9petl)",
+      "region": "Veracruz-Puebla / Trans-Mexican Volcanic Belt",
+      "lat": 19.03,
+      "lon": -97.269,
+      "elevM": 5636,
+      "zoomDistance": 5.9,
+      "sensorSuite": "StriX-3 (SLC-InSAR) + CATALYST X-Band APS",
+      "sarSatelliteId": "STRIX-3",
+      "incidenceAngleDeg": 34.1,
+      "apsStatus": "CATALYST Stratified Orographic Delay Compensated",
+      "apsZtdM": 1.348,
+      "fringesRemoved": 42.15,
+      "rmseReductionPct": 98.92,
+      "roleSummary": "Highest volcanic summit in North America (5636m), colossal 1.25m base-to-summit ZTD differential, and torrential windward Gulf/Pacific moisture lift."
+    },
+    {
+      "id": "mx_popocatepetl",
+      "country": "Mexico",
+      "countryCode": "MX",
+      "name": "Popocat\u00e9petl Volcano",
+      "region": "State of Mexico-Puebla / Trans-Mexican Volcanic Belt",
+      "lat": 19.0225,
+      "lon": -98.6278,
+      "elevM": 5426,
+      "zoomDistance": 5.92,
+      "sensorSuite": "StriX-3 StripMap + ICEYE-X38 Lahar Cue",
+      "sarSatelliteId": "STRIX-3",
+      "incidenceAngleDeg": 34.1,
+      "apsStatus": "CATALYST Active Volcanic Phase Screen Correction",
+      "apsZtdM": 1.391,
+      "fringesRemoved": 38.8,
+      "rmseReductionPct": 98.67,
+      "roleSummary": "Active stratovolcano with steep ash/lava slopes, intense orographic tropical storm rainbands, and high-risk lahar channel coherence loss."
+    },
+    {
+      "id": "mx_culiacan_valley",
+      "country": "Mexico",
+      "countryCode": "MX",
+      "name": "Culiac\u00e1n Alluvial Valley",
+      "region": "Sinaloa / Pacific Coastal Plain",
+      "lat": 24.8054,
+      "lon": -107.394,
+      "elevM": 55,
+      "zoomDistance": 6.0,
+      "sensorSuite": "ICEYE-X38 Spotlight (\u03c3\u2070 < -16.5 dB Flood Mask)",
+      "sarSatelliteId": "ICEYE-X38",
+      "incidenceAngleDeg": 28.4,
+      "apsStatus": "CATALYST Coastal Humid Marine Delay Ready",
+      "apsZtdM": 2.518,
+      "fringesRemoved": 15.3,
+      "rmseReductionPct": 98.2,
+      "roleSummary": "Pacific coastal plain drainage basin receiving catastrophic Sierra Madre runoff, extensive agricultural flood specular backscatter."
+    },
+    {
+      "id": "mx_colima_volcano",
+      "country": "Mexico",
+      "countryCode": "MX",
+      "name": "Volc\u00e1n de Colima (Fuego)",
+      "region": "Colima-Jalisco / Western Volcanic Belt",
+      "lat": 19.5124,
+      "lon": -103.6174,
+      "elevM": 3820,
+      "zoomDistance": 5.95,
+      "sensorSuite": "StriX-3 InSAR Coherence + CATALYST APS",
+      "sarSatelliteId": "STRIX-3",
+      "incidenceAngleDeg": 34.1,
+      "apsStatus": "CATALYST Pacific Moisture Plume Compensation",
+      "apsZtdM": 1.724,
+      "fringesRemoved": 28.4,
+      "rmseReductionPct": 98.54,
+      "roleSummary": "Pacific-facing volcanic edifice directly exposed to Eastern Pacific tropical cyclones, steep pyroclastic slope decorrelation."
+    }
+  ],
+  "stac_orders_file": "outputs\\scientific_study_verified\\advanced_capabilities\\mexico_stac_tasking_orders.geojson",
+  "stac_orders_sha256": "7adad42c640581efc82543cb4cfe991332417b851ee39cafc0179c16f24b0788",
+  "stac_orders_count": 3,
+  "figure": "outputs\\scientific_study_verified\\advanced_capabilities\\figures\\07_mexico_hidden_terrain_geoint.png"
+}

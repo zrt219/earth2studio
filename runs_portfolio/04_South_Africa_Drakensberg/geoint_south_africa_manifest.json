@@ -1,0 +1,100 @@
+{
+  "module": "od_experiments.geoint_sar.south_africa_terrain",
+  "theater": "South Africa Hidden Terrain (Drakensberg Escarpment, Lesotho, Cape Fold, Tugela/Durban)",
+  "data_source": "NOAA_GFS_0P25_VERIFIED_TENSORS",
+  "compliance": "Rule e2s-014 Certified (Zero Synthetic Noise, Authentic GFS Tensors, Explicit origin='upper')",
+  "bounds": {
+    "lat_north": -26.0,
+    "lat_south": -35.0,
+    "lon_west": 18.0,
+    "lon_east": 33.0
+  },
+  "target_coordinates": {
+    "za_thabana_ntlenyana": {
+      "name": "Thabana Ntlenyana (Lesotho Highest Summit)",
+      "country": "Lesotho",
+      "country_code": "LS",
+      "lat": -29.4686,
+      "lon": 29.2694,
+      "elevation_m": 3482.0,
+      "significance": "Highest mountain in Southern Africa; summit of the Drakensberg Escarpment"
+    },
+    "za_mont_aux_sources": {
+      "name": "Mont-aux-Sources & Tugela Falls",
+      "country": "South Africa",
+      "country_code": "ZA",
+      "lat": -28.75,
+      "lon": 28.8833,
+      "elevation_m": 3282.0,
+      "significance": "Source of Tugela River; 948m waterfall cliff face into KwaZulu-Natal"
+    },
+    "za_durban": {
+      "name": "Durban Coastal Plain & Harbour",
+      "country": "South Africa",
+      "country_code": "ZA",
+      "lat": -29.8587,
+      "lon": 31.0218,
+      "elevation_m": 15.0,
+      "significance": "Subtropical coastal city; high vulnerability to cutoff-low flash flooding"
+    },
+    "za_tugela_mouth": {
+      "name": "Tugela River Estuary & Alluvial Basin",
+      "country": "South Africa",
+      "country_code": "ZA",
+      "lat": -29.22,
+      "lon": 31.5,
+      "elevation_m": 8.0,
+      "significance": "Discharge corridor for Drakensberg catchment into Indian Ocean"
+    },
+    "za_swartberg_pass": {
+      "name": "Swartberg Pass (Cape Fold Belt)",
+      "country": "South Africa",
+      "country_code": "ZA",
+      "lat": -33.35,
+      "lon": 22.05,
+      "elevation_m": 1583.0,
+      "significance": "Steep anticlinal quartzite gorge separating Great Karoo from Little Karoo"
+    },
+    "za_cape_town": {
+      "name": "Cape Town & Table Mountain",
+      "country": "South Africa",
+      "country_code": "ZA",
+      "lat": -33.9249,
+      "lon": 18.4241,
+      "elevation_m": 25.0,
+      "significance": "Southwestern apex of Cape Fold Belt; convergence of cold Benguela & warm Agulhas"
+    }
+  },
+  "x_band_physics": {
+    "carrier_frequency_ghz": 9.65,
+    "wavelength_cm": 3.1067,
+    "half_wavelength_fringe_cm": 1.5533
+  },
+  "aps_correction_metrics": {
+    "carrier_frequency_ghz": 9.65,
+    "wavelength_cm": 3.1067,
+    "incidence_angle_deg": 34.1,
+    "mean_ztd_m": 2.2831,
+    "max_delta_slant_cm": 10.82,
+    "uncorrected_phase_rmse_rad": 15.7448,
+    "corrected_phase_rmse_rad": 0.1789,
+    "aps_fringes_removed": 10.42,
+    "rmse_reduction_pct": 98.86
+  },
+  "hazard_attribution_metrics": {
+    "flood_threshold_db": -16.5,
+    "min_sigma0_vv_db": -28.86,
+    "mean_land_sigma0_vv_db": -7.63,
+    "inundated_pixels": 8,
+    "inundated_area_km2": 18.5,
+    "coherence_threshold": 0.32,
+    "min_coherence_gamma": 0.08,
+    "mean_coherence_gamma": 0.706,
+    "decorrelated_slope_pixels": 6895,
+    "high_risk_slope_area_km2": 826.78
+  },
+  "stac_orders_file": "outputs\\scientific_study_verified\\advanced_capabilities\\stac_south_africa_tasking_orders.geojson",
+  "stac_orders_sha256": "61f6e276b2e427b2e55443093aa319e1271dedbe38d388066ec4157962dea369",
+  "stac_orders_count": 3,
+  "figure": "outputs\\scientific_study_verified\\advanced_capabilities\\figures\\07_geoint_south_africa_hidden_terrain.png"
+}

@@ -414,6 +414,763 @@
       border-color: #ef4444;
     }
 
+    /* Modern Glassmorphic Run Gallery Modal */
+    #runs-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(2, 6, 23, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 110;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .runs-modal-content {
+      max-width: 1200px;
+      width: 100%;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 22px 26px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75), 0 0 30px rgba(56, 189, 248, 0.12);
+    }
+
+    .runs-modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 12px;
+    }
+
+    .runs-modal-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .runs-count-badge {
+      font-size: 0.70rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: rgba(56, 189, 248, 0.16);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+    }
+
+    .runs-modal-subtitle {
+      font-size: 0.74rem;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
+    /* Live Search & Filter Bar */
+    .runs-search-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 0 2px 0;
+      flex-wrap: wrap;
+    }
+
+    .runs-search-input-box {
+      flex: 1;
+      min-width: 260px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .runs-search-input-box .search-icon {
+      position: absolute;
+      left: 10px;
+      font-size: 0.8rem;
+      color: #64748b;
+      pointer-events: none;
+    }
+
+    #runs-search-input {
+      width: 100%;
+      padding: 7px 32px 7px 32px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      color: #f1f5f9;
+      font-size: 0.76rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    #runs-search-input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.3);
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    #runs-search-input::placeholder {
+      color: #64748b;
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 8px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 0.72rem;
+      padding: 2px 5px;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .search-clear-btn:hover {
+      color: #f87171;
+    }
+
+    .runs-search-summary {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+
+    .runs-filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 4px 0;
+    }
+
+    .runs-filter-btn {
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 0.73rem;
+      font-weight: 600;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .runs-filter-btn:hover {
+      background: rgba(30, 41, 59, 0.95);
+      color: #f1f5f9;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .runs-filter-btn.active {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: #38bdf8;
+      color: #38bdf8;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    }
+
+    .runs-filter-btn .filter-count {
+      padding: 1px 6px;
+      font-size: 0.64rem;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+    }
+
+    .runs-filter-btn.active .filter-count {
+      background: rgba(56, 189, 248, 0.35);
+      color: #ffffff;
+    }
+
+    .runs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 16px;
+      padding: 4px 1px;
+    }
+
+    .run-card {
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .run-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.45);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.15);
+    }
+
+    .run-card-thumb-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #090d16;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .run-card-thumb-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transition: transform 0.3s ease;
+      display: block;
+    }
+
+    .run-card-thumb-wrap:hover img {
+      transform: scale(1.05);
+    }
+
+    .run-thumb-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, transparent 0%, rgba(2, 6, 23, 0.88) 100%);
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      opacity: 0.95;
+    }
+
+    .run-thumb-zoom-badge {
+      font-size: 0.65rem;
+      color: #cbd5e1;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      padding: 2px 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .run-card-body {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .run-card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .run-cat-pill {
+      font-size: 0.63rem;
+      font-weight: 700;
+      border-radius: 9999px;
+      padding: 2px 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .run-num-badge {
+      font-size: 0.66rem;
+      font-weight: 800;
+      color: #94a3b8;
+      font-family: monospace;
+    }
+
+    .run-card-title {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #f8fafc;
+      line-height: 1.35;
+    }
+
+    .run-card-desc {
+      font-size: 0.71rem;
+      color: #cbd5e1;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 2px;
+    }
+
+    .run-card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .run-tag {
+      font-size: 0.61rem;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #94a3b8;
+      border-radius: 4px;
+      padding: 2px 5px;
+      white-space: nowrap;
+    }
+
+    .run-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      margin-top: auto;
+    }
+
+    .run-card-coords {
+      font-size: 0.65rem;
+      color: #94a3b8;
+      font-family: monospace;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .btn-fly-theater {
+      padding: 5px 11px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 6px;
+      background: rgba(2, 132, 199, 0.25);
+      border: 1px solid #0284c7;
+      color: #e0f2fe;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-fly-theater:hover {
+      background: #0284c7;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.5);
+    }
+
+    .btn-activate-swath {
+      padding: 5px 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 6px;
+      background: rgba(16, 185, 129, 0.22);
+      border: 1px solid #10b981;
+      color: #a7f3d0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-activate-swath:hover {
+      background: #10b981;
+      color: #022c22;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+    }
+
+    .btn-inspect-stac {
+      padding: 5px 9px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border-radius: 6px;
+      background: rgba(148, 163, 184, 0.15);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: #cbd5e1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-inspect-stac:hover {
+      background: rgba(148, 163, 184, 0.3);
+      color: #ffffff;
+      border-color: #94a3b8;
+    }
+
+    /* Lightbox Modal & Comparison Split Slider */
+    #run-lightbox-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(2, 6, 23, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 120;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .lightbox-content {
+      max-width: 1200px;
+      width: 100%;
+      max-height: 94vh;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 18px 22px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85);
+    }
+
+    .lightbox-body {
+      flex: 1;
+      max-height: calc(88vh - 120px);
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #050811;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 8px;
+    }
+
+    .lightbox-body img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    .lightbox-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .lightbox-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 4px;
+    }
+
+    .lightbox-mode-toggle {
+      display: flex;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .lightbox-toggle-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.70rem;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .lightbox-toggle-btn:hover {
+      color: #f1f5f9;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .lightbox-toggle-btn.active {
+      background: rgba(56, 189, 248, 0.22);
+      color: #38bdf8;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+    }
+
+    .lightbox-split-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 480px;
+      overflow: hidden;
+      border-radius: 6px;
+      background: #020617;
+      user-select: none;
+    }
+
+    .split-image-before, .split-image-after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .split-image-before img, .split-image-after img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .split-image-after {
+      width: 50%;
+      border-right: 2px solid #38bdf8;
+      background: #020617;
+      z-index: 2;
+    }
+
+    .split-label {
+      position: absolute;
+      bottom: 12px;
+      padding: 4px 10px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      border-radius: 6px;
+      z-index: 5;
+      letter-spacing: 0.5px;
+      pointer-events: none;
+    }
+
+    .before-label {
+      right: 14px;
+      background: rgba(239, 68, 68, 0.3);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+    }
+
+    .after-label {
+      left: 14px;
+      background: rgba(16, 185, 129, 0.3);
+      border: 1px solid #10b981;
+      color: #a7f3d0;
+    }
+
+    .split-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      background: #38bdf8;
+      z-index: 10;
+      pointer-events: none;
+      transform: translateX(-50%);
+    }
+
+    .split-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #0284c7;
+      border: 2px solid #ffffff;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.6), 0 0 14px rgba(56, 189, 248, 0.5);
+    }
+
+    .split-slider-range {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: ew-resize;
+      z-index: 15;
+      margin: 0;
+    }
+
+    /* STAC Inspector Modal */
+    #stac-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(2, 6, 23, 0.90);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 125;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .stac-modal-content {
+      max-width: 920px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 20px 24px;
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(52, 211, 153, 0.12);
+    }
+
+    .stac-modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+    }
+
+    .stac-modal-meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 2px 0;
+    }
+
+    .stac-modal-body {
+      flex: 1;
+      max-height: calc(75vh - 120px);
+      overflow-y: auto;
+      background: #060913;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .stac-code-block {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.73rem;
+      line-height: 1.5;
+      color: #a7f3d0;
+      white-space: pre-wrap;
+      word-break: break-all;
+      user-select: text;
+    }
+
+    .stac-modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Bottom HUD Quick-Run Carousel */
+    .hud-quick-runs {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 12;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      max-width: calc(100vw - 60px);
+      overflow-x: auto;
+      border-radius: 9999px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .hud-quick-runs::-webkit-scrollbar {
+      height: 3px;
+    }
+
+    .hud-quick-runs::-webkit-scrollbar-thumb {
+      background: rgba(56, 189, 248, 0.3);
+      border-radius: 2px;
+    }
+
+    .quick-runs-header {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .quick-runs-title {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: 0.5px;
+      margin-right: 4px;
+    }
+
+    .quick-runs-scroll {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .quick-run-chip {
+      padding: 3px 9px;
+      font-size: 0.66rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .quick-run-chip:hover {
+      background: rgba(30, 41, 59, 0.95);
+      color: #ffffff;
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    .quick-run-chip.active {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: #38bdf8;
+      color: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+    }
+
     /* Screen-Space Pinned POI Popup Card */
     #poi-popup-card {
       position: absolute;
@@ -1097,6 +1854,7 @@
 
   <!-- Floating Quick-Action Toolbar -->
   <div id="quick-toolbar" class="glass-card" role="toolbar" aria-label="Mission Quick Toolbar">
+    <button id="btn-toolbar-runs" class="toolbar-btn" aria-label="Browse 11 Scientific Runs" data-tooltip="Explore all 11 scientific research runs across Baseline Pillars, Hidden Terrains, Multi-Band Physics, and Global Synoptic Theaters.">🖼️ Runs</button>
     <button id="btn-toolbar-cities" class="toolbar-btn" aria-label="Target Cities" aria-pressed="false" data-tooltip="Focus Italy/Japan target cities inside the 131K Sentinel-2 regional crops.">📍 Cities</button>
     <button id="btn-toolbar-tour" class="toolbar-btn" aria-label="Launch 6-Step Executive Tour" data-tooltip="Start the 6-step guided tour of flood masks, slope risk, and CATALYST APS noise removal.">🎓 Tour</button>
     <button id="btn-toolbar-sar" class="toolbar-btn" aria-label="Toggle SAR Orbits & Swaths" aria-pressed="false" data-tooltip="Show or hide ICEYE-X38 & Synspective StriX-3 X-band orbits, look-cones, and ground swaths.">🛰 SAR</button>
@@ -1206,6 +1964,14 @@
       <button id="fly-global" aria-label="Fly to Global View" data-tooltip="Reset camera to full planetary overview (0°N, 0°E).">🌍 Global</button>
       <button id="fly-italy" aria-label="Fly to Italy Domain" data-tooltip="Center boresight over Italy & Po Valley ICEYE-X38 flood corridor.">🇮🇹 Italy (Med.)</button>
       <button id="fly-japan" aria-label="Fly to Japan Domain" data-tooltip="Center boresight over Japan & Honshu StriX-3 typhoon corridor.">🇯🇵 Japan (Pac.)</button>
+      <button id="fly-south-africa" aria-label="Fly to South Africa" data-tooltip="Center boresight over Drakensberg Escarpment & Bushveld Complex.">🇿🇦 South Africa</button>
+      <button id="fly-mexico" aria-label="Fly to Mexico" data-tooltip="Center boresight over Sierra Madre Oriental & Popocatépetl.">🇲🇽 Mexico</button>
+      <button id="fly-russia" aria-label="Fly to Northern Russia" data-tooltip="Center boresight over Putorana Plateau & Lena River.">🇷🇺 Russia</button>
+      <button id="fly-southern-italy" aria-label="Fly to Southern Italy" data-tooltip="Center boresight over Mount Etna & Campi Flegrei.">🌋 S. Italy</button>
+      <button id="fly-finland" aria-label="Fly to Finland" data-tooltip="Center boresight over Kvarken Archipelago & Fennoscandian uplift.">🇫🇮 Finland</button>
+      <button id="fly-japan-farmland" aria-label="Fly to Japan Satoyama" data-tooltip="Center boresight over Yamakoshi terraced paddy levee breach corridor.">🌾 JP Farmland</button>
+      <button id="fly-brazil" aria-label="Fly to Brazil" data-tooltip="Center boresight over Serra do Mar escarpments & Pantanal wetland.">🇧🇷 Brazil</button>
+      <button id="fly-vancouver" aria-label="Fly to Vancouver" data-tooltip="Center boresight over Fraser River Delta & Coast Mountains.">🇨🇦 Vancouver</button>
       <button id="fly-americas" aria-label="Fly to Americas" data-tooltip="Center boresight over North America synoptic domain.">🌎 Americas</button>
       <button id="fly-arctic" aria-label="Fly to Arctic" data-tooltip="Inspect North Polar atmospheric circulation.">❄️ Arctic</button>
       <button id="fly-antarctic" aria-label="Fly to Antarctic" data-tooltip="Inspect South Polar atmospheric circulation.">🇦🇶 Antarctic</button>
@@ -1213,8 +1979,8 @@
 
     <!-- Interactive Italy & Japan City Target Picker -->
     <div class="control-label">
-      <span>Target Cities (Italy &amp; Japan) <button class="help-chip" data-help-topic="cities" title="Explain Precision City Beacons">?</button></span>
-      <button id="layer-cities" aria-label="Toggle City Beacons" aria-pressed="false" data-tooltip="Show or hide 13 clickable 3D city target beacons across Italy and Japan." style="padding:2px 7px; font-size:0.65rem;">📍 Beacons</button>
+      <span>Target Cities (10 Synoptic Theaters) <button class="help-chip" data-help-topic="cities" title="Explain Precision City Beacons">?</button></span>
+      <button id="layer-cities" aria-label="Toggle City Beacons" aria-pressed="false" data-tooltip="Show or hide 60 clickable 3D city target beacons across 10 synoptic theaters." style="padding:2px 7px; font-size:0.65rem;">📍 Beacons</button>
     </div>
     <div id="city-picker-group">
       <input type="text" id="city-search-input" class="city-search-input" placeholder="🔍 Search cities (e.g. Milan, Tokyo, Rome, Fuji)..." aria-label="Search Target Cities" data-tooltip="Type to filter cities; press Enter to fly to top match." />
@@ -1237,6 +2003,77 @@
           <option value="jp_osaka">Osaka / Kansai</option>
           <option value="jp_kyoto">Kyoto / Lake Biwa</option>
           <option value="jp_sendai">Sendai / Tohoku</option>
+        </select>
+        <select id="city-select-south-africa" class="city-select" aria-label="Select 🇿🇦 South Africa Cities..." data-tooltip="Fly directly to verified targets.">
+          <option value="">🇿🇦 South Africa Cities...</option>
+          <option value="za_thabana_ntlenyana">Thabana Ntlenyana (Lesotho Highest Summit)</option>
+          <option value="za_mont_aux_sources">Mont-aux-Sources & Tugela Falls</option>
+          <option value="za_durban">Durban Coastal Plain & Harbour</option>
+          <option value="za_tugela_mouth">Tugela River Estuary & Basin</option>
+          <option value="za_swartberg_pass">Swartberg Pass (Cape Fold Belt)</option>
+          <option value="za_cape_town">Cape Town & Table Mountain</option>
+        </select>
+        <select id="city-select-mexico" class="city-select" aria-label="Select 🇲🇽 Mexico Cities..." data-tooltip="Fly directly to verified targets.">
+          <option value="">🇲🇽 Mexico Cities...</option>
+          <option value="mx_copper_canyon">Copper Canyon (Divisadero)</option>
+          <option value="mx_orizaba">Pico de Orizaba (Citlaltépetl)</option>
+          <option value="mx_popocatepetl">Popocatépetl Volcano</option>
+          <option value="mx_culiacan_valley">Culiacán Alluvial Valley</option>
+          <option value="mx_colima_volcano">Volcán de Colima (Fuego)</option>
+        </select>
+        <select id="city-select-russia" class="city-select" aria-label="Select 🇷🇺 Russia Cities..." data-tooltip="Fly directly to verified targets.">
+          <option value="">🇷🇺 Russia Cities...</option>
+          <option value="ru_putorana_kamen">Mount Kamen / Putorana Plateau</option>
+          <option value="ru_norilsk_traps">Norilsk Basalt Escarpment</option>
+          <option value="ru_verkhoyansk_pole">Verkhoyansk Cold Pole</option>
+          <option value="ru_batagay_megaslump">Batagay Permafrost Thaw Megaslump</option>
+          <option value="ru_yakutsk_lena_jam">Yakutsk Lena River Floodplain</option>
+          <option value="ru_pokrovsk_choke">Pokrovsk Lena Ice-Jam Choke Point</option>
+        </select>
+        <select id="city-select-southern-italy" class="city-select" aria-label="Select 🌋 Southern Italy Cities..." data-tooltip="Fly directly to verified targets.">
+          <option value="">🌋 Southern Italy Cities...</option>
+          <option value="it_mount_etna">Mount Etna (Summit & East Flank Collapse)</option>
+          <option value="it_campi_flegrei">Campi Flegrei Caldera (Pozzuoli / Solfatara)</option>
+          <option value="it_aspromonte_sila">Aspromonte & Sila Crystalline Massifs</option>
+          <option value="it_apulia_karst">Alta Murgia & Salento Karst Basin</option>
+          <option value="it_catania_simeto">Catania Coastal Plain & Simeto Alluvial Basin</option>
+          <option value="it_vesuvius">Somma-Vesuvius Volcanic Complex</option>
+        </select>
+        <select id="city-select-finland" class="city-select" aria-label="Select 🇫🇮 Finland Cities..." data-tooltip="Fly directly to verified targets.">
+          <option value="">🇫🇮 Finland Cities...</option>
+          <option value="fi_kvarken_vaasa">Kvarken Archipelago / Vaasa</option>
+          <option value="fi_saimaa_lake">Lake Saimaa (Savonlinna / Linnansaari)</option>
+          <option value="fi_paijanne_lake">Lake Päijänne (Jyväskylä / Tehi)</option>
+          <option value="fi_siikaneva_peatland">Siikaneva Boreal Peatland Complex</option>
+          <option value="fi_martimoaapa_mire">Martimoaapa Aapa Mire / Kemi</option>
+          <option value="fi_halti_lapland">Halti Fell / Kilpisjärvi</option>
+        </select>
+        <select id="city-select-japan-farmland" class="city-select" aria-label="Select 🌾 Japan Farmland..." data-tooltip="Fly directly to verified targets.">
+          <option value="">🌾 Japan Farmland...</option>
+          <option value="jp_yamakoshi_tanada">Yamakoshi Terraced Rice Paddies (山古志の棚田)</option>
+          <option value="jp_hoshitoge_tanada">Hoshitoge Terraced Paddies (星峠の棚田)</option>
+          <option value="jp_obasute_tanada">Obasute Terraced Paddies (姨捨の棚田)</option>
+          <option value="jp_iya_valley_terrace">Iya Valley Ochiai Terraced Hamlet (祖谷渓 落合集落)</option>
+          <option value="jp_kamikatsu_terrace">Kamikatsu Kashihara Terraces (樫原の棚田)</option>
+          <option value="jp_shiroyone_senmaida">Shiroyone Senmaida (白米千枚田)</option>
+        </select>
+        <select id="city-select-brazil" class="city-select" aria-label="Select 🇧🇷 Brazil Cities..." data-tooltip="Fly directly to verified targets.">
+          <option value="">🇧🇷 Brazil Cities...</option>
+          <option value="br_sao_sebastiao">São Sebastião Coastal Escarpment</option>
+          <option value="br_petropolis">Petrópolis Granitic Escarpment</option>
+          <option value="br_corumba_pantanal">Corumbá Upper Paraguay Wetland</option>
+          <option value="br_cuiaba_pantanal">Cuiabá River Wetland Basin</option>
+          <option value="br_sinop_arc">Sinop Deforestation Frontier</option>
+          <option value="br_alta_floresta_frontier">Alta Floresta Teles Pires Basin</option>
+        </select>
+        <select id="city-select-vancouver" class="city-select" aria-label="Select 🇨🇦 Vancouver Cities..." data-tooltip="Fly directly to verified targets.">
+          <option value="">🇨🇦 Vancouver Cities...</option>
+          <option value="van_roberts_bank">Roberts Bank Superport & Deltaport</option>
+          <option value="van_richmond_lulu">Richmond & Lulu Island (Fraser Delta)</option>
+          <option value="van_garibaldi_summit">Mount Garibaldi & Cayley Massif</option>
+          <option value="van_howe_sound">Howe Sound Fjord & Squamish Escarpment</option>
+          <option value="van_yvr_airport">Sea Island & Vancouver International (YVR)</option>
+          <option value="van_sumas_prairie">Sumas Prairie & Fraser Lowland Basin</option>
         </select>
       </div>
       <div class="btn-group">
@@ -1368,6 +2205,133 @@
     </div>
   </div>
 
+  <!-- Modern Glassmorphic 3D Twin Run Gallery Modal -->
+  <div id="runs-modal" class="hidden" role="dialog" aria-label="3D Twin Scientific Run Gallery">
+    <div class="runs-modal-content glass-card">
+      <div class="runs-modal-header">
+        <div class="runs-modal-title-wrap">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="tour-badge" style="background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">VERIFIED SCIENTIFIC RUN CATALOG</span>
+            <span class="runs-count-badge" id="runs-active-count">11 Runs</span>
+          </div>
+          <div class="modal-title" style="margin-top: 4px;">🖼️ 3D Twin Scientific Run Gallery</div>
+          <div class="runs-modal-subtitle">
+            Browse all 11 verified research runs · High-resolution publication figures from <code>/runs/</code> · 1-click 3D camera theater navigation
+          </div>
+        </div>
+        <button id="runs-modal-close" class="close-btn" aria-label="Close Run Gallery">×</button>
+      </div>
+
+      <!-- Live Search and Filter Controls -->
+      <div class="runs-search-bar-wrap">
+        <div class="runs-search-input-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="runs-search-input" placeholder="Search runs by theater, country, sensor (ICEYE, StriX), hazard (volcano, flood, subsidence), or keyword..." aria-label="Search scientific runs" autocomplete="off" />
+          <button id="runs-search-clear" class="search-clear-btn" title="Clear search" aria-label="Clear search">✕</button>
+        </div>
+        <div id="runs-search-summary" class="runs-search-summary">Showing 11 runs</div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="runs-filter-bar" role="tablist" aria-label="Run Categories">
+        <button class="runs-filter-btn active" data-category="ALL" role="tab" aria-selected="true">
+          All Runs <span class="filter-count">11</span>
+        </button>
+        <button class="runs-filter-btn" data-category="Baseline Pillars" role="tab" aria-selected="false">
+          🏛️ Baseline Pillars <span class="filter-count">1</span>
+        </button>
+        <button class="runs-filter-btn" data-category="Hidden Terrains" role="tab" aria-selected="false">
+          🏔️ Hidden Terrains <span class="filter-count">3</span>
+        </button>
+        <button class="runs-filter-btn" data-category="Multi-Band & Deep Hazards" role="tab" aria-selected="false">
+          ⚡ Multi-Band &amp; Deep Hazards <span class="filter-count">2</span>
+        </button>
+        <button class="runs-filter-btn" data-category="Global Synoptic Theaters" role="tab" aria-selected="false">
+          🌐 Global Synoptic Theaters <span class="filter-count">5</span>
+        </button>
+      </div>
+
+      <!-- Runs Grid Container -->
+      <div id="runs-grid" class="runs-grid">
+        <!-- Rendered dynamically by uiController.renderRunsGallery() -->
+      </div>
+    </div>
+  </div>
+
+  <!-- High-Resolution Run Figure Lightbox Modal -->
+  <div id="run-lightbox-modal" class="hidden" role="dialog" aria-label="Publication Figure Lightbox">
+    <div class="lightbox-content glass-card">
+      <div class="modal-header">
+        <div>
+          <span id="lightbox-badge" class="tour-badge">PUBLICATION FIGURE</span>
+          <div id="lightbox-title" class="modal-title" style="margin-top:4px;">Figure Preview</div>
+          <div id="lightbox-meta" style="font-size:0.72rem; color:#94a3b8; margin-top:2px;"></div>
+        </div>
+        <button id="lightbox-close-btn" class="close-btn" aria-label="Close Lightbox">×</button>
+      </div>
+      <div class="lightbox-toolbar">
+        <div class="lightbox-mode-toggle" id="lightbox-mode-toggle">
+          <button id="lightbox-view-figure" class="lightbox-toggle-btn active" data-mode="figure">🖼️ Publication Figure</button>
+          <button id="lightbox-view-split" class="lightbox-toggle-btn" data-mode="split">⚡ Phase Comparison Split Slider</button>
+        </div>
+      </div>
+      <div class="lightbox-body" id="lightbox-body">
+        <img id="lightbox-img" src="" alt="High Resolution Scientific Publication Figure" />
+        <div id="lightbox-split-container" class="lightbox-split-container hidden">
+          <div class="split-image-before">
+            <img id="lightbox-img-before" src="" alt="Raw InSAR / Atmospheric Phase Screen" />
+            <span class="split-label before-label">RAW InSAR / APS DELAY</span>
+          </div>
+          <div class="split-image-after" id="split-image-after">
+            <img id="lightbox-img-after" src="" alt="CATALYST GFS CORRECTED" />
+            <span class="split-label after-label">CATALYST GFS CORRECTED</span>
+          </div>
+          <div class="split-divider" id="split-divider">
+            <div class="split-handle">↔</div>
+          </div>
+          <input type="range" id="split-slider-input" min="0" max="100" value="50" class="split-slider-range" aria-label="Comparison swipe position" />
+        </div>
+      </div>
+      <div class="lightbox-footer">
+        <div id="lightbox-hash" style="font-family: monospace; font-size: 0.68rem; color: #94a3b8;"></div>
+        <div style="display:flex; gap:8px;">
+          <a id="lightbox-download-link" href="#" target="_blank" class="toolbar-btn" style="text-decoration:none; color:#f0f4f8;">⬇ Open Full Res</a>
+          <button id="lightbox-fly-btn" class="toolbar-btn active-btn">🎯 Fly to Theater</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAC v1.0.0 Tasking Order Inspector Modal -->
+  <div id="stac-modal" class="hidden" role="dialog" aria-label="OGC STAC v1.0.0 Tasking Order Inspector">
+    <div class="stac-modal-content glass-card">
+      <div class="stac-modal-header">
+        <div class="stac-modal-title-wrap">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="tour-badge" style="background: rgba(52, 211, 153, 0.15); border-color: rgba(52, 211, 153, 0.4); color: #34d399;">OGC STAC v1.0.0 SPECIFICATION</span>
+            <span class="runs-count-badge" id="stac-modal-run-badge">RUN 02</span>
+          </div>
+          <div class="modal-title" id="stac-modal-title" style="margin-top: 4px;">📋 STAC Tasking Order Inspector</div>
+          <div class="runs-modal-subtitle" id="stac-modal-subtitle">
+            Validated OGC STAC FeatureCollection with radar constellation swath geometry and observation metadata
+          </div>
+        </div>
+        <button id="stac-modal-close" class="close-btn" aria-label="Close STAC Inspector">×</button>
+      </div>
+      <div class="stac-modal-meta-bar" id="stac-modal-meta-bar"></div>
+      <div class="stac-modal-body">
+        <pre class="stac-code-block"><code id="stac-json-content">Loading STAC tasking orders...</code></pre>
+      </div>
+      <div class="stac-modal-footer">
+        <div id="stac-modal-hash" style="font-family: monospace; font-size: 0.68rem; color: #94a3b8;"></div>
+        <div style="display:flex; gap:8px;">
+          <button id="stac-copy-btn" class="toolbar-btn active-btn">📋 Copy STAC JSON</button>
+          <a id="stac-download-btn" href="#" download="stac_order.geojson" class="toolbar-btn" style="text-decoration:none; color:#f0f4f8;">⬇ Download GeoJSON</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Interactive 6-Step Guided Mission Briefing Card -->
   <div id="mission-tour-card" class="glass-card hidden" role="dialog" aria-label="Mission Briefing Tutorial">
     <div class="tour-top-row">
@@ -1413,6 +2377,16 @@
   <div id="globe-hover-pill" aria-hidden="true"></div>
   <div id="ui-tooltip" role="tooltip"></div>
 
+  <!-- Floating Bottom HUD Quick-Run Carousel -->
+  <nav id="hud-quick-runs" class="hud-quick-runs glass-card" aria-label="Quick-Run Synoptic Theater Switcher">
+    <div class="quick-runs-header">
+      <span class="quick-runs-title">🌐 THEATERS:</span>
+    </div>
+    <div class="quick-runs-scroll" id="quick-runs-scroll">
+      <!-- 11 clickable run chips dynamically populated by uiController.renderHudQuickRuns() -->
+    </div>
+  </nav>
+
   <!-- Footer Attribution -->
   <div class="hud-footer glass-card">
     Zhane Daye | SAR &amp; Earth System Engineering | <a href="/reports/EARTH2_X_BAND_SAR_INSAR_ENGINEERING_REPORT.pdf" target="_blank">Engineering Report (PDF)</a> · <a href="https://github.com/zrt219/earth2studio" target="_blank">GitHub</a> · <a href="https://www.linkedin.com/in/zhane-umattr" target="_blank">LinkedIn</a>
@@ -1436,6 +2410,7 @@
           <tr><td><span class="shortcuts-key">Space</span> / <span class="shortcuts-key">P</span></td><td>Toggle 24h Storm Lead-Time Animation</td></tr>
           <tr><td><span class="shortcuts-key">R</span></td><td>Reset Camera to Default Perspective</td></tr>
           <tr><td><span class="shortcuts-key">T</span></td><td>Start Interactive Mission Briefing Tour</td></tr>
+          <tr><td><span class="shortcuts-key">G</span></td><td>Open 3D Twin Run Gallery (11 Runs)</td></tr>
           <tr><td><span class="shortcuts-key">?</span></td><td>Toggle Mission Explainer Drawer</td></tr>
           <tr><td><span class="shortcuts-key">Esc</span></td><td>Close Active Modal, Tour, or POI Card</td></tr>
         </tbody>

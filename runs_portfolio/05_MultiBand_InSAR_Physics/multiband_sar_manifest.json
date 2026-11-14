@@ -1,0 +1,143 @@
+{
+  "module": "od_experiments.geoint_sar.multiband_sar_comparison",
+  "study_id": "OD-EARTH2-MULTIBAND-SAR-COMPARISON",
+  "data_source": "NOAA_GFS_0P25_OPERATIONAL_VERIFIED_TENSORS",
+  "compliance": "Rule e2s-014 Certified (Zero Synthetic Noise, Explicit origin='upper')",
+  "bands": {
+    "X": {
+      "band_name": "X-band",
+      "frequency_ghz": 9.65,
+      "wavelength_cm": 3.106657595854922,
+      "half_wavelength_cm": 1.553328797927461,
+      "primary_missions": [
+        "ICEYE (Spotlight/StripMap)",
+        "Synspective (StriX)",
+        "TerraSAR-X / TanDEM-X",
+        "COSMO-SkyMed"
+      ]
+    },
+    "C": {
+      "band_name": "C-band",
+      "frequency_ghz": 5.405,
+      "wavelength_cm": 5.546576466234968,
+      "half_wavelength_cm": 2.773288233117484,
+      "primary_missions": [
+        "Copernicus Sentinel-1 (IW SLC)",
+        "RADARSAT-2",
+        "RADARSAT Constellation (RCM)"
+      ]
+    },
+    "L": {
+      "band_name": "L-band",
+      "frequency_ghz": 1.27,
+      "wavelength_cm": 23.60570535433071,
+      "half_wavelength_cm": 11.802852677165355,
+      "primary_missions": [
+        "NASA-ISRO NISAR",
+        "JAXA ALOS-2 (PALSAR-2)",
+        "JAXA ALOS-4",
+        "SAOCOM 1A/1B"
+      ]
+    }
+  },
+  "regional_metrics": {
+    "south_africa": {
+      "name": "South Africa Drakensberg Escarpment & Lesotho Highlands",
+      "max_elevation_m": 3482.0,
+      "max_delta_ztd_m": 0.0388,
+      "fringes_X": 8.32,
+      "fringes_C": 4.66,
+      "fringes_L": 1.1,
+      "fringe_ratio_X_to_L": 7.6,
+      "nyquist_violation_pct_X": 0.0,
+      "nyquist_violation_pct_C": 0.0,
+      "nyquist_violation_pct_L": 0.0
+    },
+    "mexico": {
+      "name": "Mexico Trans-Mexican Volcanic Belt (Pico de Orizaba & Popocat\u00e9petl)",
+      "max_elevation_m": 5636.0,
+      "max_delta_ztd_m": 0.0615,
+      "fringes_X": 12.89,
+      "fringes_C": 7.22,
+      "fringes_L": 1.7,
+      "fringe_ratio_X_to_L": 7.6,
+      "nyquist_violation_pct_X": 0.0,
+      "nyquist_violation_pct_C": 0.0,
+      "nyquist_violation_pct_L": 0.0
+    },
+    "northern_russia": {
+      "name": "Northern Russia Putorana Plateau Basalt Traps",
+      "max_elevation_m": 1701.0,
+      "max_delta_ztd_m": -0.0036,
+      "fringes_X": 0.84,
+      "fringes_C": 0.47,
+      "fringes_L": 0.11,
+      "fringe_ratio_X_to_L": 7.6,
+      "nyquist_violation_pct_X": 0.0,
+      "nyquist_violation_pct_C": 0.0,
+      "nyquist_violation_pct_L": 0.0
+    }
+  },
+  "vegetation_decorrelation_summary": {
+    "south_africa_savanna": {
+      "half_life_days": {
+        "X": 1.52,
+        "C": 4.86,
+        "L": 88.04
+      },
+      "coherence_at_12d": {
+        "X": 0.154,
+        "C": 0.304,
+        "L": 0.923
+      }
+    },
+    "mexico_pine_oak": {
+      "half_life_days": {
+        "X": 0.59,
+        "C": 1.88,
+        "L": 34.02
+      },
+      "coherence_at_12d": {
+        "X": 0.08,
+        "C": 0.091,
+        "L": 0.8
+      }
+    },
+    "russia_taiga_tundra": {
+      "half_life_days": {
+        "X": 1.18,
+        "C": 3.76,
+        "L": 68.03
+      },
+      "coherence_at_12d": {
+        "X": 0.181,
+        "C": 0.27,
+        "L": 0.906
+      }
+    }
+  },
+  "penetration_depths_summary_m": {
+    "forest_canopy": {
+      "X": 0.55,
+      "C": 2.45,
+      "L": 11.85
+    },
+    "dry_soil_sand": {
+      "X": 0.143,
+      "C": 0.255,
+      "L": 1.085
+    },
+    "wet_soil": {
+      "X": 0.012,
+      "C": 0.038,
+      "L": 0.185
+    },
+    "permafrost_ice_snow": {
+      "X": 2.4,
+      "C": 7.2,
+      "L": 28.5
+    }
+  },
+  "figure_file": "outputs\\scientific_study_verified\\advanced_capabilities\\figures\\08_multiband_insar_comparison.png",
+  "figure_sha256": "289847dda97518d0eda4f77f5e9805b42fe4a366801bff0dc35a2741b1bffc5a"
+}

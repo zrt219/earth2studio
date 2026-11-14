@@ -56,8 +56,46 @@ function createCityBeacon(city) {
   };
 
   const isItaly = city.country === 'Italy';
-  const primaryColor = isItaly ? 0x38bdf8 : 0xf43f5e;
-  const accentColor = isItaly ? 0x10b981 : 0xfbbf24;
+  const isJapan = city.country === 'Japan';
+  const isMexico = city.country === 'Mexico';
+  const isRussia = city.country === 'Russia';
+  const isSouthAfrica = city.country === 'South Africa' || city.country === 'Lesotho';
+  const isSouthernItaly = ['it_mount_etna', 'it_campi_flegrei', 'it_aspromonte_sila', 'it_apulia_karst', 'it_catania_simeto', 'it_vesuvius'].includes(city.id);
+  const isFinland = city.country === 'Finland' || city.id.startsWith('fi_');
+  const isJapanFarmland = ['jp_yamakoshi_tanada', 'jp_hoshitoge_tanada', 'jp_obasute_tanada', 'jp_iya_valley_terrace', 'jp_kamikatsu_terrace', 'jp_shiroyone_senmaida'].includes(city.id);
+  const isBrazil = city.country === 'Brazil' || city.id.startsWith('br_');
+  const isVancouver = city.country === 'Canada' || city.id.startsWith('van_');
+
+  let primaryColor = 0x38bdf8;
+  let accentColor = 0x10b981;
+  if (isSouthernItaly) {
+    primaryColor = 0xff4757; // Volcanic Coral / Magma
+    accentColor = 0xffa502; // Flare Orange
+  } else if (isFinland) {
+    primaryColor = 0x70d6ff; // Polar Ice / Glacial Cyan
+    accentColor = 0x00f0ff; // Borealis Glow
+  } else if (isJapanFarmland) {
+    primaryColor = 0xe0a96d; // Terraced Amber / Harvest Gold
+    accentColor = 0x80b918; // Bamboo Green
+  } else if (isBrazil) {
+    primaryColor = 0x06d6a0; // Amazonian Emerald / Rainforest Green
+    accentColor = 0x00f5d4; // Tropical Turquoise
+  } else if (isVancouver) {
+    primaryColor = 0x00b4d8; // Pacific Marine Teal
+    accentColor = 0x90e0ef; // Salish Sea Cyan
+  } else if (isJapan) {
+    primaryColor = 0xf43f5e; // Rose / Crimson
+    accentColor = 0xfbbf24; // Amber / Gold
+  } else if (isMexico) {
+    primaryColor = 0xf59e0b; // Amber / Terracotta
+    accentColor = 0x10b981; // Emerald / Jade
+  } else if (isRussia) {
+    primaryColor = 0x06b6d4; // Cyan / Arctic Blue
+    accentColor = 0xa855f7; // Violet / Aurora
+  } else if (isSouthAfrica) {
+    primaryColor = 0x10b981; // Emerald / Savanna
+    accentColor = 0xf59e0b; // Warm Gold
+  }
 
   // Tangent outer surface ring
   const ringGeom = new THREE.RingGeometry(0.042, 0.068, 24);
@@ -99,6 +137,28 @@ function createCityBeacon(city) {
   return markerRoot;
 }
 
+export function addCityBeacon(city) {
+  if (!parentGlobe || !cityGroup || !city) return null;
+  const existing = cityGroup.getObjectByName(`city_beacon_${city.id}`);
+  if (existing) return existing;
+  const beacon = createCityBeacon(city);
+  cityGroup.add(beacon);
+  return beacon;
+}
+
+export function loadHiddenTerrainBeacons() {
+  if (!parentGlobe || !cityGroup) return [];
+  const allCities = studyData.getAllTargetCities ? studyData.getAllTargetCities() : (studyData.getHiddenTerrainTargetCities ? studyData.getHiddenTerrainTargetCities() : []);
+  const added = [];
+  allCities.forEach((city) => {
+    if (!cityGroup.getObjectByName(`city_beacon_${city.id}`)) {
+      const b = addCityBeacon(city);
+      if (b) added.push(b);
+    }
+  });
+  return added;
+}
+
 export function initCitySelector(globe, callbacks = {}) {
   disposeCitySelector();
   parentGlobe = globe || null;
@@ -109,7 +169,11 @@ export function initCitySelector(globe, callbacks = {}) {
     cityGroup.name = 'city_target_markers_group';
     cityGroup.visible = markersVisible;
 
-    const cities = studyData.getTargetCities();
+    const includeHidden = Boolean(callbacks.includeHiddenTerrain);
+    const cities = includeHidden && studyData.getAllTargetCities
+      ? studyData.getAllTargetCities()
+      : studyData.getTargetCities();
+
     cities.forEach((city) => {
       const beacon = createCityBeacon(city);
       cityGroup.add(beacon);
@@ -120,6 +184,19 @@ export function initCitySelector(globe, callbacks = {}) {
   if (typeof document !== 'undefined') {
     const selItaly = document.getElementById('city-select-italy');
     const selJapan = document.getElementById('city-select-japan');
+    const selSouthAfrica = document.getElementById('city-select-south-africa');
+    const selMexico = document.getElementById('city-select-mexico');
+    const selRussia = document.getElementById('city-select-russia');
+    const selSouthernItaly = document.getElementById('city-select-southern-italy');
+    const selFinland = document.getElementById('city-select-finland');
+    const selJapanFarmland = document.getElementById('city-select-japan-farmland');
+    const selBrazil = document.getElementById('city-select-brazil');
+    const selVancouver = document.getElementById('city-select-vancouver');
+    const allSelects = [
+      selItaly, selJapan, selSouthAfrica, selMexico, selRussia,
+      selSouthernItaly, selFinland, selJapanFarmland, selBrazil, selVancouver
+    ].filter(Boolean);
+
     const btnToggle = document.getElementById('layer-cities');
     const quickChips = document.querySelectorAll('.city-quick-chip');
     const searchInput = document.getElementById('city-search-input');
@@ -127,20 +204,13 @@ export function initCitySelector(globe, callbacks = {}) {
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         const q = (e.target.value || '').trim().toLowerCase();
-        if (selItaly) {
-          Array.from(selItaly.options).forEach((opt, idx) => {
+        allSelects.forEach((sel) => {
+          Array.from(sel.options).forEach((opt, idx) => {
             if (idx === 0) return;
             const match = !q || opt.text.toLowerCase().includes(q) || opt.value.toLowerCase().includes(q);
             opt.hidden = !match;
           });
-        }
-        if (selJapan) {
-          Array.from(selJapan.options).forEach((opt, idx) => {
-            if (idx === 0) return;
-            const match = !q || opt.text.toLowerCase().includes(q) || opt.value.toLowerCase().includes(q);
-            opt.hidden = !match;
-          });
-        }
+        });
         quickChips.forEach((chip) => {
           const cid = chip.getAttribute('data-city-id') || '';
           const txt = (chip.textContent || '').toLowerCase();
@@ -154,10 +224,12 @@ export function initCitySelector(globe, callbacks = {}) {
           e.preventDefault();
           const q = (searchInput.value || '').trim().toLowerCase();
           if (!q) return;
-          const allCities = studyData.getTargetCities ? studyData.getTargetCities() : (studyData.TARGET_CITIES || []);
+          const allCities = studyData.getAllTargetCities ? studyData.getAllTargetCities() : (studyData.getTargetCities ? studyData.getTargetCities() : (studyData.TARGET_CITIES || []));
           const match = allCities.find((c) =>
             c.name.toLowerCase().includes(q) ||
             c.id.toLowerCase().includes(q) ||
+            (c.country && c.country.toLowerCase().includes(q)) ||
+            (c.region && c.region.toLowerCase().includes(q)) ||
             (c.district && c.district.toLowerCase().includes(q)) ||
             (c.radarTarget && c.radarTarget.toLowerCase().includes(q))
           );
@@ -169,23 +241,16 @@ export function initCitySelector(globe, callbacks = {}) {
       });
     }
 
-    if (selItaly) {
-      selItaly.addEventListener('change', (e) => {
+    allSelects.forEach((sel) => {
+      sel.addEventListener('change', (e) => {
         if (e.target.value) {
-          if (selJapan) selJapan.value = '';
+          allSelects.forEach((other) => {
+            if (other !== sel) other.value = '';
+          });
           focusCity(e.target.value, callbacks);
         }
       });
-    }
-
-    if (selJapan) {
-      selJapan.addEventListener('change', (e) => {
-        if (e.target.value) {
-          if (selItaly) selItaly.value = '';
-          focusCity(e.target.value, callbacks);
-        }
-      });
-    }
+    });
 
     if (btnToggle) {
       btnToggle.addEventListener('click', () => {
@@ -246,6 +311,10 @@ export function focusCity(cityId, callbacks = {}) {
 
   activeCityId = city.id;
 
+  if (cityGroup && !cityGroup.getObjectByName(`city_beacon_${city.id}`)) {
+    addCityBeacon(city);
+  }
+
   if (!markersVisible) {
     setCityMarkersVisibility(true);
   }
@@ -256,13 +325,53 @@ export function focusCity(cityId, callbacks = {}) {
   if (typeof document !== 'undefined') {
     const selItaly = document.getElementById('city-select-italy');
     const selJapan = document.getElementById('city-select-japan');
-    if (city.country === 'Italy') {
-      if (selItaly) selItaly.value = city.id;
-      if (selJapan) selJapan.value = '';
-    } else if (city.country === 'Japan') {
-      if (selJapan) selJapan.value = city.id;
-      if (selItaly) selItaly.value = '';
+    const selSouthAfrica = document.getElementById('city-select-south-africa');
+    const selMexico = document.getElementById('city-select-mexico');
+    const selRussia = document.getElementById('city-select-russia');
+    const selSouthernItaly = document.getElementById('city-select-southern-italy');
+    const selFinland = document.getElementById('city-select-finland');
+    const selJapanFarmland = document.getElementById('city-select-japan-farmland');
+    const selBrazil = document.getElementById('city-select-brazil');
+    const selVancouver = document.getElementById('city-select-vancouver');
+
+    const sItalyIds = ['it_mount_etna', 'it_campi_flegrei', 'it_aspromonte_sila', 'it_apulia_karst', 'it_catania_simeto', 'it_vesuvius'];
+    const jpFarmIds = ['jp_yamakoshi_tanada', 'jp_hoshitoge_tanada', 'jp_obasute_tanada', 'jp_iya_valley_terrace', 'jp_kamikatsu_terrace', 'jp_shiroyone_senmaida'];
+
+    let targetSelect = null;
+    if (sItalyIds.includes(city.id)) {
+      targetSelect = selSouthernItaly || selItaly;
+    } else if (jpFarmIds.includes(city.id)) {
+      targetSelect = selJapanFarmland || selJapan;
+    } else if (city.country === 'Finland' || city.id.startsWith('fi_')) {
+      targetSelect = selFinland;
+    } else if (city.country === 'Brazil' || city.id.startsWith('br_')) {
+      targetSelect = selBrazil;
+    } else if (city.country === 'Canada' || city.id.startsWith('van_')) {
+      targetSelect = selVancouver;
+    } else if (city.country === 'Mexico' || city.id.startsWith('mx_')) {
+      targetSelect = selMexico;
+    } else if (city.country === 'Russia' || city.id.startsWith('ru_')) {
+      targetSelect = selRussia;
+    } else if (city.country === 'South Africa' || city.country === 'Lesotho' || city.id.startsWith('za_')) {
+      targetSelect = selSouthAfrica;
+    } else if (city.country === 'Japan' || city.id.startsWith('jp_')) {
+      targetSelect = selJapan;
+    } else if (city.country === 'Italy' || city.id.startsWith('it_')) {
+      targetSelect = selItaly;
     }
+
+    const allDropdowns = [
+      selItaly, selJapan, selSouthAfrica, selMexico, selRussia,
+      selSouthernItaly, selFinland, selJapanFarmland, selBrazil, selVancouver
+    ].filter(Boolean);
+
+    allDropdowns.forEach((sel) => {
+      if (sel === targetSelect) {
+        sel.value = city.id;
+      } else {
+        sel.value = '';
+      }
+    });
 
     const quickChips = document.querySelectorAll('.city-quick-chip');
     quickChips.forEach((chip) => {
@@ -327,6 +436,8 @@ export function disposeCitySelector() {
 export default {
   CITY_SHELL_RADIUS,
   initCitySelector,
+  addCityBeacon,
+  loadHiddenTerrainBeacons,
   setCityMarkersVisibility,
   getCityMarkersVisibility,
   getInteractiveCityObjects,

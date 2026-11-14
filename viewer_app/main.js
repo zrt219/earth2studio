@@ -136,6 +136,15 @@ export function applyUrlHash() {
       citySelector.focusCity(params.city, globalCityNavCallbacks);
     }, 250);
   }
+  if (params.run) {
+    setTimeout(() => {
+      if (params.swath === '1' || params.swath === 'true' || params.swath === 'active') {
+        uiController.activateRunSwath(params.run);
+      } else {
+        uiController.flyToRun(params.run);
+      }
+    }, 350);
+  }
 }
 
 function ensureStartupTextures() {
@@ -266,7 +275,7 @@ export function init() {
   // 8b. Initialize Animated Atmospheric Wind Particles, Global Hazard Alerts, GEOINT SAR & 16K-131K Tiled Earth
   windParticles.initWindParticles(globe, 3500);
   hazardAlerts.initHazardAlerts(globe);
-  sarTasking.initSarTasking(globe);
+  sarTasking.initSarTasking(globe, { includeHiddenTerrain: true });
   tiledEarth.initTiledEarth(globe, renderer);
 
   // 9. Initialize UI Controller & Glassmorphic HUD
@@ -274,6 +283,8 @@ export function init() {
   uiController.setSceneCallbacks?.({
     setCloudsVisibility,
     setBaseTexture,
+    flyToLatLon,
+    flyTo,
     setLodEnabled: (enabled) => {
       tiledEarth.setTiledEarthEnabled(enabled);
       const btn = document.getElementById('layer-sentinel-lod');
@@ -293,13 +304,14 @@ export function init() {
     onStepSync: () => uiController.updateActiveOverlayBadge?.()
   });
 
-  // 9c. Initialize Italy & Japan City Target Picker + 3D Surface Beacons
+  // 9c. Initialize Precision Global & Hidden Terrain City Target Picker + 3D Surface Beacons
   const cityNavCallbacks = {
     flyToLatLon,
     setSpinState,
     showPopup: uiController.showPopup,
     getCamera: () => camera,
-    onVisibilityChange: () => uiController.updateActiveOverlayBadge?.()
+    onVisibilityChange: () => uiController.updateActiveOverlayBadge?.(),
+    includeHiddenTerrain: true
   };
   globalCityNavCallbacks = cityNavCallbacks;
   citySelector.initCitySelector(globe, cityNavCallbacks);
@@ -1012,6 +1024,14 @@ function setupNavigationButtons() {
   const btnGlobal = document.getElementById('fly-global');
   const btnItaly = document.getElementById('fly-italy');
   const btnJapan = document.getElementById('fly-japan');
+  const btnSouthAfrica = document.getElementById('fly-south-africa');
+  const btnMexico = document.getElementById('fly-mexico');
+  const btnRussia = document.getElementById('fly-russia');
+  const btnSouthernItaly = document.getElementById('fly-southern-italy');
+  const btnFinland = document.getElementById('fly-finland');
+  const btnJapanFarmland = document.getElementById('fly-japan-farmland');
+  const btnBrazil = document.getElementById('fly-brazil');
+  const btnVancouver = document.getElementById('fly-vancouver');
   const btnAmericas = document.getElementById('fly-americas');
   const btnArctic = document.getElementById('fly-arctic');
   const btnAntarctic = document.getElementById('fly-antarctic');
@@ -1040,6 +1060,78 @@ function setupNavigationButtons() {
       uiController.setSpinState(false);
       // Japan synoptic domain (36°N, 138°E)
       flyToLatLon(36.0, 138.0, 8.5);
+    });
+  }
+
+  if (btnSouthAfrica) {
+    btnSouthAfrica.addEventListener('click', () => {
+      isSpinning = false;
+      uiController.setSpinState(false);
+      // South Africa & Drakensberg synoptic domain (-29.5°S, 26.5°E)
+      flyToLatLon(-29.5, 26.5, 8.5);
+    });
+  }
+
+  if (btnMexico) {
+    btnMexico.addEventListener('click', () => {
+      isSpinning = false;
+      uiController.setSpinState(false);
+      // Mexico & Sierra Madre synoptic domain (23.5°N, -103.0°W)
+      flyToLatLon(23.5, -103.0, 8.5);
+    });
+  }
+
+  if (btnRussia) {
+    btnRussia.addEventListener('click', () => {
+      isSpinning = false;
+      uiController.setSpinState(false);
+      // Northern Russia & Siberian Plateau synoptic domain (66.0°N, 110.0°E)
+      flyToLatLon(66.0, 110.0, 8.5);
+    });
+  }
+
+  if (btnSouthernItaly) {
+    btnSouthernItaly.addEventListener('click', () => {
+      isSpinning = false;
+      uiController.setSpinState(false);
+      // Southern Italy, Mount Etna & Campi Flegrei volcanotectonics (38.5°N, 15.5°E)
+      flyToLatLon(38.5, 15.5, 8.5);
+    });
+  }
+
+  if (btnFinland) {
+    btnFinland.addEventListener('click', () => {
+      isSpinning = false;
+      uiController.setSpinState(false);
+      // Finland & Fennoscandian post-glacial rebound / lake ice (63.5°N, 26.0°E)
+      flyToLatLon(63.5, 26.0, 8.5);
+    });
+  }
+
+  if (btnJapanFarmland) {
+    btnJapanFarmland.addEventListener('click', () => {
+      isSpinning = false;
+      uiController.setSpinState(false);
+      // Japan Abandoned Farmland Satoyama (36.5°N, 137.5°E)
+      flyToLatLon(36.5, 137.5, 8.0);
+    });
+  }
+
+  if (btnBrazil) {
+    btnBrazil.addEventListener('click', () => {
+      isSpinning = false;
+      uiController.setSpinState(false);
+      // Brazil Tropical Dynamics (Serra do Mar & Pantanal) (-16.0°S, -50.0°W)
+      flyToLatLon(-16.0, -50.0, 10.0);
+    });
+  }
+
+  if (btnVancouver) {
+    btnVancouver.addEventListener('click', () => {
+      isSpinning = false;
+      uiController.setSpinState(false);
+      // Vancouver Cascadia Fraser Delta & Coast Mountains (49.3°N, -123.0°W)
+      flyToLatLon(49.3, -123.0, 7.5);
     });
   }
 
