@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earth-2 X-Band SAR & InSAR | LinkedIn Campaign Asset Catalog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(15, 23, 42, 0.75);
+      --card-border: rgba(0, 240, 255, 0.2);
+      --cyan: #00f0ff;
+      --cyan-glow: rgba(0, 240, 255, 0.35);
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --purple: #a855f7;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding-bottom: 60px;
+      line-height: 1.5;
+    }
+    /* Cyber Grid */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 50% 15%, rgba(0, 240, 255, 0.08), transparent 60%),
+                  linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+                  linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 40px 40px, 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 28px;
+      position: relative;
+      z-index: 1;
+    }
+    header {
+      padding: 36px 0 28px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .brand-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 12px var(--emerald);
+    }
+    .brand-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 6px;
+      font-family: var(--mono);
+    }
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .stat-pill {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--card-border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+    .stat-pill strong {
+      color: var(--cyan);
+    }
+    /* Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    .tab-btn:hover {
+      border-color: var(--cyan);
+      color: #fff;
+    }
+    .tab-btn.active {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    }
+    /* Grid */
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 28px;
+    }
+    .media-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .media-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--cyan);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.15);
+    }
+    .preview-box {
+      width: 100%;
+      height: 260px;
+      background: #070a12;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .preview-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+    .preview-box:hover img {
+      transform: scale(1.03);
+    }
+    .badge-float {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(11, 15, 25, 0.85);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+    .card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+      word-break: break-all;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 16px;
+      flex: 1;
+    }
+    .specs-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      background: rgba(11, 15, 25, 0.6);
+      padding: 10px 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .spec-item {
+      color: var(--muted);
+    }
+    .spec-item span {
+      color: #fff;
+      font-weight: 600;
+    }
+    .card-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-primary {
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+    }
+    .btn-primary:hover {
+      background: var(--cyan);
+      color: #0b0f19;
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    /* Lightbox Modal */
+    #lightbox {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(5, 8, 15, 0.92);
+      backdrop-filter: blur(16px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+    #lightbox.active {
+      display: flex;
+    }
+    .lightbox-content {
+      max-width: 90vw;
+      max-height: 85vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .lightbox-content img {
+      max-width: 100%;
+      max-height: 75vh;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 40px rgba(0, 240, 255, 0.25);
+    }
+    .lightbox-meta {
+      margin-top: 16px;
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 14px;
+      text-align: center;
+    }
+    .close-btn {
+      position: absolute;
+      top: -38px;
+      right: 0;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 28px;
+      cursor: pointer;
+    }
+    .close-btn:hover {
+      color: var(--cyan);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <div class="brand-title">
+        <div class="pulse-dot"></div>
+        EARTH-2 // LINKEDIN CAMPAIGN ASSET SUITE
+      </div>
+      <div class="brand-sub">
+        X-BAND SAR & InSAR MISSION TWIN &bull; RULE e2s-014 VERIFIED &bull; OGC STAC v1.0.0
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-pill">Total Assets: <strong id="total-count">24</strong></div>
+      <div class="stat-pill">Landscape: <strong>5</strong></div>
+      <div class="stat-pill">Square: <strong>5</strong></div>
+      <div class="stat-pill">Carousel Cards: <strong>10</strong></div>
+      <div class="stat-pill">Animated GIFs: <strong>4</strong></div>
+    </div>
+  </header>
+
+  <div class="filter-tabs">
+    <button class="tab-btn active" data-filter="all">All Assets (24)</button>
+    <button class="tab-btn" data-filter="Landscape Cards">Landscape (1200x627)</button>
+    <button class="tab-btn" data-filter="Square Cards">Square (1080x1080)</button>
+    <button class="tab-btn" data-filter="Carousel Deck">Carousel Deck (10 Cards)</button>
+    <button class="tab-btn" data-filter="Animated GIFs">Animated GIFs</button>
+  </div>
+
+  <div class="media-grid" id="grid">
+    <!-- Populated by JavaScript -->
+  </div>
+</div>
+
+<div id="lightbox" onclick="closeLightbox(event)">
+  <div class="lightbox-content" onclick="event.stopPropagation()">
+    <button class="close-btn" onclick="closeLightbox()">&times;</button>
+    <img id="lightbox-img" src="" alt="Enlarged preview">
+    <div class="lightbox-meta" id="lightbox-meta"></div>
+  </div>
+</div>
+
+<script>
+  const ASSETS = [
+  {
+    "filename": "ad_landscape_01_aps_reduction.png",
+    "rel_path": "assets/ad_landscape_01_aps_reduction.png",
+    "size_str": "214.1 KB",
+    "size_bytes": 219212,
+    "category": "Landscape Cards",
+    "dimensions": "1200 x 627",
+    "aspect": "1.91 : 1 (Landscape)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Single-Image Sponsored Content with bold metric chips and Rule e2s-014 compliance seals."
+  },
+  {
+    "filename": "ad_landscape_02_global_mission_twin.png",
+    "rel_path": "assets/ad_landscape_02_global_mission_twin.png",
+    "size_str": "441.2 KB",
+    "size_bytes": 451769,
+    "category": "Landscape Cards",
+    "dimensions": "1200 x 627",
+    "aspect": "1.91 : 1 (Landscape)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Single-Image Sponsored Content with bold metric chips and Rule e2s-014 compliance seals."
+  },
+  {
+    "filename": "ad_landscape_03_deep_hazards_infrastructure.png",
+    "rel_path": "assets/ad_landscape_03_deep_hazards_infrastructure.png",
+    "size_str": "251.5 KB",
+    "size_bytes": 257576,
+    "category": "Landscape Cards",
+    "dimensions": "1200 x 627",
+    "aspect": "1.91 : 1 (Landscape)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Single-Image Sponsored Content with bold metric chips and Rule e2s-014 compliance seals."
+  },
+  {
+    "filename": "ad_landscape_04_ogc_stac_tasking.png",
+    "rel_path": "assets/ad_landscape_04_ogc_stac_tasking.png",
+    "size_str": "136.2 KB",
+    "size_bytes": 139494,
+    "category": "Landscape Cards",
+    "dimensions": "1200 x 627",
+    "aspect": "1.91 : 1 (Landscape)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Single-Image Sponsored Content with bold metric chips and Rule e2s-014 compliance seals."
+  },
+  {
+    "filename": "ad_landscape_05_scientific_integrity.png",
+    "rel_path": "assets/ad_landscape_05_scientific_integrity.png",
+    "size_str": "314.3 KB",
+    "size_bytes": 321848,
+    "category": "Landscape Cards",
+    "dimensions": "1200 x 627",
+    "aspect": "1.91 : 1 (Landscape)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Single-Image Sponsored Content with bold metric chips and Rule e2s-014 compliance seals."
+  },
+  {
+    "filename": "ad_square_01_aps_hero.png",
+    "rel_path": "assets/ad_square_01_aps_hero.png",
+    "size_str": "507.8 KB",
+    "size_bytes": 520002,
+    "category": "Square Cards",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
+  },
+  {
+    "filename": "ad_square_02_global_constellation.png",
+    "rel_path": "assets/ad_square_02_global_constellation.png",
+    "size_str": "596.1 KB",
+    "size_bytes": 610450,
+    "category": "Square Cards",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
+  },
+  {
+    "filename": "ad_square_03_cascadia_subsidence.png",
+    "rel_path": "assets/ad_square_03_cascadia_subsidence.png",
+    "size_str": "309.9 KB",
+    "size_bytes": 317332,
+    "category": "Square Cards",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
+  },
+  {
+    "filename": "ad_square_04_stac_api_dispatch.png",
+    "rel_path": "assets/ad_square_04_stac_api_dispatch.png",
+    "size_str": "163.0 KB",
+    "size_bytes": 166951,
+    "category": "Square Cards",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
+  },
+  {
+    "filename": "ad_square_05_multiband_sar_physics.png",
+    "rel_path": "assets/ad_square_05_multiband_sar_physics.png",
+    "size_str": "333.7 KB",
+    "size_bytes": 341681,
+    "category": "Square Cards",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
+  },
+  {
+    "filename": "carousel_card_01_mission_overview.png",
+    "rel_path": "assets/carousel_card_01_mission_overview.png",
+    "size_str": "623.9 KB",
+    "size_bytes": 638843,
+    "category": "Carousel Deck",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
+  },
+  {
+    "filename": "carousel_card_02_run01_tropospheric_aps.png",
+    "rel_path": "assets/carousel_card_02_run01_tropospheric_aps.png",
+    "size_str": "535.1 KB",
+    "size_bytes": 547971,
+    "category": "Carousel Deck",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
+  },
+  {
+    "filename": "carousel_card_03_run02_mexico_city.png",
+    "rel_path": "assets/carousel_card_03_run02_mexico_city.png",
+    "size_str": "300.3 KB",
+    "size_bytes": 307523,
+    "category": "Carousel Deck",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
+  },
+  {
+    "filename": "carousel_card_04_run03_norilsk_permafrost.png",
+    "rel_path": "assets/carousel_card_04_run03_norilsk_permafrost.png",
+    "size_str": "336.5 KB",
+    "size_bytes": 344579,
+    "category": "Carousel Deck",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
+  },
+  {
+    "filename": "carousel_card_05_run04_south_africa_karst.png",
+    "rel_path": "assets/carousel_card_05_run04_south_africa_karst.png",
+    "size_str": "541.1 KB",
+    "size_bytes": 554055,
+    "category": "Carousel Deck",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
+  },
+  {
+    "filename": "carousel_card_06_run05_multiband_physics.png",
+    "rel_path": "assets/carousel_card_06_run05_multiband_physics.png",
+    "size_str": "332.7 KB",
+    "size_bytes": 340726,
+    "category": "Carousel Deck",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
+  },
+  {
+    "filename": "carousel_card_07_run06_07_volcanotectonics.png",
+    "rel_path": "assets/carousel_card_07_run06_07_volcanotectonics.png",
+    "size_str": "367.1 KB",
+    "size_bytes": 375952,
+    "category": "Carousel Deck",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
+  },
+  {
+    "filename": "carousel_card_08_run08_09_wetlands_farmland.png",
+    "rel_path": "assets/carousel_card_08_run08_09_wetlands_farmland.png",
+    "size_str": "404.5 KB",
+    "size_bytes": 414241,
+    "category": "Carousel Deck",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
+  },
+  {
+    "filename": "carousel_card_09_run10_11_tropical_cascadia.png",
+    "rel_path": "assets/carousel_card_09_run10_11_tropical_cascadia.png",
+    "size_str": "327.9 KB",
+    "size_bytes": 335730,
+    "category": "Carousel Deck",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
+  },
+  {
+    "filename": "carousel_card_10_stac_constellation_dispatch.png",
+    "rel_path": "assets/carousel_card_10_stac_constellation_dispatch.png",
+    "size_str": "161.3 KB",
+    "size_bytes": 165173,
+    "category": "Carousel Deck",
+    "dimensions": "1080 x 1080",
+    "aspect": "1 : 1 (Square)",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
+  },
+  {
+    "filename": "gif_01_global_mission_twin.gif",
+    "rel_path": "assets/gif_01_global_mission_twin.gif",
+    "size_str": "942.8 KB",
+    "size_bytes": 965418,
+    "category": "Animated GIFs",
+    "dimensions": "640 x 360",
+    "aspect": "640:360",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Smooth looping animation (< 5MB) for dynamic motion sponsored posts and video placements."
+  },
+  {
+    "filename": "gif_02_insar_phase_split_slider.gif",
+    "rel_path": "assets/gif_02_insar_phase_split_slider.gif",
+    "size_str": "1.55 MB",
+    "size_bytes": 1625825,
+    "category": "Animated GIFs",
+    "dimensions": "640 x 400",
+    "aspect": "640:400",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Smooth looping animation (< 5MB) for dynamic motion sponsored posts and video placements."
+  },
+  {
+    "filename": "gif_03_swath_activation_theater_hop.gif",
+    "rel_path": "assets/gif_03_swath_activation_theater_hop.gif",
+    "size_str": "1.06 MB",
+    "size_bytes": 1113287,
+    "category": "Animated GIFs",
+    "dimensions": "640 x 400",
+    "aspect": "640:400",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Smooth looping animation (< 5MB) for dynamic motion sponsored posts and video placements."
+  },
+  {
+    "filename": "gif_04_stac_tasking_order.gif",
+    "rel_path": "assets/gif_04_stac_tasking_order.gif",
+    "size_str": "35.7 KB",
+    "size_bytes": 36582,
+    "category": "Animated GIFs",
+    "dimensions": "640 x 400",
+    "aspect": "640:400",
+    "placement": "LinkedIn Sponsored Content",
+    "desc": "Smooth looping animation (< 5MB) for dynamic motion sponsored posts and video placements."
+  }
+];
+
+  function renderGrid(filter = "all") {
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+
+    const filtered = filter === "all" ? ASSETS : ASSETS.filter(a => a.category === filter);
+
+    filtered.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "media-card";
+
+      card.innerHTML = `
+        <div class="preview-box" onclick="openLightbox('${item.rel_path}', '${item.filename}', '${item.dimensions}', '${item.size_str}')">
+          <img src="${item.rel_path}" alt="${item.filename}" loading="lazy">
+          <div class="badge-float">${item.category}</div>
+        </div>
+        <div class="card-body">
+          <div class="card-title">${item.filename}</div>
+          <div class="card-desc">${item.desc}</div>
+          <div class="specs-list">
+            <div class="spec-item">Dimensions: <span>${item.dimensions}</span></div>
+            <div class="spec-item">Size: <span>${item.size_str}</span></div>
+            <div class="spec-item">Ratio: <span>${item.aspect}</span></div>
+            <div class="spec-item">Placement: <span>Sponsored</span></div>
+          </div>
+          <div class="card-actions">
+            <a href="${item.rel_path}" download="${item.filename}" class="btn btn-primary">
+              ⬇ Download
+            </a>
+            <button onclick="openLightbox('${item.rel_path}', '${item.filename}', '${item.dimensions}', '${item.size_str}')" class="btn btn-secondary">
+              🔍 Inspect
+            </button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // Filter Buttons
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderGrid(btn.getAttribute("data-filter"));
+    });
+  });
+
+  // Lightbox
+  function openLightbox(src, name, dims, size) {
+    document.getElementById("lightbox-img").src = src;
+    document.getElementById("lightbox-meta").innerHTML = `<strong>${name}</strong> &bull; ${dims} &bull; ${size}`;
+    document.getElementById("lightbox").classList.add("active");
+  }
+
+  function closeLightbox(e) {
+    document.getElementById("lightbox").classList.remove("active");
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeLightbox();
+  });
+
+  // Initial render
+  renderGrid("all");
+</script>
+
+</body>
+</html>
