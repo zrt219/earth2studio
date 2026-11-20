@@ -369,8 +369,8 @@
       <div class="stat-value">10 Sequential</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Animated Looping GIFs</div>
-      <div class="stat-value">6 (Pure Browser)</div>
+      <div class="stat-label">60-120fps HD Videos</div>
+      <div class="stat-value">12 (1080p MP4)</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Live App Screenshots</div>
@@ -384,6 +384,7 @@
 
   <nav class="nav-tabs">
     <button class="tab-btn active" onclick="filterTab('all', this)">All Assets</button>
+    <button class="tab-btn" onclick="filterTab('videos', this)">60-120fps Videos (12)</button>
     <button class="tab-btn" onclick="filterTab('gifs', this)">Looping GIFs (6)</button>
     <button class="tab-btn" onclick="filterTab('landscape', this)">Landscape 1200x627 (5)</button>
     <button class="tab-btn" onclick="filterTab('square', this)">Square 1080x1080 (5)</button>
@@ -394,8 +395,230 @@
 
   <main class="container">
 
+    <!-- 60-120 FPS VIDEOS SECTION -->
+    <div class="asset-group" data-category="videos">
+      <div class="section-title">
+        05A. High-Framerate 60 fps &amp; 120 fps 1080p Full HD MP4 Video Ads
+        <span class="tag">Silky-Smooth WebGL Captures &bull; LinkedIn Video Ads</span>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="media-wrapper">
+            <video id="vid1" src="05_High_Framerate_Videos_60fps_120fps/video_01_globe_orbit_swath_flyto_60fps.mp4" controls autoplay loop muted playsinline style="width:100%; height:auto; display:block;"></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">01. 3D Globe Rotation &amp; Swath Fly-To</div>
+            <div class="card-desc">Free-look 3D Earth dynamics, selecting Run 02 (Mexico) in the HUD, camera zoom &amp; fly-to, and 50 km imaging swath projection.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1080p MP4</span>
+              <div>
+                <button class="copy-btn" style="position:static; margin-right:4px;" onclick="switchVid('vid1', '05_High_Framerate_Videos_60fps_120fps/video_01_globe_orbit_swath_flyto_60fps.mp4', this)">60 FPS</button>
+                <button class="copy-btn" style="position:static;" onclick="switchVid('vid1', '05_High_Framerate_Videos_60fps_120fps/video_01_globe_orbit_swath_flyto_120fps.mp4', this)">120 FPS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <video id="vid2" src="05_High_Framerate_Videos_60fps_120fps/video_02_insar_split_slider_wipe_60fps.mp4" controls autoplay loop muted playsinline style="width:100%; height:auto; display:block;"></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">02. InSAR Split-Screen Slider Wipe</div>
+            <div class="card-desc">Curtain slider dragging across the interferogram, contrasting raw atmospheric fringes against corrected ground motion.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1080p MP4</span>
+              <div>
+                <button class="copy-btn" style="position:static; margin-right:4px;" onclick="switchVid('vid2', '05_High_Framerate_Videos_60fps_120fps/video_02_insar_split_slider_wipe_60fps.mp4', this)">60 FPS</button>
+                <button class="copy-btn" style="position:static;" onclick="switchVid('vid2', '05_High_Framerate_Videos_60fps_120fps/video_02_insar_split_slider_wipe_120fps.mp4', this)">120 FPS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <video id="vid3" src="05_High_Framerate_Videos_60fps_120fps/video_03_run_gallery_filter_browse_60fps.mp4" controls autoplay loop muted playsinline style="width:100%; height:auto; display:block;"></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">03. Run Gallery Browsing &amp; Filter Search</div>
+            <div class="card-desc">Browsing the 11-study portfolio catalog, filtering by search keywords ('Mexico', 'Permafrost'), and inspecting detail modals.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1080p MP4</span>
+              <div>
+                <button class="copy-btn" style="position:static; margin-right:4px;" onclick="switchVid('vid3', '05_High_Framerate_Videos_60fps_120fps/video_03_run_gallery_filter_browse_60fps.mp4', this)">60 FPS</button>
+                <button class="copy-btn" style="position:static;" onclick="switchVid('vid3', '05_High_Framerate_Videos_60fps_120fps/video_03_run_gallery_filter_browse_120fps.mp4', this)">120 FPS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <video id="vid4" src="05_High_Framerate_Videos_60fps_120fps/video_04_stac_tasking_modal_inspect_60fps.mp4" controls autoplay loop muted playsinline style="width:100%; height:auto; display:block;"></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">04. OGC STAC Tasking Modal Inspection</div>
+            <div class="card-desc">Opening the autonomous machine-readable STAC v1.0.0 order modal, scrolling sensor properties, and 1-click clipboard copy.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1080p MP4</span>
+              <div>
+                <button class="copy-btn" style="position:static; margin-right:4px;" onclick="switchVid('vid4', '05_High_Framerate_Videos_60fps_120fps/video_04_stac_tasking_modal_inspect_60fps.mp4', this)">60 FPS</button>
+                <button class="copy-btn" style="position:static;" onclick="switchVid('vid4', '05_High_Framerate_Videos_60fps_120fps/video_04_stac_tasking_modal_inspect_120fps.mp4', this)">120 FPS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <video id="vid5" src="05_High_Framerate_Videos_60fps_120fps/video_05_multitheater_quickjump_tour_60fps.mp4" controls autoplay loop muted playsinline style="width:100%; height:auto; display:block;"></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">05. Multi-Theater Global Quick-Jumps</div>
+            <div class="card-desc">High-speed orbital teleportation across Europe (Italy Alps), Arctic Siberia (Norilsk), Japan, Brazil (Pantanal), and Cascadia.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1080p MP4</span>
+              <div>
+                <button class="copy-btn" style="position:static; margin-right:4px;" onclick="switchVid('vid5', '05_High_Framerate_Videos_60fps_120fps/video_05_multitheater_quickjump_tour_60fps.mp4', this)">60 FPS</button>
+                <button class="copy-btn" style="position:static;" onclick="switchVid('vid5', '05_High_Framerate_Videos_60fps_120fps/video_05_multitheater_quickjump_tour_120fps.mp4', this)">120 FPS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <video id="vid6" src="05_High_Framerate_Videos_60fps_120fps/video_06_hud_telemetry_orbit_scrub_60fps.mp4" controls autoplay loop muted playsinline style="width:100%; height:auto; display:block;"></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">06. HUD Telemetry &amp; Mode Toggles</div>
+            <div class="card-desc">Tactical Mission Control telemetry tracking, mode switches, sub-satellite coordinates, and solar terminator line.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1080p MP4</span>
+              <div>
+                <button class="copy-btn" style="position:static; margin-right:4px;" onclick="switchVid('vid6', '05_High_Framerate_Videos_60fps_120fps/video_06_hud_telemetry_orbit_scrub_60fps.mp4', this)">60 FPS</button>
+                <button class="copy-btn" style="position:static;" onclick="switchVid('vid6', '05_High_Framerate_Videos_60fps_120fps/video_06_hud_telemetry_orbit_scrub_120fps.mp4', this)">120 FPS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- GIFS SECTION -->
-        <!-- GIFS SECTION -->
+        <!-- 60-120 FPS VIDEOS SECTION -->
+    <div class="asset-group" data-category="videos">
+      <div class="section-title">
+        05A. High-Framerate 60 fps &amp; 120 fps 1080p Full HD MP4 Video Ads
+        <span class="tag">Silky-Smooth WebGL Captures &bull; LinkedIn Video Ads</span>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="media-wrapper">
+            <video id="vid1" src="05_High_Framerate_Videos_60fps_120fps/video_01_globe_orbit_swath_flyto_60fps.mp4" controls autoplay loop muted playsinline style="width:100%; height:auto; display:block;"></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">01. 3D Globe Rotation &amp; Swath Fly-To</div>
+            <div class="card-desc">Free-look 3D Earth dynamics, selecting Run 02 (Mexico) in the HUD, camera zoom &amp; fly-to, and 50 km imaging swath projection.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1080p MP4</span>
+              <div>
+                <button class="copy-btn" style="position:static; margin-right:4px;" onclick="switchVid('vid1', '05_High_Framerate_Videos_60fps_120fps/video_01_globe_orbit_swath_flyto_60fps.mp4', this)">60 FPS</button>
+                <button class="copy-btn" style="position:static;" onclick="switchVid('vid1', '05_High_Framerate_Videos_60fps_120fps/video_01_globe_orbit_swath_flyto_120fps.mp4', this)">120 FPS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <video id="vid2" src="05_High_Framerate_Videos_60fps_120fps/video_02_insar_split_slider_wipe_60fps.mp4" controls autoplay loop muted playsinline style="width:100%; height:auto; display:block;"></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">02. InSAR Split-Screen Slider Wipe</div>
+            <div class="card-desc">Curtain slider dragging across the interferogram, contrasting raw atmospheric fringes against corrected ground motion.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1080p MP4</span>
+              <div>
+                <button class="copy-btn" style="position:static; margin-right:4px;" onclick="switchVid('vid2', '05_High_Framerate_Videos_60fps_120fps/video_02_insar_split_slider_wipe_60fps.mp4', this)">60 FPS</button>
+                <button class="copy-btn" style="position:static;" onclick="switchVid('vid2', '05_High_Framerate_Videos_60fps_120fps/video_02_insar_split_slider_wipe_120fps.mp4', this)">120 FPS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <video id="vid3" src="05_High_Framerate_Videos_60fps_120fps/video_03_run_gallery_filter_browse_60fps.mp4" controls autoplay loop muted playsinline style="width:100%; height:auto; display:block;"></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">03. Run Gallery Browsing &amp; Filter Search</div>
+            <div class="card-desc">Browsing the 11-study portfolio catalog, filtering by search keywords ('Mexico', 'Permafrost'), and inspecting detail modals.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1080p MP4</span>
+              <div>
+                <button class="copy-btn" style="position:static; margin-right:4px;" onclick="switchVid('vid3', '05_High_Framerate_Videos_60fps_120fps/video_03_run_gallery_filter_browse_60fps.mp4', this)">60 FPS</button>
+                <button class="copy-btn" style="position:static;" onclick="switchVid('vid3', '05_High_Framerate_Videos_60fps_120fps/video_03_run_gallery_filter_browse_120fps.mp4', this)">120 FPS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <video id="vid4" src="05_High_Framerate_Videos_60fps_120fps/video_04_stac_tasking_modal_inspect_60fps.mp4" controls autoplay loop muted playsinline style="width:100%; height:auto; display:block;"></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">04. OGC STAC Tasking Modal Inspection</div>
+            <div class="card-desc">Opening the autonomous machine-readable STAC v1.0.0 order modal, scrolling sensor properties, and 1-click clipboard copy.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1080p MP4</span>
+              <div>
+                <button class="copy-btn" style="position:static; margin-right:4px;" onclick="switchVid('vid4', '05_High_Framerate_Videos_60fps_120fps/video_04_stac_tasking_modal_inspect_60fps.mp4', this)">60 FPS</button>
+                <button class="copy-btn" style="position:static;" onclick="switchVid('vid4', '05_High_Framerate_Videos_60fps_120fps/video_04_stac_tasking_modal_inspect_120fps.mp4', this)">120 FPS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <video id="vid5" src="05_High_Framerate_Videos_60fps_120fps/video_05_multitheater_quickjump_tour_60fps.mp4" controls autoplay loop muted playsinline style="width:100%; height:auto; display:block;"></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">05. Multi-Theater Global Quick-Jumps</div>
+            <div class="card-desc">High-speed orbital teleportation across Europe (Italy Alps), Arctic Siberia (Norilsk), Japan, Brazil (Pantanal), and Cascadia.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1080p MP4</span>
+              <div>
+                <button class="copy-btn" style="position:static; margin-right:4px;" onclick="switchVid('vid5', '05_High_Framerate_Videos_60fps_120fps/video_05_multitheater_quickjump_tour_60fps.mp4', this)">60 FPS</button>
+                <button class="copy-btn" style="position:static;" onclick="switchVid('vid5', '05_High_Framerate_Videos_60fps_120fps/video_05_multitheater_quickjump_tour_120fps.mp4', this)">120 FPS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <video id="vid6" src="05_High_Framerate_Videos_60fps_120fps/video_06_hud_telemetry_orbit_scrub_60fps.mp4" controls autoplay loop muted playsinline style="width:100%; height:auto; display:block;"></video>
+          </div>
+          <div class="card-body">
+            <div class="card-title">06. HUD Telemetry &amp; Mode Toggles</div>
+            <div class="card-desc">Tactical Mission Control telemetry tracking, mode switches, sub-satellite coordinates, and solar terminator line.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1080p MP4</span>
+              <div>
+                <button class="copy-btn" style="position:static; margin-right:4px;" onclick="switchVid('vid6', '05_High_Framerate_Videos_60fps_120fps/video_06_hud_telemetry_orbit_scrub_60fps.mp4', this)">60 FPS</button>
+                <button class="copy-btn" style="position:static;" onclick="switchVid('vid6', '05_High_Framerate_Videos_60fps_120fps/video_06_hud_telemetry_orbit_scrub_120fps.mp4', this)">120 FPS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GIFS SECTION -->
     <div class="asset-group" data-category="gifs">
       <div class="section-title">
         05. Pure Browser Screen-Recorded Looping GIFs
@@ -931,6 +1154,18 @@ See how next-gen space-tech operators scale their data products: https://viewera
       document.getElementById('modal').classList.remove('active');
     }
 
+    function switchVid(id, src, btn) {
+      const vid = document.getElementById(id);
+      if (vid) {
+        const curTime = vid.currentTime;
+        vid.src = src;
+        vid.currentTime = curTime;
+        vid.play();
+        btn.parentElement.querySelectorAll('button').forEach(b => b.style.background = 'rgba(0, 240, 255, 0.15)');
+        btn.style.background = 'var(--cyan)';
+        btn.style.color = '#050811';
+      }
+    }
     function copyText(id) {
       const el = document.getElementById(id);
       const btn = el.querySelector('.copy-btn');

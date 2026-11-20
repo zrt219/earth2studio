@@ -37,6 +37,13 @@ linkedin_ad_campaign_assets/
 │   ├── card_08_run08_09_wetlands_farmland.png
 │   ├── card_09_run10_11_tropical_cascadia.png
 │   └── card_10_stac_constellation_dispatch.png
+├── 05_High_Framerate_Videos_60fps_120fps/ <- 12 Full HD 1080p MP4 videos (60 fps universal + 120 fps high-refresh)
+│   ├── video_01_globe_orbit_swath_flyto_60fps.mp4 & _120fps.mp4
+│   ├── video_02_insar_split_slider_wipe_60fps.mp4 & _120fps.mp4
+│   ├── video_03_run_gallery_filter_browse_60fps.mp4 & _120fps.mp4
+│   ├── video_04_stac_tasking_modal_inspect_60fps.mp4 & _120fps.mp4
+│   ├── video_05_multitheater_quickjump_tour_60fps.mp4 & _120fps.mp4
+│   └── video_06_hud_telemetry_orbit_scrub_60fps.mp4 & _120fps.mp4
 ├── 05_Video_and_Animated_GIFs/            <- 6 pure browser screen-recorded GIFs (<5MB, 0% synthetic graphics)
 │   ├── gif_01_globe_orbit_swath_flyto.gif
 │   ├── gif_02_insar_split_slider_wipe.gif
@@ -95,6 +102,15 @@ Sequenced 1 to 10 with 100% aspect-ratio preserved contain mode (zero cropping o
 - `card_08_run08_09_wetlands_farmland.png` &mdash; Runs 08-09: Hokkaido Peatlands & Pantanal Flood Inundation
 - `card_09_run10_11_tropical_cascadia.png` &mdash; Runs 10-11: Tapajós High-Moisture SAR & Cascadia Fault Margin
 - `card_10_stac_constellation_dispatch.png` &mdash; Autonomous OGC STAC Constellation Dispatch Call-To-Action
+
+### `05_High_Framerate_Videos_60fps_120fps/` (Full HD 1080p MP4 at 60 fps & 120 fps)
+Silky-smooth, true 60 fps and 120 fps Full HD (1920x1080) H.264 video assets designed for LinkedIn Sponsored Video Content, web embeds, and 120Hz high-refresh displays:
+1. `video_01_globe_orbit_swath_flyto_60fps.mp4` & `..._120fps.mp4` (4.5 MB / 5.3 MB) &mdash; 3D globe orbital dynamics, HUD selection, camera fly-to, and 50 km swath activation.
+2. `video_02_insar_split_slider_wipe_60fps.mp4` & `..._120fps.mp4` (2.1 MB / 2.6 MB) &mdash; High-framerate split comparison curtain wipe across raw vs. corrected InSAR phase.
+3. `video_03_run_gallery_filter_browse_60fps.mp4` & `..._120fps.mp4` (2.9 MB / 3.9 MB) &mdash; Run gallery browsing, search filtering, and study detail modal walkthrough.
+4. `video_04_stac_tasking_modal_inspect_60fps.mp4` & `..._120fps.mp4` (1.0 MB / 1.1 MB) &mdash; OGC STAC v1.0.0 order modal inspection, payload parameter scrolling, and copy.
+5. `video_05_multitheater_quickjump_tour_60fps.mp4` & `..._120fps.mp4` (7.8 MB / 8.3 MB) &mdash; High-speed orbital teleportation across Europe, Arctic Siberia, Japan, Brazil, and Cascadia.
+6. `video_06_hud_telemetry_orbit_scrub_60fps.mp4` & `..._120fps.mp4` (3.3 MB / 3.7 MB) &mdash; Tactical Mission Control telemetry tracking, mode switches, sub-satellite tracking, and solar terminator line.
 
 ### `05_Video_and_Animated_GIFs/` (Pure Browser Screen-Recorded Looping GIFs)
 Authentic 16:9 full-viewport recordings captured directly from the live 3D WebGL viewer at http://localhost:5173/ with zero synthetic overlays, added cards, or artificial blocks:

@@ -1,6 +1,6 @@
 {
   "campaign_name": "Earth-2 X-Band SAR & InSAR Mission Twin - B2B LinkedIn Campaign",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "date_created": "2026-11-19",
   "target_url": "https://viewerapp.vercel.app",
   "repository": "https://github.com/zrt219/earth2studio",
@@ -158,6 +158,75 @@
         "05_stac_tasking_inspector.png",
         "06_insar_split_slider_comparison.png",
         "07_hud_quick_runs_vancouver.png"
+      ]
+    },
+    "05_High_Framerate_Videos_60fps_120fps": {
+      "description": "Full HD 1080p (1920x1080) MP4 videos at silky-smooth 60 fps and 120 fps for LinkedIn Video Ads and high-refresh displays. 0% synthetic graphics, 100% authentic live WebGL 3D Mission Control captures.",
+      "formats": [
+        "60 fps (universal LinkedIn Sponsored Video standard)",
+        "120 fps (ProMotion / 120Hz high-refresh displays)"
+      ],
+      "videos": [
+        {
+          "id": "video_01_globe_orbit_swath_flyto",
+          "title": "3D Globe Rotation & Swath Fly-To",
+          "files": {
+            "60fps": "video_01_globe_orbit_swath_flyto_60fps.mp4",
+            "120fps": "video_01_globe_orbit_swath_flyto_120fps.mp4"
+          },
+          "resolution": "1920x1080",
+          "focus": "Free-look 3D Earth orbit dynamics, selecting Run 02 in HUD, camera fly-to, and 50 km swath projection activation."
+        },
+        {
+          "id": "video_02_insar_split_slider_wipe",
+          "title": "InSAR Split Comparison Slider",
+          "files": {
+            "60fps": "video_02_insar_split_slider_wipe_60fps.mp4",
+            "120fps": "video_02_insar_split_slider_wipe_120fps.mp4"
+          },
+          "resolution": "1920x1080",
+          "focus": "Curtain wipe comparison slider dragging from 10% to 100% showing raw fringes vs. corrected ground displacement."
+        },
+        {
+          "id": "video_03_run_gallery_filter_browse",
+          "title": "Run Gallery Browsing & Filter Search",
+          "files": {
+            "60fps": "video_03_run_gallery_filter_browse_60fps.mp4",
+            "120fps": "video_03_run_gallery_filter_browse_120fps.mp4"
+          },
+          "resolution": "1920x1080",
+          "focus": "Browsing the 11-study portfolio catalog, filtering by search keywords ('Mexico', 'Permafrost'), and inspecting detail modals."
+        },
+        {
+          "id": "video_04_stac_tasking_modal_inspect",
+          "title": "OGC STAC Tasking Modal Inspection",
+          "files": {
+            "60fps": "video_04_stac_tasking_modal_inspect_60fps.mp4",
+            "120fps": "video_04_stac_tasking_modal_inspect_120fps.mp4"
+          },
+          "resolution": "1920x1080",
+          "focus": "Opening autonomous machine-readable STAC v1.0.0 order modal, scrolling sensor properties, and 1-click clipboard copy."
+        },
+        {
+          "id": "video_05_multitheater_quickjump_tour",
+          "title": "Multi-Theater Global Quick-Jumps",
+          "files": {
+            "60fps": "video_05_multitheater_quickjump_tour_60fps.mp4",
+            "120fps": "video_05_multitheater_quickjump_tour_120fps.mp4"
+          },
+          "resolution": "1920x1080",
+          "focus": "High-speed orbital teleportation across Europe (Italy Alps), Arctic Siberia (Norilsk), Japan, Brazil (Pantanal), and Cascadia."
+        },
+        {
+          "id": "video_06_hud_telemetry_orbit_scrub",
+          "title": "HUD Telemetry & Mode Toggles",
+          "files": {
+            "60fps": "video_06_hud_telemetry_orbit_scrub_60fps.mp4",
+            "120fps": "video_06_hud_telemetry_orbit_scrub_120fps.mp4"
+          },
+          "resolution": "1920x1080",
+          "focus": "Tactical Mission Control telemetry tracking, mode switches, sub-satellite coordinates, and solar terminator line."
+        }
       ]
     }
   },
