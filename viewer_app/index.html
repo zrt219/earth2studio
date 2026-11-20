@@ -1216,6 +1216,14 @@
     .hud-footer a { color: #38bdf8; text-decoration: none; }
     .hud-footer a:hover { text-decoration: underline; }
 
+    /* Clean Uncluttered Cockpit: Permanently hide Camera Controls Widget & Bottom Theaters Bar */
+    #camera-controls-widget,
+    .camera-widget,
+    #hud-quick-runs,
+    .hud-quick-runs {
+      display: none !important;
+    }
+
     /* Floating Camera Controls Widget */
     .camera-widget {
       position: absolute;
@@ -1388,7 +1396,7 @@
       }
       #quick-toolbar {
         left: 374px;
-        right: 218px;
+        right: 20px;
         transform: none;
         max-width: none;
         justify-content: flex-start;
@@ -1408,7 +1416,7 @@
     @media (min-width: 1121px) and (max-width: 1360px) {
       #quick-toolbar {
         left: 444px;
-        right: 244px;
+        right: 20px;
         transform: none;
         max-width: none;
         justify-content: flex-start;

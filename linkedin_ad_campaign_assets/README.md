@@ -46,13 +46,15 @@ linkedin_ad_campaign_assets/
 │   ├── video_06_stac_tasking_modal_inspection_60fps.mp4 & _120fps.mp4
 │   ├── video_07_all_11_regions_grand_tour_60fps.mp4 & _120fps.mp4
 │   └── video_08_precision_city_targets_beacons_60fps.mp4 & _120fps.mp4
-├── 05_Video_and_Animated_GIFs/            <- 6 pure browser screen-recorded GIFs (<5MB, 0% synthetic graphics)
-│   ├── gif_01_globe_orbit_swath_flyto.gif
-│   ├── gif_02_insar_split_slider_wipe.gif
-│   ├── gif_03_run_gallery_filter_browse.gif
-│   ├── gif_04_stac_tasking_modal_inspect.gif
-│   ├── gif_05_multitheater_quickjump_tour.gif
-│   └── gif_06_hud_telemetry_orbit_scrub.gif
+├── 05_Video_and_Animated_GIFs/            <- 8 pure browser screen-recorded 16:9 GIFs (<5MB, 0% squish, uncluttered overlay)
+│   ├── gif_01_all_surfaces_relief.gif
+│   ├── gif_02_surface_temps_tendency_wind.gif
+│   ├── gif_03_sar_incidence_kinematics.gif
+│   ├── gif_04_weather_hazards_forecast_playback.gif
+│   ├── gif_05_insar_split_slider_comparison.gif
+│   ├── gif_06_stac_tasking_modal_inspection.gif
+│   ├── gif_07_all_11_regions_grand_tour.gif
+│   └── gif_08_precision_city_targets_beacons.gif
 ├── 06_App_Showcase_Screenshots/           <- 7 high-resolution WebGL UI captures from the 3D Mission Twin
 │   ├── 01_mission_control_overview.png
 │   ├── 02_run_gallery_catalog.png

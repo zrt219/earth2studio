@@ -1,6 +1,6 @@
 {
   "campaign_name": "Earth-2 X-Band SAR & InSAR Mission Twin - B2B LinkedIn Campaign",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "date_created": "2026-11-19",
   "target_url": "https://viewerapp.vercel.app",
   "repository": "https://github.com/zrt219/earth2studio",
@@ -102,49 +102,55 @@
       ]
     },
     "05_Video_and_Animated_GIFs": {
-      "description": "6 authentic browser-recorded looping GIFs (< 5MB) captured directly from the live 3D WebGL viewer without any added synthetic cards, blocks, or artificial graphics.",
+      "description": "8 pure browser screen-recorded looping GIFs in true 16:9 widescreen (960x540, 0% squish, <5MB LinkedIn compliant) with uncluttered overlay (camera widget & theaters bar hidden, no scrollbar).",
       "files": [
         {
-          "name": "gif_01_globe_orbit_swath_flyto.gif",
-          "size_kb": 1953.9,
-          "dimensions": "960x600",
-          "frames": 9,
-          "focus": "3D Globe orbital dynamics, run selection in HUD, camera fly-to, and 50 km swath projection activation"
+          "name": "gif_01_all_surfaces_relief.gif",
+          "resolution": "960x540 (16:9)",
+          "file_size": "0.92 MB",
+          "description": "All Surfaces, Sentinel-2 131K LOD & 3D Topographic Relief with uncluttered cockpit view."
         },
         {
-          "name": "gif_02_insar_split_slider_wipe.gif",
-          "size_kb": 847.7,
-          "dimensions": "960x600",
-          "frames": 9,
-          "focus": "InSAR split-screen comparison curtain wiping from 10% to 100% showing raw fringes vs. corrected ground displacement"
+          "name": "gif_02_surface_temps_tendency_wind.gif",
+          "resolution": "960x540 (16:9)",
+          "file_size": "0.81 MB",
+          "description": "NOAA GFS Surface Temperatures, 24h Tendency, Winds & Hazards."
         },
         {
-          "name": "gif_03_run_gallery_filter_browse.gif",
-          "size_kb": 1101.1,
-          "dimensions": "960x600",
-          "frames": 9,
-          "focus": "Run Gallery portfolio browsing, interactive keyword filtering, and detailed study modal inspection"
+          "name": "gif_03_sar_incidence_kinematics.gif",
+          "resolution": "960x540 (16:9)",
+          "file_size": "0.67 MB",
+          "description": "SAR Kinematics, 50km Swaths & Incidence Angle Geometry."
         },
         {
-          "name": "gif_04_stac_tasking_modal_inspect.gif",
-          "size_kb": 374.5,
-          "dimensions": "960x600",
-          "frames": 7,
-          "focus": "OGC STAC v1.0.0 tasking order modal inspection, payload parameter scrolling, and 1-click clipboard copy"
+          "name": "gif_04_weather_hazards_forecast_playback.gif",
+          "resolution": "960x540 (16:9)",
+          "file_size": "0.95 MB",
+          "description": "24h Forecast Lead-Time Playback & Hazard Simulation."
         },
         {
-          "name": "gif_05_multitheater_quickjump_tour.gif",
-          "size_kb": 2793.3,
-          "dimensions": "960x600",
-          "frames": 10,
-          "focus": "Multi-theater global quick-jumping across Europe (Italy Alps), Arctic Siberia (Norilsk), South America (Pantanal), and Cascadia"
+          "name": "gif_05_insar_split_slider_comparison.gif",
+          "resolution": "960x540 (16:9)",
+          "file_size": "0.35 MB",
+          "description": "InSAR Split-Screen Curtain Slider Comparison."
         },
         {
-          "name": "gif_06_hud_telemetry_orbit_scrub.gif",
-          "size_kb": 1409.9,
-          "dimensions": "960x600",
-          "frames": 8,
-          "focus": "Tactical Mission Control telemetry tracking, mode switches, sub-satellite coordinates, and solar terminator line"
+          "name": "gif_06_stac_tasking_modal_inspection.gif",
+          "resolution": "960x540 (16:9)",
+          "file_size": "0.26 MB",
+          "description": "OGC STAC v1.0.0 Tasking Modal & API Payload."
+        },
+        {
+          "name": "gif_07_all_11_regions_grand_tour.gif",
+          "resolution": "960x540 (16:9)",
+          "file_size": "3.36 MB",
+          "description": "All 11 Global Research Theaters Grand Tour."
+        },
+        {
+          "name": "gif_08_precision_city_targets_beacons.gif",
+          "resolution": "960x540 (16:9)",
+          "file_size": "0.45 MB",
+          "description": "Precision Urban Targets, Volcano Beacons & High-Res Geology."
         }
       ]
     },
@@ -251,5 +257,5 @@
     }
   },
   "last_updated": "2026-11-20",
-  "redesign_notes": "v5.0.0: Comprehensive feature video showcase suite featuring 8 dedicated 60/120fps 1080p MP4 videos covering all surfaces & relief, surface temps & winds, SAR incidence kinematics, weather hazard simulations, InSAR curtain slider wiping, STAC tasking modal, all 11 global theaters grand tour, and precision urban target beacons."
+  "redesign_notes": "v6.0.0: Redone 8-suite 1080p 16:9 widescreen looping GIFs and paired 60/120fps Full HD MP4s with completely uncluttered cockpit overlay (camera controls & theaters bar hidden, zero toolbar scrollbars, 0% squish)."
 }
