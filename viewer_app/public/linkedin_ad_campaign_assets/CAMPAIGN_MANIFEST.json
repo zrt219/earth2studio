@@ -1,6 +1,6 @@
 {
   "campaign_name": "Earth-2 X-Band SAR & InSAR Mission Twin - B2B LinkedIn Campaign",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "date_created": "2026-11-19",
   "target_url": "https://viewerapp.vercel.app",
   "repository": "https://github.com/zrt219/earth2studio",
@@ -57,7 +57,7 @@
       ]
     },
     "03_Single_Image_Ads_Square_1080x1080": {
-      "description": "Sponsored Content Square Image Ads (1:1 ratio, 1080x1080 px). Highest CTR on mobile devices.",
+      "description": "De-cluttered minimalist hero creatives (1:1 ratio, 1080x1080 px) with 85% visual dominance, single bold headline, single metric pill, and ZERO nested glass boxes.",
       "files": [
         {
           "name": "ad_01_aps_hero_1080x1080.png",
@@ -87,7 +87,7 @@
       ]
     },
     "04_Carousel_Ad_Cards_1080x1080": {
-      "description": "10 sequential cards for LinkedIn Document / Carousel Ads (1080x1080 px).",
+      "description": "10 sequential cards for LinkedIn Document / Carousel Ads (1080x1080 px). 100% scientific figures fit completely without ANY cropping (aspect-ratio preserved contain mode).",
       "cards": [
         "card_01_mission_overview.png",
         "card_02_run01_tropospheric_aps.png",
@@ -106,7 +106,7 @@
       "files": [
         {
           "name": "gif_01_global_mission_twin.gif",
-          "size_kb": 943,
+          "size_kb": 942,
           "dimensions": "640x360",
           "frames": 36
         },
@@ -124,9 +124,39 @@
         },
         {
           "name": "gif_04_stac_tasking_order.gif",
-          "size_kb": 36,
+          "size_kb": 35,
           "dimensions": "640x400",
           "frames": 19
+        },
+        {
+          "name": "gif_05_radar_beam_sweep.gif",
+          "size_kb": 1474,
+          "dimensions": "640x400",
+          "frames": 36
+        },
+        {
+          "name": "gif_06_multiband_penetration_scan.gif",
+          "size_kb": 376,
+          "dimensions": "640x400",
+          "frames": 36
+        },
+        {
+          "name": "gif_07_permafrost_thaw_heatmap.gif",
+          "size_kb": 791,
+          "dimensions": "640x400",
+          "frames": 36
+        },
+        {
+          "name": "gif_08_cascadia_slow_slip_timelapse.gif",
+          "size_kb": 653,
+          "dimensions": "640x400",
+          "frames": 36
+        },
+        {
+          "name": "gif_09_interactive_app_ui_tour.gif",
+          "size_kb": 1285,
+          "dimensions": "640x400",
+          "frames": 48
         }
       ]
     },
@@ -142,5 +172,7 @@
         "07_hud_quick_runs_vancouver.png"
       ]
     }
-  }
+  },
+  "last_updated": "2026-11-20",
+  "redesign_notes": "Full B2B visual redesign: Aspect-ratio preserved contain mode on carousel cards (0% cropping), minimalist 85% dominance hero square ads, and 5 brand new showcase animated GIFs."
 }

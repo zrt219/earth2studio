@@ -74,7 +74,7 @@ Designed for maximum horizontal visual impact on desktop LinkedIn feeds:
 5. `ad_05_scientific_integrity_1200x627.png` &mdash; **Physics-First Remote Sensing** (0% synthetic noise, verifiable physical ray tracing)
 
 ### `03_Single_Image_Ads_Square_1080x1080/` (1:1)
-Optimized for mobile feeds where square creative captures ~30% more screen real estate:
+De-cluttered minimalist hero creatives with 85% visual dominance, single bold headline, single metric pill, and ZERO nested glass boxes:
 1. `ad_01_aps_hero_1080x1080.png` &mdash; Stop InSAR atmospheric false alarms with Earth-2.
 2. `ad_02_global_constellation_1080x1080.png` &mdash; Autonomous SAR constellation mission planning twin.
 3. `ad_03_cascadia_subsidence_1080x1080.png` &mdash; Cascadia slow-slip subduction zone deformation detection.
@@ -82,7 +82,7 @@ Optimized for mobile feeds where square creative captures ~30% more screen real 
 5. `ad_05_multiband_sar_physics_1080x1080.png` &mdash; Multi-frequency X, C, and L-band penetration depth modeling.
 
 ### `04_Carousel_Ad_Cards_1080x1080/` (1:1)
-Sequenced 1 to 10 for multi-image swipeable carousel ads or compiled into a LinkedIn Document Ad (PDF):
+Sequenced 1 to 10 with 100% aspect-ratio preserved contain mode (zero cropping of scientific figures), minimal top header, and subtle bottom swipe prompt:
 - `card_01_mission_overview.png` &mdash; Mission Overview: The Earth-2 Digital Twin Platform
 - `card_02_run01_tropospheric_aps.png` &mdash; Run 01: Tropospheric Phase Screen & Zenith Delay
 - `card_03_run02_mexico_city.png` &mdash; Run 02: Mexico City Aquifer Compaction (-38.4 cm/yr)
@@ -100,6 +100,11 @@ Looping visual demonstrations specifically engineered under LinkedIn's 5MB uploa
 2. `gif_02_insar_phase_split_slider.gif` (1.55 MB, 640x400, 36 frames) &mdash; Dynamic curtain split-screen comparing uncorrected phase delay against corrected ground motion.
 3. `gif_03_swath_activation_theater_hop.gif` (1.06 MB, 640x400, 40 frames) &mdash; Camera fly-to and instant swath activation between global theaters.
 4. `gif_04_stac_tasking_order.gif` (36 KB, 640x400, 19 frames) &mdash; Autonomous STAC v1.0.0 JSON payload dispatch animation.
+5. `gif_05_radar_beam_sweep.gif` (640x400, 36 frames) &mdash; Active satellite phased-array microwave radar beam sweep with Doppler and swath illumination.
+6. `gif_06_multiband_penetration_scan.gif` (640x400, 36 frames) &mdash; Multi-band penetration scanner comparing X-band, C-band, and L-band penetration depth.
+7. `gif_07_permafrost_thaw_heatmap.gif` (640x400, 36 frames) &mdash; Norilsk Arctic permafrost thaw heatmap showing active layer deepening and thermokarst subsidence.
+8. `gif_08_cascadia_slow_slip_timelapse.gif` (640x400, 36 frames) &mdash; Cascadia subduction zone episodic tremor and slip (ETS) recurrence timelapse.
+9. `gif_09_interactive_app_ui_tour.gif` (640x400, 48 frames) &mdash; High-fidelity interactive 3D Mission Twin WebGL UI tour with cursor interaction.
 
 ### `06_App_Showcase_Screenshots/` (High-Res UI Captures)
 Direct 1080p WebGL screenshots from the live mission twin at `http://localhost:5173/`:

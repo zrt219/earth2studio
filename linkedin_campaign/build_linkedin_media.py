@@ -24,7 +24,10 @@ import shutil
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageOps, ImageEnhance
 
 # Directories
-WORKSPACE_ROOT = os.path.dirname(os.path.abspath(__file__))
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+WORKSPACE_ROOT = os.path.dirname(THIS_DIR) if os.path.basename(THIS_DIR) == "linkedin_campaign" else THIS_DIR
+if WORKSPACE_ROOT not in sys.path:
+    sys.path.insert(0, WORKSPACE_ROOT)
 OUTPUT_DIR = os.path.join(WORKSPACE_ROOT, "linkedin_campaign", "assets")
 SCREENSHOTS_DIR = os.path.join(WORKSPACE_ROOT, "linkedin_campaign", "screenshots")
 RUNS_DIR = os.path.join(WORKSPACE_ROOT, "viewer_app", "public", "runs")
@@ -340,360 +343,24 @@ def generate_landscape_cards():
 # 2. SQUARE SPONSORED CONTENT CARDS (1080 x 1080)
 # =============================================================================
 def generate_square_cards():
-    print("Generating Square Sponsored Content Cards (1080x1080)...")
-    W, H = 1080, 1080
-
-    cards = [
-        {
-            "id": "ad_square_01_aps_hero",
-            "filename": "ad_square_01_aps_hero.png",
-            "tag": "RULE e2s-014 VERIFIED",
-            "stat": "-98.7%",
-            "stat_label": "ATMOSPHERIC PHASE SCREEN (APS) ERROR REDUCTION",
-            "title": "Clean InSAR Phase Fringes",
-            "sub": "Raw X-band interferograms suffer heavy tropospheric water vapor distortion. Earth-2 assimilates NOAA GFS 0.25° tensors to remove 12.2 turbulent fringes without hallucinated noise.",
-            "points": ["ICEYE Spotlight & Synspective StriX", "Authentic Zenith Total Delay Modeling", "Sub-centimeter Surface Displacement"],
-            "feat_img": os.path.join(RUNS_DIR, "run_01_baseline_advanced_pillars", "06_geoint_sar_aps_trifecta.png"),
-            "cta": "EXPLORE InSAR MISSION TWIN ➔"
-        },
-        {
-            "id": "ad_square_02_global_constellation",
-            "filename": "ad_square_02_global_constellation.png",
-            "tag": "GLOBAL MISSION CONTROL",
-            "stat": "11 RUNS",
-            "stat_label": "SCIENTIFIC RESEARCH SUITES & SATELLITE TWIN",
-            "title": "Commercial SAR Digital Twin",
-            "sub": "Simulate and task commercial X-band radar constellations in real-time. Full WebGL 3D mission control globe with orbital tracks, look-cones, and instant swath activation.",
-            "points": ["WebGL Orbit Mechanics Engine", "570 km SSO Polar Orbits", "1-Click Swath Fly-To Navigation"],
-            "feat_img": os.path.join(SCREENSHOTS_DIR, "01_mission_control_overview.png"),
-            "cta": "LAUNCH 3D MISSION TWIN ➔"
-        },
-        {
-            "id": "ad_square_03_cascadia_subsidence",
-            "filename": "ad_square_03_cascadia_subsidence.png",
-            "tag": "CRITICAL INFRASTRUCTURE",
-            "stat": "40 cm/yr",
-            "stat_label": "RAPID COASTAL & DELTA SUBSIDENCE TRACKED",
-            "title": "Cascadia Subduction & Fraser Delta",
-            "sub": "Quantifying liquefaction risk zones, sea-level vulnerability, and sediment compaction with high-resolution persistent scatterer InSAR and physical hazard models.",
-            "points": ["Vancouver Fraser River Delta", "Seismic Liquefaction Vulnerability", "Rule e2s-014 Strict Verification"],
-            "feat_img": os.path.join(RUNS_DIR, "run_11_vancouver_cascadia_delta", "14_vancouver_terrain.png"),
-            "cta": "INSPECT HAZARD STUDY ➔"
-        },
-        {
-            "id": "ad_square_04_stac_api_dispatch",
-            "filename": "ad_square_04_stac_api_dispatch.png",
-            "tag": "OGC STAC v1.0.0 COMPLIANT",
-            "stat": "< 50 ms",
-            "stat_label": "INSTANT SATELLITE TASKING DISPATCH",
-            "title": "Automated Radar Tasking API",
-            "sub": "Generate production-ready OGC STAC GeoJSON tasking orders directly from atmospheric correction outputs. Ready for commercial constellation dispatch.",
-            "points": ["Spotlight & Stripmap Geometry", "Incidence & Azimuth Metadata", "1-Click Clipboard Order Copy"],
-            "feat_img": os.path.join(SCREENSHOTS_DIR, "05_stac_tasking_inspector.png"),
-            "cta": "VIEW STAC SPECIFICATION ➔"
-        },
-        {
-            "id": "ad_square_05_multiband_sar_physics",
-            "filename": "ad_square_05_multiband_sar_physics.png",
-            "tag": "MULTI-BAND RADAR PHYSICS",
-            "stat": "X / C / L",
-            "stat_label": "MULTI-WAVELENGTH COHERENCE MODELING",
-            "title": "Multi-Band InSAR Decoupling",
-            "sub": "Compare wavelength penetration depths (3.1cm vs 5.6cm vs 23.6cm) and temporal decorrelation across dense Amazon canopy and built environments.",
-            "points": ["Volume Scattering Decoupling", "Phase Coherence γ Profiling", "Cross-Constellation Fusion"],
-            "feat_img": os.path.join(RUNS_DIR, "run_05_multiband_insar_physics", "08_multiband_insar_comparison.png"),
-            "cta": "READ MULTI-BAND PAPER ➔"
-        }
-    ]
-
-    for card in cards:
-        base = Image.new("RGBA", (W, H), BG_COLOR)
-        
-        # Background preview
-        if os.path.exists(card["feat_img"]):
-            bg_im = load_and_cover(card["feat_img"], (W, H))
-            bg_im = ImageEnhance.Brightness(bg_im).enhance(0.28)
-            base.paste(bg_im, (0, 0))
-            
-        draw_ov = ImageDraw.Draw(base)
-        draw_scanlines_and_grid(draw_ov, W, H, step=50, alpha=15)
-        
-        # Branding Header & Footer
-        draw_branding_header(draw_ov, W, tag=card["tag"])
-        draw_branding_footer(draw_ov, W, H, cta=card["cta"])
-        
-        # Top Stat Glass Card
-        stat_box = [50, 75, W - 50, 230]
-        draw_glass_panel(draw_ov, stat_box, fill=(15, 23, 42, 235), outline=(0, 240, 255, 120), radius=12)
-        draw_hud_corners(draw_ov, stat_box, color=CYAN, length=16, width=2)
-        
-        draw_t = ImageDraw.Draw(base)
-        # Tag
-        draw_badge(draw_t, card["tag"], (75, 95), bg=(0, 240, 255, 30), border=CYAN, text_color=CYAN, font=get_font("mono", 12, bold=True))
-        
-        # Stat Number
-        font_stat = get_font("segoe", 52, bold=True)
-        draw_t.text((75, 125), card["stat"], fill=CYAN, font=font_stat)
-        
-        # Stat Label
-        font_sl = get_font("mono", 13, bold=True)
-        draw_t.text((75, 192), card["stat_label"], fill=EMERALD, font=font_sl)
-        
-        # Middle Visual Window
-        vis_box = [50, 250, W - 50, 700]
-        draw_glass_panel(draw_ov, vis_box, fill=(10, 15, 26, 240), outline=(0, 240, 255, 90), radius=12)
-        draw_hud_corners(draw_ov, vis_box, color=CYAN, length=16, width=2)
-        
-        vw = vis_box[2] - vis_box[0] - 16
-        vh = vis_box[3] - vis_box[1] - 16
-        if os.path.exists(card["feat_img"]):
-            img_c = load_and_cover(card["feat_img"], (vw, vh))
-            base.paste(img_c, (vis_box[0] + 8, vis_box[1] + 8))
-            draw_t.rounded_rectangle([vis_box[0] + 8, vis_box[1] + 8, vis_box[2] - 8, vis_box[3] - 8], radius=8, outline=(0, 240, 255, 100), width=1)
-            
-        # Bottom Text Content Panel
-        bot_box = [50, 720, W - 50, H - 75]
-        draw_glass_panel(draw_ov, bot_box, fill=(15, 23, 42, 240), outline=(0, 240, 255, 110), radius=12)
-        draw_hud_corners(draw_ov, bot_box, color=CYAN, length=16, width=2)
-        
-        bx = 75
-        by = 740
-        font_bt = get_font("segoe", 24, bold=True)
-        draw_t.text((bx, by), card["title"], fill=WHITE, font=font_bt)
-        by += 34
-        
-        font_bp = get_font("segoe", 15, bold=False)
-        words = card["sub"].split(" ")
-        line = ""
-        for w in words:
-            if font_bp.getbbox(line + w + " ")[2] > (W - 160):
-                draw_t.text((bx, by), line, fill=MUTED, font=font_bp)
-                by += 22
-                line = w + " "
-            else:
-                line += w + " "
-        if line:
-            draw_t.text((bx, by), line, fill=MUTED, font=font_bp)
-            by += 28
-            
-        # Feature chips
-        cx = bx
-        for p in card["points"]:
-            cx = draw_badge(draw_t, p, (cx, by), bg=(30, 41, 59, 180), border=(71, 85, 105), text_color=WHITE, font=get_font("mono", 11, bold=False), padding=(8, 4)) + 12
-
-        out_path = os.path.join(OUTPUT_DIR, card["filename"])
-        base.save(out_path, "PNG", optimize=True)
-        print(f"  ✓ {card['filename']} saved ({os.path.getsize(out_path)} bytes)")
+    import redesign_linkedin_assets
+    out = redesign_linkedin_assets.generate_square_cards()
+    for fname, img in out.items():
+        p = os.path.join(OUTPUT_DIR, fname)
+        img.save(p, "PNG", optimize=True)
+    return out
 
 
 # =============================================================================
 # 3. 10-CARD CAROUSEL DECK (1080 x 1080)
 # =============================================================================
 def generate_carousel_cards():
-    print("Generating 10-Card Carousel Deck (1080x1080)...")
-    W, H = 1080, 1080
-
-    deck = [
-        {
-            "card_idx": "01 / 10",
-            "filename": "carousel_card_01_mission_overview.png",
-            "tag": "PORTFOLIO OVERVIEW",
-            "run_num": "SYSTEM ARCHITECTURE",
-            "title": "Earth-2 X-Band SAR & InSAR Twin",
-            "highlight": "11 SCIENTIFIC RUNS",
-            "sub": "End-to-end digital twin uniting physical hazard modeling, commercial SAR satellite tasking, and atmospheric correction.",
-            "bullets": ["Authentic NOAA GFS 0.25° Tensors", "Rule e2s-014 Scientific Integrity", "ICEYE & Synspective Constellations"],
-            "img": os.path.join(SCREENSHOTS_DIR, "01_mission_control_overview.png"),
-            "swipe": "Swipe to explore Run 01: APS Correction ➔"
-        },
-        {
-            "card_idx": "02 / 10",
-            "filename": "carousel_card_02_run01_tropospheric_aps.png",
-            "tag": "RUN 01 // GLOBAL BASELINE",
-            "run_num": "BASELINE PILLAR 01",
-            "title": "Tropospheric APS Noise Removal",
-            "highlight": "-98.7% ERROR REDUCTION",
-            "sub": "Po Valley Alps InSAR validation removing 12.2 turbulent atmospheric fringes using CATALYST Zenith Total Delay raytracing.",
-            "bullets": ["Uncorrected Phase RMSE: 14.78 rad", "Corrected Phase RMSE: 0.18 rad", "Zero Stochastic Hallucinations"],
-            "img": os.path.join(RUNS_DIR, "run_01_baseline_advanced_pillars", "06_geoint_sar_aps_trifecta.png"),
-            "swipe": "Swipe to Run 02: Mexico City Subsidence ➔"
-        },
-        {
-            "card_idx": "03 / 10",
-            "filename": "carousel_card_03_run02_mexico_city.png",
-            "tag": "RUN 02 // HIDDEN TERRAIN",
-            "run_num": "LATIN AMERICA THEATER",
-            "title": "Mexico City Aquifer Depletion",
-            "highlight": "40 CM / YEAR COMPACTION",
-            "sub": "Rapid lacustrine clay consolidation and differential settlement threatening critical municipal rail and water lines.",
-            "bullets": ["Lacustrine Aquifer Compaction", "Differential Settlement Fault Scarps", "ICEYE Ascending Spotlight VV"],
-            "img": os.path.join(RUNS_DIR, "run_02_mexico_hidden_terrain", "07_mexico_hidden_terrain_geoint.png"),
-            "swipe": "Swipe to Run 03: Arctic Permafrost Thaw ➔"
-        },
-        {
-            "card_idx": "04 / 10",
-            "filename": "carousel_card_04_run03_norilsk_permafrost.png",
-            "tag": "RUN 03 // HIDDEN TERRAIN",
-            "run_num": "ARCTIC SIBERIA THEATER",
-            "title": "Norilsk Permafrost Degradation",
-            "highlight": "THERMOKARST SUBSIDENCE",
-            "sub": "Active-layer deepening and thermophysical loss of bearing capacity across massive Arctic industrial and metallurgical hubs.",
-            "bullets": ["Thermokarst Cavity Collapse", "Talik Formation & Thaw Slumps", "High-Latitude Orbit Tracking"],
-            "img": os.path.join(RUNS_DIR, "run_03_northern_russia_terrain", "06_russia_hidden_terrain_geoint.png"),
-            "swipe": "Swipe to Run 04: Karst Dolines ➔"
-        },
-        {
-            "card_idx": "05 / 10",
-            "filename": "carousel_card_05_run04_south_africa_karst.png",
-            "tag": "RUN 04 // HIDDEN TERRAIN",
-            "run_num": "SOUTHERN AFRICA THEATER",
-            "title": "Gauteng Karst Dolines & Mines",
-            "highlight": "SINKHOLE COLLAPSE WARNING",
-            "sub": "Sub-surface cavern dewatering and catastrophic sinkhole precursors across deep gold reef mining shafts.",
-            "bullets": ["Dolomitic Karst Cavities", "Mine Dewatering Ground Instability", "Coherence Phase Drop Alert"],
-            "img": os.path.join(RUNS_DIR, "run_04_south_africa_terrain", "07_geoint_south_africa_hidden_terrain.png"),
-            "swipe": "Swipe to Run 05: Multi-Band Physics ➔"
-        },
-        {
-            "card_idx": "06 / 10",
-            "filename": "carousel_card_06_run05_multiband_physics.png",
-            "tag": "RUN 05 // MULTI-BAND SAR",
-            "run_num": "RADAR PHYSICS ENGINE",
-            "title": "X vs C vs L-Band Comparison",
-            "highlight": "3.1 CM vs 5.6 CM vs 23.6 CM",
-            "sub": "Physical trade-offs between high spatial resolution and volumetric canopy decorrelation across diverse vegetation biomes.",
-            "bullets": ["X-Band 3.1cm Precision Focus", "C-Band 5.6cm Operational Baseline", "L-Band 23.6cm Deep Canopy Penetration"],
-            "img": os.path.join(RUNS_DIR, "run_05_multiband_insar_physics", "08_multiband_insar_comparison.png"),
-            "swipe": "Swipe to Run 06 & 07: Volcanotectonics ➔"
-        },
-        {
-            "card_idx": "07 / 10",
-            "filename": "carousel_card_07_run06_07_volcanotectonics.png",
-            "tag": "RUN 06 & 07 // DEEP HAZARDS",
-            "run_num": "MEDITERRANEAN THEATER",
-            "title": "Campi Flegrei Bradyseism",
-            "highlight": "MAGMA CHAMBER INFLATION",
-            "sub": "Caldera uplift and micro-seismic swarm monitoring across Pozzuoli and the Gulf of Pozzuoli with millimeter precision.",
-            "bullets": ["Hydrothermal System Overpressure", "Volcanotectonic Faulting", "Synspective StriX Asc/Desc Fusion"],
-            "img": os.path.join(RUNS_DIR, "run_06_deep_geophysical_hazards", "09_deep_geophysical_hazards.png"),
-            "swipe": "Swipe to Run 08 & 09: Boreal Wetlands ➔"
-        },
-        {
-            "card_idx": "08 / 10",
-            "filename": "carousel_card_08_run08_09_wetlands_farmland.png",
-            "tag": "RUN 08 & 09 // ECOSYSTEMS",
-            "run_num": "NORDIC & JAPAN THEATERS",
-            "title": "Boreal Peatlands & Farmland Decay",
-            "highlight": "GLACIAL REBOUND & HYDROLOGY",
-            "sub": "Post-glacial isostatic uplift in Finland peatlands paired with terraced paddy vegetation succession in rural Honshu.",
-            "bullets": ["Fennoscandian Uplift: 8 mm/yr", "Methane Bog Hydrological Flux", "Terraced Paddy Abandonment"],
-            "img": os.path.join(RUNS_DIR, "run_08_finland_glacial_rebound_peatlands", "11_finland_terrain.png"),
-            "swipe": "Swipe to Run 10 & 11: Amazon & Cascadia ➔"
-        },
-        {
-            "card_idx": "09 / 10",
-            "filename": "carousel_card_09_run10_11_tropical_cascadia.png",
-            "tag": "RUN 10 & 11 // DYNAMICS",
-            "run_num": "AMAZON & CASCADIA THEATERS",
-            "title": "Tropical Canopy & Coastal Delta",
-            "highlight": "SUBDUCTION & CANOPY PENETRATION",
-            "sub": "X-band microwave canopy scattering in the Amazon basin paired with Fraser River delta tidal liquefaction subsidence.",
-            "bullets": ["Amazon Heavy Foliage Backscatter", "Cascadia Megathrust Locked Zone", "Fraser Delta Subsidence Risk"],
-            "img": os.path.join(RUNS_DIR, "run_11_vancouver_cascadia_delta", "14_vancouver_terrain.png"),
-            "swipe": "Swipe to OGC STAC Sensor Tasking ➔"
-        },
-        {
-            "card_idx": "10 / 10",
-            "filename": "carousel_card_10_stac_constellation_dispatch.png",
-            "tag": "MISSION DISPATCH ENGINE",
-            "run_num": "OGC STAC v1.0.0 SPEC",
-            "title": "Automated Constellation Tasking",
-            "highlight": "INSTANT MISSION ORCHESTRATION",
-            "sub": "From atmospheric correction to commercial constellation tasking order in <50ms. Fully compliant with modern defense and GEOINT APIs.",
-            "bullets": ["ICEYE & Synspective GeoJSON Specs", "Automated Tasking Order Validation", "Rule e2s-014 Certified Workflow"],
-            "img": os.path.join(SCREENSHOTS_DIR, "05_stac_tasking_inspector.png"),
-            "swipe": "Explore Live 3D Twin Now 🚀"
-        }
-    ]
-
-    for card in deck:
-        base = Image.new("RGBA", (W, H), BG_COLOR)
-        
-        # Background
-        if os.path.exists(card["img"]):
-            bg_im = load_and_cover(card["img"], (W, H))
-            bg_im = ImageEnhance.Brightness(bg_im).enhance(0.24)
-            base.paste(bg_im, (0, 0))
-            
-        draw_ov = ImageDraw.Draw(base)
-        draw_scanlines_and_grid(draw_ov, W, H, step=50, alpha=15)
-        
-        # Carousel Header
-        draw_branding_header(draw_ov, W, run_title="EARTH-2 // CAROUSEL DECK", tag=f"CARD {card['card_idx']}")
-        draw_branding_footer(draw_ov, W, H, cta=card["swipe"], metrics=f"RUN PORTFOLIO  |  {card['run_num']}")
-        
-        # Top Meta Card
-        top_box = [50, 75, W - 50, 205]
-        draw_glass_panel(draw_ov, top_box, fill=(15, 23, 42, 235), outline=(0, 240, 255, 120), radius=12)
-        draw_hud_corners(draw_ov, top_box, color=CYAN, length=16, width=2)
-        
-        draw_t = ImageDraw.Draw(base)
-        # Card Index Badge
-        draw_badge(draw_t, card["tag"], (75, 92), bg=(0, 240, 255, 30), border=CYAN, text_color=CYAN, font=get_font("mono", 12, bold=True))
-        draw_badge(draw_t, card["card_idx"], (W - 165, 92), bg=(16, 185, 129, 30), border=EMERALD, text_color=EMERALD, font=get_font("mono", 12, bold=True))
-        
-        # Highlight Metric
-        font_hl = get_font("segoe", 38, bold=True)
-        draw_t.text((75, 126), card["highlight"], fill=CYAN, font=font_hl)
-        
-        font_rn = get_font("mono", 12, bold=True)
-        draw_t.text((75, 172), card["run_num"], fill=MUTED, font=font_rn)
-        
-        # Main Visual Center Window
-        vis_box = [50, 225, W - 50, 720]
-        draw_glass_panel(draw_ov, vis_box, fill=(10, 15, 26, 240), outline=(0, 240, 255, 90), radius=12)
-        draw_hud_corners(draw_ov, vis_box, color=CYAN, length=16, width=2)
-        
-        vw = vis_box[2] - vis_box[0] - 16
-        vh = vis_box[3] - vis_box[1] - 16
-        if os.path.exists(card["img"]):
-            img_c = load_and_cover(card["img"], (vw, vh))
-            base.paste(img_c, (vis_box[0] + 8, vis_box[1] + 8))
-            draw_t.rounded_rectangle([vis_box[0] + 8, vis_box[1] + 8, vis_box[2] - 8, vis_box[3] - 8], radius=8, outline=(0, 240, 255, 90), width=1)
-            
-        # Bottom Information Box
-        bot_box = [50, 740, W - 50, H - 75]
-        draw_glass_panel(draw_ov, bot_box, fill=(15, 23, 42, 240), outline=(0, 240, 255, 110), radius=12)
-        draw_hud_corners(draw_ov, bot_box, color=CYAN, length=16, width=2)
-        
-        bx = 75
-        by = 758
-        font_bt = get_font("segoe", 24, bold=True)
-        draw_t.text((bx, by), card["title"], fill=WHITE, font=font_bt)
-        by += 32
-        
-        font_bp = get_font("segoe", 15, bold=False)
-        words = card["sub"].split(" ")
-        line = ""
-        for w in words:
-            if font_bp.getbbox(line + w + " ")[2] > (W - 160):
-                draw_t.text((bx, by), line, fill=MUTED, font=font_bp)
-                by += 22
-                line = w + " "
-            else:
-                line += w + " "
-        if line:
-            draw_t.text((bx, by), line, fill=MUTED, font=font_bp)
-            by += 28
-            
-        # Bullets
-        cx = bx
-        for b in card["bullets"]:
-            cx = draw_badge(draw_t, b, (cx, by), bg=(30, 41, 59, 180), border=(71, 85, 105), text_color=WHITE, font=get_font("mono", 11, bold=False), padding=(8, 4)) + 10
-
-        out_path = os.path.join(OUTPUT_DIR, card["filename"])
-        base.save(out_path, "PNG", optimize=True)
-        print(f"  ✓ {card['filename']} saved ({os.path.getsize(out_path)} bytes)")
+    import redesign_linkedin_assets
+    out = redesign_linkedin_assets.generate_carousel_cards()
+    for fname, img in out.items():
+        p = os.path.join(OUTPUT_DIR, fname)
+        img.save(p, "PNG", optimize=True)
+    return out
 
 
 # =============================================================================
@@ -1620,11 +1287,22 @@ def main():
     # 3. Generate 10-Card Carousel Deck
     generate_carousel_cards()
 
-    # 4. Generate 4 Animated GIFs
+    # 4. Generate Animated GIFs
     generate_gif_01_global_mission_twin()
     generate_gif_02_insar_phase_split_slider()
     generate_gif_03_swath_activation_theater_hop()
     generate_gif_04_stac_tasking_order()
+
+    # Brand new showcase GIFs 05-09
+    try:
+        import redesign_linkedin_assets
+        redesign_linkedin_assets.generate_gif_05_radar_beam_sweep()
+        redesign_linkedin_assets.generate_gif_06_multiband_penetration_scan()
+        redesign_linkedin_assets.generate_gif_07_permafrost_thaw_heatmap()
+        redesign_linkedin_assets.generate_gif_08_cascadia_slow_slip_timelapse()
+        redesign_linkedin_assets.generate_gif_09_interactive_app_ui_tour()
+    except Exception as e:
+        print(f"Warning: could not run extended GIFs: {e}")
 
     # 5. Generate Asset Previewer HTML
     generate_html_previewer()
