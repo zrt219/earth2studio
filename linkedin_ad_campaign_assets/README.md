@@ -37,11 +37,13 @@ linkedin_ad_campaign_assets/
 │   ├── card_08_run08_09_wetlands_farmland.png
 │   ├── card_09_run10_11_tropical_cascadia.png
 │   └── card_10_stac_constellation_dispatch.png
-├── 05_Video_and_Animated_GIFs/            <- 4 looping showcase GIFs (<5MB limit for direct feed upload)
-│   ├── gif_01_global_mission_twin.gif
-│   ├── gif_02_insar_phase_split_slider.gif
-│   ├── gif_03_swath_activation_theater_hop.gif
-│   └── gif_04_stac_tasking_order.gif
+├── 05_Video_and_Animated_GIFs/            <- 6 pure browser screen-recorded GIFs (<5MB, 0% synthetic graphics)
+│   ├── gif_01_globe_orbit_swath_flyto.gif
+│   ├── gif_02_insar_split_slider_wipe.gif
+│   ├── gif_03_run_gallery_filter_browse.gif
+│   ├── gif_04_stac_tasking_modal_inspect.gif
+│   ├── gif_05_multitheater_quickjump_tour.gif
+│   └── gif_06_hud_telemetry_orbit_scrub.gif
 ├── 06_App_Showcase_Screenshots/           <- 7 high-resolution WebGL UI captures from the 3D Mission Twin
 │   ├── 01_mission_control_overview.png
 │   ├── 02_run_gallery_catalog.png
@@ -94,17 +96,14 @@ Sequenced 1 to 10 with 100% aspect-ratio preserved contain mode (zero cropping o
 - `card_09_run10_11_tropical_cascadia.png` &mdash; Runs 10-11: Tapajós High-Moisture SAR & Cascadia Fault Margin
 - `card_10_stac_constellation_dispatch.png` &mdash; Autonomous OGC STAC Constellation Dispatch Call-To-Action
 
-### `05_Video_and_Animated_GIFs/` (<5MB Looping Creatives)
-Looping visual demonstrations specifically engineered under LinkedIn's 5MB upload threshold:
-1. `gif_01_global_mission_twin.gif` (943 KB, 640x360, 36 frames) &mdash; Real-time 3D orbit propagation and swath footprint.
-2. `gif_02_insar_phase_split_slider.gif` (1.55 MB, 640x400, 36 frames) &mdash; Dynamic curtain split-screen comparing uncorrected phase delay against corrected ground motion.
-3. `gif_03_swath_activation_theater_hop.gif` (1.06 MB, 640x400, 40 frames) &mdash; Camera fly-to and instant swath activation between global theaters.
-4. `gif_04_stac_tasking_order.gif` (36 KB, 640x400, 19 frames) &mdash; Autonomous STAC v1.0.0 JSON payload dispatch animation.
-5. `gif_05_radar_beam_sweep.gif` (640x400, 36 frames) &mdash; Active satellite phased-array microwave radar beam sweep with Doppler and swath illumination.
-6. `gif_06_multiband_penetration_scan.gif` (640x400, 36 frames) &mdash; Multi-band penetration scanner comparing X-band, C-band, and L-band penetration depth.
-7. `gif_07_permafrost_thaw_heatmap.gif` (640x400, 36 frames) &mdash; Norilsk Arctic permafrost thaw heatmap showing active layer deepening and thermokarst subsidence.
-8. `gif_08_cascadia_slow_slip_timelapse.gif` (640x400, 36 frames) &mdash; Cascadia subduction zone episodic tremor and slip (ETS) recurrence timelapse.
-9. `gif_09_interactive_app_ui_tour.gif` (640x400, 48 frames) &mdash; High-fidelity interactive 3D Mission Twin WebGL UI tour with cursor interaction.
+### `05_Video_and_Animated_GIFs/` (Pure Browser Screen-Recorded Looping GIFs)
+Authentic 16:9 full-viewport recordings captured directly from the live 3D WebGL viewer at http://localhost:5173/ with zero synthetic overlays, added cards, or artificial blocks:
+1. `gif_01_globe_orbit_swath_flyto.gif` (1.91 MB, 960x600, 9 frames) &mdash; 3D Globe Free-Look, Earth rotation, HUD run selection, camera fly-to, and 50 km swath projection activation.
+2. `gif_02_insar_split_slider_wipe.gif` (848 KB, 960x600, 9 frames) &mdash; Progressive curtain slider wipe across the interferogram revealing raw phase fringes vs. corrected ground displacement.
+3. `gif_03_run_gallery_filter_browse.gif` (1.08 MB, 960x600, 9 frames) &mdash; Run Gallery catalog browsing, interactive keyword filtering ('Mexico', 'Permafrost'), and detailed study modal inspection.
+4. `gif_04_stac_tasking_modal_inspect.gif` (375 KB, 960x600, 7 frames) &mdash; OGC STAC v1.0.0 order modal inspection, payload parameter scrolling, and 1-click clipboard copy.
+5. `gif_05_multitheater_quickjump_tour.gif` (2.73 MB, 960x600, 10 frames) &mdash; Multi-theater quick-jumping across Europe (Italy Alps), Arctic Siberia (Norilsk), Japan, Brazil (Pantanal), and Cascadia (Vancouver).
+6. `gif_06_hud_telemetry_orbit_scrub.gif` (1.38 MB, 960x600, 8 frames) &mdash; Tactical Mission Control telemetry tracking, mode switches, sub-satellite coordinates, and solar terminator line.
 
 ### `06_App_Showcase_Screenshots/` (High-Res UI Captures)
 Direct 1080p WebGL screenshots from the live mission twin at `http://localhost:5173/`:

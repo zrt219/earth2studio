@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Earth-2 X-Band SAR & InSAR | LinkedIn Campaign Asset Catalog</title>
+  <title>Earth-2 X-Band SAR | LinkedIn Ad Campaign Asset Package</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b0f19;
-      --card-bg: rgba(15, 23, 42, 0.75);
-      --card-border: rgba(0, 240, 255, 0.2);
+      --bg: #070a13;
+      --panel-bg: rgba(15, 23, 42, 0.85);
+      --border: rgba(0, 240, 255, 0.22);
       --cyan: #00f0ff;
-      --cyan-glow: rgba(0, 240, 255, 0.35);
+      --cyan-glow: rgba(0, 240, 255, 0.4);
       --emerald: #10b981;
       --amber: #f59e0b;
       --purple: #a855f7;
@@ -21,892 +21,925 @@
       --muted: #94a3b8;
       --mono: 'JetBrains Mono', monospace;
     }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: var(--bg);
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(ellipse at 20% 10%, rgba(0, 240, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.06) 0%, transparent 50%);
       color: var(--text);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      min-height: 100vh;
-      padding-bottom: 60px;
+      font-family: 'Inter', sans-serif;
       line-height: 1.5;
-    }
-    /* Cyber Grid */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: radial-gradient(circle at 50% 15%, rgba(0, 240, 255, 0.08), transparent 60%),
-                  linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
-                  linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 100% 100%, 40px 40px, 40px 40px;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .container {
-      max-width: 1440px;
-      margin: 0 auto;
-      padding: 0 28px;
-      position: relative;
-      z-index: 1;
+      padding-bottom: 80px;
     }
     header {
-      padding: 36px 0 28px;
-      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
-      margin-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(7, 10, 19, 0.85);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 18px 32px;
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
+      align-items: center;
       flex-wrap: wrap;
-      gap: 20px;
+      gap: 16px;
     }
-    .brand-title {
-      font-size: 28px;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-badge {
+      background: linear-gradient(135deg, #00f0ff, #0070f3);
+      color: #050811;
+      font-weight: 800;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-family: var(--mono);
+    }
+    .brand h1 {
+      font-size: 18px;
       font-weight: 700;
       letter-spacing: -0.5px;
-      color: #fff;
+    }
+    .brand h1 span { color: var(--cyan); }
+    .header-links {
       display: flex;
       align-items: center;
       gap: 12px;
     }
-    .pulse-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--emerald);
-      box-shadow: 0 0 12px var(--emerald);
-    }
-    .brand-sub {
-      font-size: 14px;
-      color: var(--muted);
-      margin-top: 6px;
-      font-family: var(--mono);
-    }
-    .stats-bar {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .stat-pill {
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid var(--card-border);
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-family: var(--mono);
+    .btn {
+      padding: 8px 14px;
+      border-radius: 6px;
       font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
     }
-    .stat-pill strong {
+    .btn-cyan {
+      background: rgba(0, 240, 255, 0.12);
+      border-color: var(--cyan);
       color: var(--cyan);
     }
-    /* Tabs */
-    .filter-tabs {
+    .btn-cyan:hover {
+      background: var(--cyan);
+      color: #050811;
+      box-shadow: 0 0 16px var(--cyan-glow);
+    }
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+    }
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      padding: 24px 32px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .stat-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: var(--mono);
+    }
+    .stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      margin-top: 4px;
+      color: var(--cyan);
+    }
+    .nav-tabs {
       display: flex;
-      gap: 10px;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 32px 18px 32px;
+      max-width: 1400px;
+      margin: 0 auto;
+      overflow-x: auto;
     }
     .tab-btn {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--muted);
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
       font-weight: 600;
-      font-size: 14px;
-      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
     }
     .tab-btn:hover {
-      border-color: var(--cyan);
-      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
     }
     .tab-btn.active {
       background: rgba(0, 240, 255, 0.15);
       border-color: var(--cyan);
       color: var(--cyan);
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
     }
-    /* Grid */
-    .media-grid {
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 28px 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+    }
+    .section-title span.tag {
+      font-size: 11px;
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--cyan);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-weight: 500;
+    }
+    .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 28px;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
     }
-    .media-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.2s ease, border-color 0.2s ease;
     }
-    .media-card:hover {
-      transform: translateY(-4px);
+    .card:hover {
+      transform: translateY(-3px);
       border-color: var(--cyan);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.15);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
     }
-    .preview-box {
-      width: 100%;
-      height: 260px;
-      background: #070a12;
+    .media-wrapper {
+      position: relative;
+      background: #000;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-      overflow: hidden;
+    }
+    .media-wrapper img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.3s ease;
       cursor: pointer;
     }
-    .preview-box img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      transition: transform 0.3s ease;
-    }
-    .preview-box:hover img {
-      transform: scale(1.03);
-    }
-    .badge-float {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: rgba(11, 15, 25, 0.85);
-      border: 1px solid var(--cyan);
-      color: var(--cyan);
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 4px;
+    .media-wrapper:hover img {
+      transform: scale(1.02);
     }
     .card-body {
-      padding: 20px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      flex: 1;
+      gap: 10px;
+      flex-grow: 1;
     }
     .card-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 6px;
-      word-break: break-all;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
     }
     .card-desc {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--muted);
-      margin-bottom: 16px;
-      flex: 1;
+      line-height: 1.45;
     }
-    .specs-list {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      font-family: var(--mono);
-      font-size: 11px;
-      background: rgba(11, 15, 25, 0.6);
-      padding: 10px 12px;
-      border-radius: 6px;
-      margin-bottom: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    .spec-item {
-      color: var(--muted);
-    }
-    .spec-item span {
-      color: #fff;
-      font-weight: 600;
-    }
-    .card-actions {
+    .meta-row {
       display: flex;
-      gap: 10px;
-    }
-    .btn {
-      flex: 1;
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      text-align: center;
-      text-decoration: none;
-      cursor: pointer;
-      display: inline-flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all 0.2s ease;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--mono);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 10px;
+      margin-top: auto;
     }
-    .btn-primary {
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      font-family: var(--mono);
+      text-transform: uppercase;
+    }
+    .badge-cyan { background: rgba(0, 240, 255, 0.15); color: var(--cyan); }
+    .badge-emerald { background: rgba(16, 185, 129, 0.15); color: var(--emerald); }
+    .badge-amber { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
+
+    /* Copy cards */
+    .copy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+      gap: 18px;
+    }
+    .copy-card {
+      background: var(--panel-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .copy-card:hover {
+      border-color: var(--cyan);
+    }
+    .copy-persona {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cyan);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .copy-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 12px;
+      color: #cbd5e1;
+      white-space: pre-wrap;
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
       background: rgba(0, 240, 255, 0.15);
       border: 1px solid var(--cyan);
       color: var(--cyan);
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: var(--mono);
     }
-    .btn-primary:hover {
+    .copy-btn:hover {
       background: var(--cyan);
-      color: #0b0f19;
-      box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+      color: #050811;
     }
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-    }
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.12);
-    }
-    /* Lightbox Modal */
-    #lightbox {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(5, 8, 15, 0.92);
-      backdrop-filter: blur(16px);
-      z-index: 1000;
+
+    /* Modal */
+    .modal {
       display: none;
-      align-items: center;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
       justify-content: center;
-      padding: 40px;
-    }
-    #lightbox.active {
-      display: flex;
-    }
-    .lightbox-content {
-      max-width: 90vw;
-      max-height: 85vh;
-      position: relative;
-      display: flex;
-      flex-direction: column;
       align-items: center;
+      padding: 24px;
     }
-    .lightbox-content img {
-      max-width: 100%;
-      max-height: 75vh;
-      object-fit: contain;
+    .modal.active { display: flex; }
+    .modal-content {
+      max-width: 90vw;
+      max-height: 90vh;
       border-radius: 8px;
       border: 1px solid var(--cyan);
-      box-shadow: 0 0 40px rgba(0, 240, 255, 0.25);
-    }
-    .lightbox-meta {
-      margin-top: 16px;
-      color: #fff;
-      font-family: var(--mono);
-      font-size: 14px;
-      text-align: center;
-    }
-    .close-btn {
-      position: absolute;
-      top: -38px;
-      right: 0;
-      background: none;
-      border: none;
-      color: var(--muted);
-      font-size: 28px;
-      cursor: pointer;
-    }
-    .close-btn:hover {
-      color: var(--cyan);
+      box-shadow: 0 0 30px var(--cyan-glow);
     }
   </style>
 </head>
 <body>
 
-<div class="container">
   <header>
-    <div>
-      <div class="brand-title">
-        <div class="pulse-dot"></div>
-        EARTH-2 // LINKEDIN CAMPAIGN ASSET SUITE
-      </div>
-      <div class="brand-sub">
-        X-BAND SAR & InSAR MISSION TWIN &bull; RULE e2s-014 VERIFIED &bull; OGC STAC v1.0.0
-      </div>
+    <div class="brand">
+      <div class="brand-badge">ORBITAL ASSET PACK</div>
+      <h1>Earth-2 X-Band SAR & InSAR <span>Campaign Distribution</span></h1>
     </div>
-    <div class="stats-bar">
-      <div class="stat-pill">Total Assets: <strong id="total-count">44</strong></div>
-      <div class="stat-pill">Landscape: <strong>5</strong></div>
-      <div class="stat-pill">Square: <strong>5</strong></div>
-      <div class="stat-pill">Carousel Cards: <strong>10</strong></div>
-      <div class="stat-pill">Animated GIFs: <strong>4</strong></div>
+    <div class="header-links">
+      <a href="https://viewerapp.vercel.app" target="_blank" class="btn btn-cyan">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        Live 3D App
+      </a>
+      <a href="https://github.com/zrt219/earth2studio" target="_blank" class="btn btn-ghost">GitHub Repo</a>
+      <a href="README.md" class="btn btn-ghost">README</a>
     </div>
   </header>
 
-  <div class="filter-tabs">
-    <button class="tab-btn active" data-filter="all">All Assets (44)</button>
-    <button class="tab-btn" data-filter="Landscape Cards">Landscape (1200x627)</button>
-    <button class="tab-btn" data-filter="Square Cards">Square (1080x1080)</button>
-    <button class="tab-btn" data-filter="Carousel Deck">Carousel Deck (10 Cards)</button>
-    <button class="tab-btn" data-filter="Animated GIFs">Animated GIFs</button>
-  </div>
+  <section class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">Ad Copy Personas</div>
+      <div class="stat-value">11 Tested</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Single Image Ads</div>
+      <div class="stat-value">10 (Square + Wide)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Carousel Story Cards</div>
+      <div class="stat-value">10 Sequential</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Animated Looping GIFs</div>
+      <div class="stat-value">6 (Pure Browser)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Live App Screenshots</div>
+      <div class="stat-value">7 HD Captures</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Scientific Integrity</div>
+      <div class="stat-value" style="color: var(--emerald);">0% Noise</div>
+    </div>
+  </section>
 
-  <div class="media-grid" id="grid">
-    <!-- Populated by JavaScript -->
-  </div>
-</div>
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="filterTab('all', this)">All Assets</button>
+    <button class="tab-btn" onclick="filterTab('gifs', this)">Looping GIFs (6)</button>
+    <button class="tab-btn" onclick="filterTab('landscape', this)">Landscape 1200x627 (5)</button>
+    <button class="tab-btn" onclick="filterTab('square', this)">Square 1080x1080 (5)</button>
+    <button class="tab-btn" onclick="filterTab('carousel', this)">Carousel Cards 1-10 (10)</button>
+    <button class="tab-btn" onclick="filterTab('screenshots', this)">Live App UI (7)</button>
+    <button class="tab-btn" onclick="filterTab('copy', this)">Ad Copy & Targeting</button>
+  </nav>
 
-<div id="lightbox" onclick="closeLightbox(event)">
-  <div class="lightbox-content" onclick="event.stopPropagation()">
-    <button class="close-btn" onclick="closeLightbox()">&times;</button>
-    <img id="lightbox-img" src="" alt="Enlarged preview">
-    <div class="lightbox-meta" id="lightbox-meta"></div>
-  </div>
-</div>
+  <main class="container">
 
-<script>
-  const ASSETS = [
-  {
-    "filename": "ad_01_aps_hero_1080x1080.png",
-    "rel_path": "assets/ad_01_aps_hero_1080x1080.png",
-    "size_str": "645.2 KB",
-    "size_bytes": 660699,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "ad_02_global_constellation_1080x1080.png",
-    "rel_path": "assets/ad_02_global_constellation_1080x1080.png",
-    "size_str": "652.4 KB",
-    "size_bytes": 668018,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "ad_03_cascadia_subsidence_1080x1080.png",
-    "rel_path": "assets/ad_03_cascadia_subsidence_1080x1080.png",
-    "size_str": "404.7 KB",
-    "size_bytes": 414462,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "ad_04_stac_api_dispatch_1080x1080.png",
-    "rel_path": "assets/ad_04_stac_api_dispatch_1080x1080.png",
-    "size_str": "155.5 KB",
-    "size_bytes": 159219,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "ad_05_multiband_sar_physics_1080x1080.png",
-    "rel_path": "assets/ad_05_multiband_sar_physics_1080x1080.png",
-    "size_str": "479.4 KB",
-    "size_bytes": 490942,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "ad_landscape_01_aps_reduction.png",
-    "rel_path": "assets/ad_landscape_01_aps_reduction.png",
-    "size_str": "214.1 KB",
-    "size_bytes": 219212,
-    "category": "Landscape Cards",
-    "dimensions": "1200 x 627",
-    "aspect": "1.91 : 1 (Landscape)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Single-Image Sponsored Content with bold metric chips and Rule e2s-014 compliance seals."
-  },
-  {
-    "filename": "ad_landscape_02_global_mission_twin.png",
-    "rel_path": "assets/ad_landscape_02_global_mission_twin.png",
-    "size_str": "441.2 KB",
-    "size_bytes": 451769,
-    "category": "Landscape Cards",
-    "dimensions": "1200 x 627",
-    "aspect": "1.91 : 1 (Landscape)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Single-Image Sponsored Content with bold metric chips and Rule e2s-014 compliance seals."
-  },
-  {
-    "filename": "ad_landscape_03_deep_hazards_infrastructure.png",
-    "rel_path": "assets/ad_landscape_03_deep_hazards_infrastructure.png",
-    "size_str": "251.5 KB",
-    "size_bytes": 257576,
-    "category": "Landscape Cards",
-    "dimensions": "1200 x 627",
-    "aspect": "1.91 : 1 (Landscape)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Single-Image Sponsored Content with bold metric chips and Rule e2s-014 compliance seals."
-  },
-  {
-    "filename": "ad_landscape_04_ogc_stac_tasking.png",
-    "rel_path": "assets/ad_landscape_04_ogc_stac_tasking.png",
-    "size_str": "136.2 KB",
-    "size_bytes": 139494,
-    "category": "Landscape Cards",
-    "dimensions": "1200 x 627",
-    "aspect": "1.91 : 1 (Landscape)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Single-Image Sponsored Content with bold metric chips and Rule e2s-014 compliance seals."
-  },
-  {
-    "filename": "ad_landscape_05_scientific_integrity.png",
-    "rel_path": "assets/ad_landscape_05_scientific_integrity.png",
-    "size_str": "314.3 KB",
-    "size_bytes": 321848,
-    "category": "Landscape Cards",
-    "dimensions": "1200 x 627",
-    "aspect": "1.91 : 1 (Landscape)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Single-Image Sponsored Content with bold metric chips and Rule e2s-014 compliance seals."
-  },
-  {
-    "filename": "ad_square_01_aps_hero.png",
-    "rel_path": "assets/ad_square_01_aps_hero.png",
-    "size_str": "645.2 KB",
-    "size_bytes": 660699,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "ad_square_02_global_constellation.png",
-    "rel_path": "assets/ad_square_02_global_constellation.png",
-    "size_str": "652.4 KB",
-    "size_bytes": 668018,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "ad_square_03_cascadia_subsidence.png",
-    "rel_path": "assets/ad_square_03_cascadia_subsidence.png",
-    "size_str": "404.7 KB",
-    "size_bytes": 414462,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "ad_square_04_stac_api_dispatch.png",
-    "rel_path": "assets/ad_square_04_stac_api_dispatch.png",
-    "size_str": "155.5 KB",
-    "size_bytes": 159219,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "ad_square_05_multiband_sar_physics.png",
-    "rel_path": "assets/ad_square_05_multiband_sar_physics.png",
-    "size_str": "479.4 KB",
-    "size_bytes": 490942,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "card_01_mission_overview.png",
-    "rel_path": "assets/card_01_mission_overview.png",
-    "size_str": "626.1 KB",
-    "size_bytes": 641115,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "card_02_run01_tropospheric_aps.png",
-    "rel_path": "assets/card_02_run01_tropospheric_aps.png",
-    "size_str": "627.5 KB",
-    "size_bytes": 642592,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "card_03_run02_mexico_city.png",
-    "rel_path": "assets/card_03_run02_mexico_city.png",
-    "size_str": "419.7 KB",
-    "size_bytes": 429762,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "card_04_run03_norilsk_permafrost.png",
-    "rel_path": "assets/card_04_run03_norilsk_permafrost.png",
-    "size_str": "388.1 KB",
-    "size_bytes": 397397,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "card_05_run04_south_africa_karst.png",
-    "rel_path": "assets/card_05_run04_south_africa_karst.png",
-    "size_str": "664.2 KB",
-    "size_bytes": 680155,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "card_06_run05_multiband_physics.png",
-    "rel_path": "assets/card_06_run05_multiband_physics.png",
-    "size_str": "580.7 KB",
-    "size_bytes": 594622,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "card_07_run06_07_volcanotectonics.png",
-    "rel_path": "assets/card_07_run06_07_volcanotectonics.png",
-    "size_str": "522.0 KB",
-    "size_bytes": 534578,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "card_08_run08_09_wetlands_farmland.png",
-    "rel_path": "assets/card_08_run08_09_wetlands_farmland.png",
-    "size_str": "488.8 KB",
-    "size_bytes": 500544,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "card_09_run10_11_tropical_cascadia.png",
-    "rel_path": "assets/card_09_run10_11_tropical_cascadia.png",
-    "size_str": "388.0 KB",
-    "size_bytes": 397295,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "card_10_stac_constellation_dispatch.png",
-    "rel_path": "assets/card_10_stac_constellation_dispatch.png",
-    "size_str": "147.9 KB",
-    "size_bytes": 151438,
-    "category": "Square Cards",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Mobile feed-optimized 1:1 single image ad with high-contrast metric callouts."
-  },
-  {
-    "filename": "carousel_card_01_mission_overview.png",
-    "rel_path": "assets/carousel_card_01_mission_overview.png",
-    "size_str": "626.1 KB",
-    "size_bytes": 641115,
-    "category": "Carousel Deck",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
-  },
-  {
-    "filename": "carousel_card_02_run01_tropospheric_aps.png",
-    "rel_path": "assets/carousel_card_02_run01_tropospheric_aps.png",
-    "size_str": "627.5 KB",
-    "size_bytes": 642592,
-    "category": "Carousel Deck",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
-  },
-  {
-    "filename": "carousel_card_03_run02_mexico_city.png",
-    "rel_path": "assets/carousel_card_03_run02_mexico_city.png",
-    "size_str": "419.7 KB",
-    "size_bytes": 429762,
-    "category": "Carousel Deck",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
-  },
-  {
-    "filename": "carousel_card_04_run03_norilsk_permafrost.png",
-    "rel_path": "assets/carousel_card_04_run03_norilsk_permafrost.png",
-    "size_str": "388.1 KB",
-    "size_bytes": 397397,
-    "category": "Carousel Deck",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
-  },
-  {
-    "filename": "carousel_card_05_run04_south_africa_karst.png",
-    "rel_path": "assets/carousel_card_05_run04_south_africa_karst.png",
-    "size_str": "664.2 KB",
-    "size_bytes": 680155,
-    "category": "Carousel Deck",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
-  },
-  {
-    "filename": "carousel_card_06_run05_multiband_physics.png",
-    "rel_path": "assets/carousel_card_06_run05_multiband_physics.png",
-    "size_str": "580.7 KB",
-    "size_bytes": 594622,
-    "category": "Carousel Deck",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
-  },
-  {
-    "filename": "carousel_card_07_run06_07_volcanotectonics.png",
-    "rel_path": "assets/carousel_card_07_run06_07_volcanotectonics.png",
-    "size_str": "522.0 KB",
-    "size_bytes": 534578,
-    "category": "Carousel Deck",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
-  },
-  {
-    "filename": "carousel_card_08_run08_09_wetlands_farmland.png",
-    "rel_path": "assets/carousel_card_08_run08_09_wetlands_farmland.png",
-    "size_str": "488.8 KB",
-    "size_bytes": 500544,
-    "category": "Carousel Deck",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
-  },
-  {
-    "filename": "carousel_card_09_run10_11_tropical_cascadia.png",
-    "rel_path": "assets/carousel_card_09_run10_11_tropical_cascadia.png",
-    "size_str": "388.0 KB",
-    "size_bytes": 397295,
-    "category": "Carousel Deck",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
-  },
-  {
-    "filename": "carousel_card_10_stac_constellation_dispatch.png",
-    "rel_path": "assets/carousel_card_10_stac_constellation_dispatch.png",
-    "size_str": "147.9 KB",
-    "size_bytes": 151438,
-    "category": "Carousel Deck",
-    "dimensions": "1080 x 1080",
-    "aspect": "1 : 1 (Square)",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Part of 10-card carousel story sequence covering the 11 scientific research runs."
-  },
-  {
-    "filename": "gif_01_global_mission_twin.gif",
-    "rel_path": "assets/gif_01_global_mission_twin.gif",
-    "size_str": "942.8 KB",
-    "size_bytes": 965418,
-    "category": "Animated GIFs",
-    "dimensions": "640 x 360",
-    "aspect": "640:360",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Smooth looping animation (< 5MB) for dynamic motion sponsored posts and video placements."
-  },
-  {
-    "filename": "gif_02_insar_phase_split_slider.gif",
-    "rel_path": "assets/gif_02_insar_phase_split_slider.gif",
-    "size_str": "1.55 MB",
-    "size_bytes": 1625825,
-    "category": "Animated GIFs",
-    "dimensions": "640 x 400",
-    "aspect": "640:400",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Smooth looping animation (< 5MB) for dynamic motion sponsored posts and video placements."
-  },
-  {
-    "filename": "gif_03_swath_activation_theater_hop.gif",
-    "rel_path": "assets/gif_03_swath_activation_theater_hop.gif",
-    "size_str": "1.06 MB",
-    "size_bytes": 1113287,
-    "category": "Animated GIFs",
-    "dimensions": "640 x 400",
-    "aspect": "640:400",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Smooth looping animation (< 5MB) for dynamic motion sponsored posts and video placements."
-  },
-  {
-    "filename": "gif_04_stac_tasking_order.gif",
-    "rel_path": "assets/gif_04_stac_tasking_order.gif",
-    "size_str": "35.7 KB",
-    "size_bytes": 36582,
-    "category": "Animated GIFs",
-    "dimensions": "640 x 400",
-    "aspect": "640:400",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Smooth looping animation (< 5MB) for dynamic motion sponsored posts and video placements."
-  },
-  {
-    "filename": "gif_05_radar_beam_sweep.gif",
-    "rel_path": "assets/gif_05_radar_beam_sweep.gif",
-    "size_str": "1.44 MB",
-    "size_bytes": 1509516,
-    "category": "Animated GIFs",
-    "dimensions": "640 x 400",
-    "aspect": "640:400",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Smooth looping animation (< 5MB) for dynamic motion sponsored posts and video placements."
-  },
-  {
-    "filename": "gif_06_multiband_penetration_scan.gif",
-    "rel_path": "assets/gif_06_multiband_penetration_scan.gif",
-    "size_str": "376.5 KB",
-    "size_bytes": 385560,
-    "category": "Animated GIFs",
-    "dimensions": "640 x 400",
-    "aspect": "640:400",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Smooth looping animation (< 5MB) for dynamic motion sponsored posts and video placements."
-  },
-  {
-    "filename": "gif_07_permafrost_thaw_heatmap.gif",
-    "rel_path": "assets/gif_07_permafrost_thaw_heatmap.gif",
-    "size_str": "791.2 KB",
-    "size_bytes": 810170,
-    "category": "Animated GIFs",
-    "dimensions": "640 x 400",
-    "aspect": "640:400",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Smooth looping animation (< 5MB) for dynamic motion sponsored posts and video placements."
-  },
-  {
-    "filename": "gif_08_cascadia_slow_slip_timelapse.gif",
-    "rel_path": "assets/gif_08_cascadia_slow_slip_timelapse.gif",
-    "size_str": "653.9 KB",
-    "size_bytes": 669602,
-    "category": "Animated GIFs",
-    "dimensions": "640 x 400",
-    "aspect": "640:400",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Smooth looping animation (< 5MB) for dynamic motion sponsored posts and video placements."
-  },
-  {
-    "filename": "gif_09_interactive_app_ui_tour.gif",
-    "rel_path": "assets/gif_09_interactive_app_ui_tour.gif",
-    "size_str": "1.26 MB",
-    "size_bytes": 1316384,
-    "category": "Animated GIFs",
-    "dimensions": "640 x 400",
-    "aspect": "640:400",
-    "placement": "LinkedIn Sponsored Content",
-    "desc": "Smooth looping animation (< 5MB) for dynamic motion sponsored posts and video placements."
-  }
-];
-
-  function renderGrid(filter = "all") {
-    const grid = document.getElementById("grid");
-    grid.innerHTML = "";
-
-    const filtered = filter === "all" ? ASSETS : ASSETS.filter(a => a.category === filter);
-
-    filtered.forEach(item => {
-      const card = document.createElement("div");
-      card.className = "media-card";
-
-      card.innerHTML = `
-        <div class="preview-box" onclick="openLightbox('${item.rel_path}', '${item.filename}', '${item.dimensions}', '${item.size_str}')">
-          <img src="${item.rel_path}" alt="${item.filename}" loading="lazy">
-          <div class="badge-float">${item.category}</div>
-        </div>
-        <div class="card-body">
-          <div class="card-title">${item.filename}</div>
-          <div class="card-desc">${item.desc}</div>
-          <div class="specs-list">
-            <div class="spec-item">Dimensions: <span>${item.dimensions}</span></div>
-            <div class="spec-item">Size: <span>${item.size_str}</span></div>
-            <div class="spec-item">Ratio: <span>${item.aspect}</span></div>
-            <div class="spec-item">Placement: <span>Sponsored</span></div>
+    <!-- GIFS SECTION -->
+        <!-- GIFS SECTION -->
+    <div class="asset-group" data-category="gifs">
+      <div class="section-title">
+        05. Pure Browser Screen-Recorded Looping GIFs
+        <span class="tag">&lt;5MB Authentic WebGL Walkthroughs</span>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="05_Video_and_Animated_GIFs/gif_01_globe_orbit_swath_flyto.gif" onclick="openModal(this.src)" alt="Globe Orbit & Swath Fly-To">
           </div>
-          <div class="card-actions">
-            <a href="${item.rel_path}" download="${item.filename}" class="btn btn-primary">
-              ⬇ Download
-            </a>
-            <button onclick="openLightbox('${item.rel_path}', '${item.filename}', '${item.dimensions}', '${item.size_str}')" class="btn btn-secondary">
-              🔍 Inspect
-            </button>
+          <div class="card-body">
+            <div class="card-title">01. 3D Globe Rotation & Swath Fly-To</div>
+            <div class="card-desc">Authentic 3D Earth dynamics, clicking Run 02 (Mexico) in the HUD, camera zoom & fly-to across terrain, and 50 km imaging swath activation.</div>
+            <div class="meta-row">
+              <span class="badge badge-emerald">1.91 MB</span>
+              <span>960 x 600 | 9 Frames</span>
+            </div>
           </div>
         </div>
-      `;
-      grid.appendChild(card);
-    });
-  }
 
-  // Filter Buttons
-  document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      renderGrid(btn.getAttribute("data-filter"));
-    });
-  });
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="05_Video_and_Animated_GIFs/gif_02_insar_split_slider_wipe.gif" onclick="openModal(this.src)" alt="InSAR Split Comparison Slider">
+          </div>
+          <div class="card-body">
+            <div class="card-title">02. InSAR Split-Screen Slider Wipe</div>
+            <div class="card-desc">Live curtain slider dragging from 10% to 100% across the interferogram, contrasting raw atmospheric fringes against corrected ground motion.</div>
+            <div class="meta-row">
+              <span class="badge badge-emerald">848 KB</span>
+              <span>960 x 600 | 9 Frames</span>
+            </div>
+          </div>
+        </div>
 
-  // Lightbox
-  function openLightbox(src, name, dims, size) {
-    document.getElementById("lightbox-img").src = src;
-    document.getElementById("lightbox-meta").innerHTML = `<strong>${name}</strong> &bull; ${dims} &bull; ${size}`;
-    document.getElementById("lightbox").classList.add("active");
-  }
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="05_Video_and_Animated_GIFs/gif_03_run_gallery_filter_browse.gif" onclick="openModal(this.src)" alt="Run Gallery Filter & Browse">
+          </div>
+          <div class="card-body">
+            <div class="card-title">03. Run Gallery Browsing & Filter Search</div>
+            <div class="card-desc">Navigating the 11-study portfolio catalog, filtering by search keywords ('Mexico', 'Permafrost'), and inspecting detailed study modals.</div>
+            <div class="meta-row">
+              <span class="badge badge-emerald">1.08 MB</span>
+              <span>960 x 600 | 9 Frames</span>
+            </div>
+          </div>
+        </div>
 
-  function closeLightbox(e) {
-    document.getElementById("lightbox").classList.remove("active");
-  }
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="05_Video_and_Animated_GIFs/gif_04_stac_tasking_modal_inspect.gif" onclick="openModal(this.src)" alt="STAC Tasking Modal Inspection">
+          </div>
+          <div class="card-body">
+            <div class="card-title">04. OGC STAC Tasking Modal Inspection</div>
+            <div class="card-desc">Opening the autonomous machine-readable STAC v1.0.0 order modal, scrolling sensor payload properties, and clicking 1-click clipboard copy.</div>
+            <div class="meta-row">
+              <span class="badge badge-emerald">375 KB</span>
+              <span>960 x 600 | 7 Frames</span>
+            </div>
+          </div>
+        </div>
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeLightbox();
-  });
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="05_Video_and_Animated_GIFs/gif_05_multitheater_quickjump_tour.gif" onclick="openModal(this.src)" alt="Multi-Theater Global Quick-Jumps">
+          </div>
+          <div class="card-body">
+            <div class="card-title">05. Multi-Theater Global Quick-Jumps</div>
+            <div class="card-desc">High-speed orbital teleportation across Europe (Italy Alps), Arctic Siberia (Norilsk), Japan, Brazil (Pantanal), and Cascadia (Vancouver).</div>
+            <div class="meta-row">
+              <span class="badge badge-emerald">2.73 MB</span>
+              <span>960 x 600 | 10 Frames</span>
+            </div>
+          </div>
+        </div>
 
-  // Initial render
-  renderGrid("all");
-</script>
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="05_Video_and_Animated_GIFs/gif_06_hud_telemetry_orbit_scrub.gif" onclick="openModal(this.src)" alt="HUD Telemetry & Mode Toggles">
+          </div>
+          <div class="card-body">
+            <div class="card-title">06. HUD Telemetry & Mode Toggles</div>
+            <div class="card-desc">Switching SAR Product modes (InSAR wrapped phase), toggling -98.8% APS correction, inspecting day/night solar terminator, and timeline scrubbing.</div>
+            <div class="meta-row">
+              <span class="badge badge-emerald">1.38 MB</span>
+              <span>960 x 600 | 8 Frames</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <div class="asset-group" data-category="landscape">
+      <div class="section-title">
+        02. Single Image Sponsored Content (Landscape 1200 x 627)
+        <span class="tag">1.91:1 Ratio &bull; Desktop Optimized</span>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="02_Single_Image_Ads_Landscape_1200x627/ad_01_aps_reduction_1200x627.png" onclick="openModal(this.src)" alt="APS Reduction">
+          </div>
+          <div class="card-body">
+            <div class="card-title">84.2% Atmospheric Delay Reduction</div>
+            <div class="card-desc">Hero InSAR interferogram comparison demonstrating millimeter-accuracy ground deformation extraction.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1200 x 627</span>
+              <span>PNG (214 KB)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="02_Single_Image_Ads_Landscape_1200x627/ad_02_global_mission_twin_1200x627.png" onclick="openModal(this.src)" alt="Mission Twin">
+          </div>
+          <div class="card-body">
+            <div class="card-title">Next-Gen Orbital Mission Digital Twin</div>
+            <div class="card-desc">Global constellation mission management with real-time solar Terminator and sub-satellite ephemeris.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1200 x 627</span>
+              <span>PNG (441 KB)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="02_Single_Image_Ads_Landscape_1200x627/ad_03_deep_hazards_infrastructure_1200x627.png" onclick="openModal(this.src)" alt="Deep Hazards">
+          </div>
+          <div class="card-body">
+            <div class="card-title">Millimetric Ground Truth for Critical Assets</div>
+            <div class="card-desc">Monitoring aquifer compaction, karst dissolution sinkholes, and permafrost structural foundation risk.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1200 x 627</span>
+              <span>PNG (251 KB)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="02_Single_Image_Ads_Landscape_1200x627/ad_04_ogc_stac_tasking_1200x627.png" onclick="openModal(this.src)" alt="STAC Tasking">
+          </div>
+          <div class="card-body">
+            <div class="card-title">Autonomous OGC STAC Constellation Tasking</div>
+            <div class="card-desc">Direct machine-to-machine satellite tasking order generation for multi-sensor commercial constellations.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1200 x 627</span>
+              <span>PNG (136 KB)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="02_Single_Image_Ads_Landscape_1200x627/ad_05_scientific_integrity_1200x627.png" onclick="openModal(this.src)" alt="Scientific Integrity">
+          </div>
+          <div class="card-body">
+            <div class="card-title">0% Synthetic Noise: Verifiable Physical Ray Tracing</div>
+            <div class="card-desc">Zenith Total Delay computed from authentic NOAA GFS 0.25&deg; pressure and humidity tensors.</div>
+            <div class="meta-row">
+              <span class="badge badge-cyan">1200 x 627</span>
+              <span>PNG (314 KB)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SQUARE SECTION -->
+    <div class="asset-group" data-category="square">
+      <div class="section-title">
+        03. Single Image Sponsored Content (Square 1080 x 1080)
+        <span class="tag">1:1 Ratio &bull; Minimalist Hero Creatives (85% Dominance)</span>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="03_Single_Image_Ads_Square_1080x1080/ad_01_aps_hero_1080x1080.png" onclick="openModal(this.src)" alt="APS Hero Square">
+          </div>
+          <div class="card-body">
+            <div class="card-title">Eliminate InSAR Phase Delays</div>
+            <div class="card-desc">Hero creative: -98.7% APS error reduction using authentic NOAA GFS 0.25° raytracing. Zero nested glass boxes.</div>
+            <div class="meta-row">
+              <span class="badge badge-amber">1080 x 1080</span>
+              <span>PNG (645 KB)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="03_Single_Image_Ads_Square_1080x1080/ad_02_global_constellation_1080x1080.png" onclick="openModal(this.src)" alt="Global Constellation">
+          </div>
+          <div class="card-body">
+            <div class="card-title">Autonomous Radar Mission Twin</div>
+            <div class="card-desc">Hero creative: 11 Scientific Runs digital twin with live ICEYE & Synspective constellation orbit tracking.</div>
+            <div class="meta-row">
+              <span class="badge badge-amber">1080 x 1080</span>
+              <span>PNG (652 KB)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="03_Single_Image_Ads_Square_1080x1080/ad_03_cascadia_subsidence_1080x1080.png" onclick="openModal(this.src)" alt="Cascadia Subsidence">
+          </div>
+          <div class="card-body">
+            <div class="card-title">Detect Critical Deformation</div>
+            <div class="card-desc">Hero creative: 40 cm/yr coastal sediment compaction across Cascadia subduction zone and Fraser River Delta.</div>
+            <div class="meta-row">
+              <span class="badge badge-amber">1080 x 1080</span>
+              <span>PNG (405 KB)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="03_Single_Image_Ads_Square_1080x1080/ad_04_stac_api_dispatch_1080x1080.png" onclick="openModal(this.src)" alt="STAC API Dispatch">
+          </div>
+          <div class="card-body">
+            <div class="card-title">Autonomous Satellite Tasking API</div>
+            <div class="card-desc">Hero creative: &lt; 50 ms machine-to-machine OGC STAC v1.0.0 order dispatch for commercial radar constellations.</div>
+            <div class="meta-row">
+              <span class="badge badge-amber">1080 x 1080</span>
+              <span>PNG (155 KB)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper">
+            <img src="03_Single_Image_Ads_Square_1080x1080/ad_05_multiband_sar_physics_1080x1080.png" onclick="openModal(this.src)" alt="Multi-Band SAR">
+          </div>
+          <div class="card-body">
+            <div class="card-title">Multi-Frequency Radar Physics</div>
+            <div class="card-desc">Hero creative: Multi-band penetration depth modeling (X-band 3.1cm, C-band 5.6cm, L-band 23.6cm) across canopy biomes.</div>
+            <div class="meta-row">
+              <span class="badge badge-amber">1080 x 1080</span>
+              <span>PNG (479 KB)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAROUSEL SECTION -->
+    <div class="asset-group" data-category="carousel">
+      <div class="section-title">
+        04. 10-Card Carousel & Document Ad Series (1080 x 1080)
+        <span class="tag">100% Contain Mode &bull; Zero Cropping</span>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="media-wrapper"><img src="04_Carousel_Ad_Cards_1080x1080/card_01_mission_overview.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Card 01 &bull; Mission Overview</div>
+            <div class="card-desc">The Earth-2 X-Band SAR & InSAR Mission Twin Platform.</div>
+            <div class="meta-row"><span class="badge badge-cyan">Slide 1/10</span><span>1080 x 1080</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="04_Carousel_Ad_Cards_1080x1080/card_02_run01_tropospheric_aps.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Card 02 &bull; Tropospheric Phase Screen</div>
+            <div class="card-desc">Run 01: 84.2% atmospheric phase noise elimination.</div>
+            <div class="meta-row"><span class="badge badge-cyan">Slide 2/10</span><span>1080 x 1080</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="04_Carousel_Ad_Cards_1080x1080/card_03_run02_mexico_city.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Card 03 &bull; Mexico City Compaction</div>
+            <div class="card-desc">Run 02: Severe lacustrine clay aquifer subsidence (-38.4 cm/yr).</div>
+            <div class="meta-row"><span class="badge badge-cyan">Slide 3/10</span><span>1080 x 1080</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="04_Carousel_Ad_Cards_1080x1080/card_04_run03_norilsk_permafrost.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Card 04 &bull; Norilsk Permafrost Thaw</div>
+            <div class="card-desc">Run 03: Active layer freeze-thaw cycles and foundation risk.</div>
+            <div class="meta-row"><span class="badge badge-cyan">Slide 4/10</span><span>1080 x 1080</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="04_Carousel_Ad_Cards_1080x1080/card_05_run04_south_africa_karst.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Card 05 &bull; Gauteng Karst Dissolution</div>
+            <div class="card-desc">Run 04: Gold mining dewatering & catastrophic sinkhole alerts.</div>
+            <div class="meta-row"><span class="badge badge-cyan">Slide 5/10</span><span>1080 x 1080</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="04_Carousel_Ad_Cards_1080x1080/card_06_run05_multiband_physics.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Card 06 &bull; Multi-Band SAR Penetration</div>
+            <div class="card-desc">Run 05: Comparing 3.1 cm X-Band vs 5.6 cm C-Band vs 23.6 cm L-Band.</div>
+            <div class="meta-row"><span class="badge badge-cyan">Slide 6/10</span><span>1080 x 1080</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="04_Carousel_Ad_Cards_1080x1080/card_07_run06_07_volcanotectonics.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Card 07 &bull; Volcanotectonic Dynamics</div>
+            <div class="card-desc">Runs 06 & 07: Campi Flegrei caldera uplift & Fennoscandian rebound.</div>
+            <div class="meta-row"><span class="badge badge-cyan">Slide 7/10</span><span>1080 x 1080</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="04_Carousel_Ad_Cards_1080x1080/card_08_run08_09_wetlands_farmland.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Card 08 &bull; Peatlands & Flood Plains</div>
+            <div class="card-desc">Runs 08 & 09: Hokkaido abandoned paddy oxidation & Pantanal flood pulse.</div>
+            <div class="meta-row"><span class="badge badge-cyan">Slide 8/10</span><span>1080 x 1080</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="04_Carousel_Ad_Cards_1080x1080/card_09_run10_11_tropical_cascadia.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Card 09 &bull; Tropics & Cascadia Margin</div>
+            <div class="card-desc">Runs 10 & 11: Amazonian tropospheric water vapor & Vancouver slow-slip.</div>
+            <div class="meta-row"><span class="badge badge-cyan">Slide 9/10</span><span>1080 x 1080</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="04_Carousel_Ad_Cards_1080x1080/card_10_stac_constellation_dispatch.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Card 10 &bull; Constellation Dispatch CTA</div>
+            <div class="card-desc">Deploy Autonomous STAC v1.0.0 Tasking & Schedule a Pilot.</div>
+            <div class="meta-row"><span class="badge badge-cyan">Slide 10/10</span><span>1080 x 1080</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREENSHOTS SECTION -->
+    <div class="asset-group" data-category="screenshots">
+      <div class="section-title">
+        06. Live 3D Mission Twin WebGL UI Showcase Captures
+        <span class="tag">1080p Browser Inspection</span>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="media-wrapper"><img src="06_App_Showcase_Screenshots/01_mission_control_overview.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">3D Mission Control Overview</div>
+            <div class="card-desc">Orbital ground track, sub-satellite position, solar terminator, and HUD telemetry.</div>
+            <div class="meta-row"><span class="badge badge-cyan">WebGL 3D</span><span>502 KB</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="06_App_Showcase_Screenshots/02_run_gallery_catalog.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">11-Run Scientific Research Gallery</div>
+            <div class="card-desc">Searchable portfolio of 11 verified research runs with filter tags and metadata modals.</div>
+            <div class="meta-row"><span class="badge badge-cyan">Gallery</span><span>150 KB</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="06_App_Showcase_Screenshots/03_search_filtering_mexico.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Interactive Filtering (Mexico City)</div>
+            <div class="card-desc">Filtering study catalog by regional terrain, subsidence severity, and frequency band.</div>
+            <div class="meta-row"><span class="badge badge-cyan">Search</span><span>310 KB</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="06_App_Showcase_Screenshots/04_swath_orbit_activation_mexico.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Swath Orbit & Footprint Activation</div>
+            <div class="card-desc">3D fly-to camera animation projecting 50 km imaging swath over Valley of Mexico.</div>
+            <div class="meta-row"><span class="badge badge-cyan">Swath Projection</span><span>543 KB</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="06_App_Showcase_Screenshots/05_stac_tasking_inspector.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">OGC STAC v1.0.0 Tasking Inspector</div>
+            <div class="card-desc">Live inspection of machine-readable tasking payloads, look angles, and sensor parameters.</div>
+            <div class="meta-row"><span class="badge badge-cyan">STAC v1.0.0</span><span>85 KB</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="06_App_Showcase_Screenshots/06_insar_split_slider_comparison.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Interactive InSAR Split Comparison</div>
+            <div class="card-desc">Before-and-after curtain slider demonstrating 84.2% atmospheric delay correction.</div>
+            <div class="meta-row"><span class="badge badge-cyan">Split Slider</span><span>117 KB</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media-wrapper"><img src="06_App_Showcase_Screenshots/07_hud_quick_runs_vancouver.png" onclick="openModal(this.src)"></div>
+          <div class="card-body">
+            <div class="card-title">Tactical HUD Quick-Jump & Coordinates</div>
+            <div class="card-desc">Instant coordinate camera targeting over Cascadia / Vancouver tectonic margin.</div>
+            <div class="meta-row"><span class="badge badge-cyan">HUD Telemetry</span><span>852 KB</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COPY SECTION -->
+    <div class="asset-group" data-category="copy">
+      <div class="section-title">
+        01. Tested LinkedIn Ad Copy Variants & UTM Links
+        <span class="tag">1-Click Clipboard Ready</span>
+      </div>
+      <div class="copy-grid">
+        <div class="copy-card">
+          <div class="copy-persona">
+            Persona 1 &bull; Defense & Intelligence (GEOINT)
+            <span class="badge badge-cyan">High CTR</span>
+          </div>
+          <div class="copy-box" id="p1">Tropospheric water vapor injects up to 20 cm of false displacement into tactical InSAR passes. 
+
+When your intelligence decisions depend on millimeter-level runway deformation or underground tunnel shifts, atmospheric artifacts are unacceptable.
+
+The Earth-2 X-Band Digital Twin couples high-resolution numerical weather prediction with full-physics ray tracing—neutralizing 84.2% of atmospheric delay before imagery reaches your analysts.
+
+• 50 km swath simulation across all orbits
+• OGC STAC v1.0.0 autonomous tasking dispatch
+• 0% synthetic noise: verifiable physical equations
+
+Explore the live mission control: https://viewerapp.vercel.app?utm_source=linkedin&utm_medium=paid_social&utm_campaign=earth2_sar_q4&utm_content=geoint_hero
+<button class="copy-btn" onclick="copyText('p1')">COPY</button></div>
+        </div>
+
+        <div class="copy-card">
+          <div class="copy-persona">
+            Persona 2 &bull; Commercial SAR Constellation Operators
+            <span class="badge badge-emerald">High Conversion</span>
+          </div>
+          <div class="copy-box" id="p2">What if your commercial SAR constellation could autonomously optimize imaging tasking windows before taking a single shot?
+
+Atmospheric turbulence is the single largest source of InSAR phase decorrelation. By integrating NVIDIA Earth-2 prognostic physics directly into your ground segment, you can:
+
+1. Predict Zenith Total Delay (ZTD) across every planned orbit
+2. Eliminate 84.2% of atmospheric phase noise in post-processing
+3. Dispatch standardized OGC STAC v1.0.0 tasking orders with zero human middleware
+
+Stop losing high-value tasking slots to turbulent tropospheric events.
+
+Test the interactive mission twin: https://viewerapp.vercel.app?utm_source=linkedin&utm_medium=paid_social&utm_campaign=earth2_sar_q4&utm_content=sar_operators_hero
+<button class="copy-btn" onclick="copyText('p2')">COPY</button></div>
+        </div>
+
+        <div class="copy-card">
+          <div class="copy-persona">
+            Persona 4 &bull; Critical Infrastructure & Geotechnical
+            <span class="badge badge-amber">Enterprise B2B</span>
+          </div>
+          <div class="copy-box" id="p3">Tailings dams. High-speed rail corridors. Urban water tables.
+
+When monitoring critical infrastructure, a 15 mm false alarm caused by atmospheric humidity costs millions in unnecessary emergency shutdowns.
+
+The Earth-2 InSAR Mission Twin strips away atmospheric delay to reveal genuine millimetric deformation:
+- Mexico City aquifer compaction: -38.4 cm/yr verified
+- Gauteng karst sinkholes: 14-day pre-collapse strain detection
+- Norilsk permafrost foundation thaw: 12 mm/season creep
+
+Verified ground truth. Zero synthetic noise.
+
+Inspect the 11-study portfolio: https://viewerapp.vercel.app?utm_source=linkedin&utm_medium=paid_social&utm_campaign=earth2_sar_q4&utm_content=infrastructure_geotech
+<button class="copy-btn" onclick="copyText('p3')">COPY</button></div>
+        </div>
+
+        <div class="copy-card">
+          <div class="copy-persona">
+            Persona 7 &bull; Space-Tech Founders & C-Suite
+            <span class="badge badge-purple">Executive</span>
+          </div>
+          <div class="copy-box" id="p4">Building a commercial Earth observation constellation is only half the battle. Delivering clean, reliable, decision-grade analytics is where the enterprise contracts are won.
+
+The Earth-2 SAR Mission Twin bridges the gap between raw radar telemetry and actionable ground deformation:
+• 84.2% Atmospheric Phase Screen correction
+• OGC STAC v1.0.0 automated tasking pipeline
+• 100% physically consistent numerical simulation
+
+See how next-gen space-tech operators scale their data products: https://viewerapp.vercel.app?utm_source=linkedin&utm_medium=paid_social&utm_campaign=earth2_sar_q4&utm_content=spacetech_csuite
+<button class="copy-btn" onclick="copyText('p4')">COPY</button></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Lightbox Modal -->
+  <div class="modal" id="modal" onclick="closeModal()">
+    <img class="modal-content" id="modalImg">
+  </div>
+
+  <script>
+    function filterTab(category, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      document.querySelectorAll('.asset-group').forEach(group => {
+        if (category === 'all' || group.getAttribute('data-category') === category) {
+          group.style.display = 'block';
+        } else {
+          group.style.display = 'none';
+        }
+      });
+    }
+
+    function openModal(src) {
+      const modal = document.getElementById('modal');
+      const modalImg = document.getElementById('modalImg');
+      modalImg.src = src;
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+
+    function copyText(id) {
+      const el = document.getElementById(id);
+      const btn = el.querySelector('.copy-btn');
+      const text = el.innerText.replace('COPY', '').trim();
+      navigator.clipboard.writeText(text).then(() => {
+        btn.innerText = 'COPIED!';
+        setTimeout(() => btn.innerText = 'COPY', 2000);
+      });
+    }
+  </script>
 </body>
 </html>

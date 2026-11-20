@@ -1,6 +1,6 @@
 {
   "campaign_name": "Earth-2 X-Band SAR & InSAR Mission Twin - B2B LinkedIn Campaign",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "date_created": "2026-11-19",
   "target_url": "https://viewerapp.vercel.app",
   "repository": "https://github.com/zrt219/earth2studio",
@@ -102,61 +102,49 @@
       ]
     },
     "05_Video_and_Animated_GIFs": {
-      "description": "Optimized looping GIFs under 5MB for direct LinkedIn feed posting.",
+      "description": "6 authentic browser-recorded looping GIFs (< 5MB) captured directly from the live 3D WebGL viewer without any added synthetic cards, blocks, or artificial graphics.",
       "files": [
         {
-          "name": "gif_01_global_mission_twin.gif",
-          "size_kb": 942,
-          "dimensions": "640x360",
-          "frames": 36
+          "name": "gif_01_globe_orbit_swath_flyto.gif",
+          "size_kb": 1953.9,
+          "dimensions": "960x600",
+          "frames": 9,
+          "focus": "3D Globe orbital dynamics, run selection in HUD, camera fly-to, and 50 km swath projection activation"
         },
         {
-          "name": "gif_02_insar_phase_split_slider.gif",
-          "size_kb": 1587,
-          "dimensions": "640x400",
-          "frames": 36
+          "name": "gif_02_insar_split_slider_wipe.gif",
+          "size_kb": 847.7,
+          "dimensions": "960x600",
+          "frames": 9,
+          "focus": "InSAR split-screen comparison curtain wiping from 10% to 100% showing raw fringes vs. corrected ground displacement"
         },
         {
-          "name": "gif_03_swath_activation_theater_hop.gif",
-          "size_kb": 1087,
-          "dimensions": "640x400",
-          "frames": 40
+          "name": "gif_03_run_gallery_filter_browse.gif",
+          "size_kb": 1101.1,
+          "dimensions": "960x600",
+          "frames": 9,
+          "focus": "Run Gallery portfolio browsing, interactive keyword filtering, and detailed study modal inspection"
         },
         {
-          "name": "gif_04_stac_tasking_order.gif",
-          "size_kb": 35,
-          "dimensions": "640x400",
-          "frames": 19
+          "name": "gif_04_stac_tasking_modal_inspect.gif",
+          "size_kb": 374.5,
+          "dimensions": "960x600",
+          "frames": 7,
+          "focus": "OGC STAC v1.0.0 tasking order modal inspection, payload parameter scrolling, and 1-click clipboard copy"
         },
         {
-          "name": "gif_05_radar_beam_sweep.gif",
-          "size_kb": 1474,
-          "dimensions": "640x400",
-          "frames": 36
+          "name": "gif_05_multitheater_quickjump_tour.gif",
+          "size_kb": 2793.3,
+          "dimensions": "960x600",
+          "frames": 10,
+          "focus": "Multi-theater global quick-jumping across Europe (Italy Alps), Arctic Siberia (Norilsk), South America (Pantanal), and Cascadia"
         },
         {
-          "name": "gif_06_multiband_penetration_scan.gif",
-          "size_kb": 376,
-          "dimensions": "640x400",
-          "frames": 36
-        },
-        {
-          "name": "gif_07_permafrost_thaw_heatmap.gif",
-          "size_kb": 791,
-          "dimensions": "640x400",
-          "frames": 36
-        },
-        {
-          "name": "gif_08_cascadia_slow_slip_timelapse.gif",
-          "size_kb": 653,
-          "dimensions": "640x400",
-          "frames": 36
-        },
-        {
-          "name": "gif_09_interactive_app_ui_tour.gif",
-          "size_kb": 1285,
-          "dimensions": "640x400",
-          "frames": 48
+          "name": "gif_06_hud_telemetry_orbit_scrub.gif",
+          "size_kb": 1409.9,
+          "dimensions": "960x600",
+          "frames": 8,
+          "focus": "Tactical Mission Control telemetry tracking, mode switches, sub-satellite coordinates, and solar terminator line"
         }
       ]
     },
