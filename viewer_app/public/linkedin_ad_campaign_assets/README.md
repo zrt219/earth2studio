@@ -37,13 +37,15 @@ linkedin_ad_campaign_assets/
 │   ├── card_08_run08_09_wetlands_farmland.png
 │   ├── card_09_run10_11_tropical_cascadia.png
 │   └── card_10_stac_constellation_dispatch.png
-├── 05_High_Framerate_Videos_60fps_120fps/ <- 12 Full HD 1080p MP4 videos (60 fps universal + 120 fps high-refresh)
-│   ├── video_01_globe_orbit_swath_flyto_60fps.mp4 & _120fps.mp4
-│   ├── video_02_insar_split_slider_wipe_60fps.mp4 & _120fps.mp4
-│   ├── video_03_run_gallery_filter_browse_60fps.mp4 & _120fps.mp4
-│   ├── video_04_stac_tasking_modal_inspect_60fps.mp4 & _120fps.mp4
-│   ├── video_05_multitheater_quickjump_tour_60fps.mp4 & _120fps.mp4
-│   └── video_06_hud_telemetry_orbit_scrub_60fps.mp4 & _120fps.mp4
+├── 05_High_Framerate_Videos_60fps_120fps/ <- 16 Full HD 1080p MP4 videos (60 fps universal + 120 fps high-refresh)
+│   ├── video_01_all_surfaces_relief_60fps.mp4 & _120fps.mp4
+│   ├── video_02_surface_temps_tendency_wind_60fps.mp4 & _120fps.mp4
+│   ├── video_03_sar_incidence_kinematics_60fps.mp4 & _120fps.mp4
+│   ├── video_04_weather_hazards_forecast_playback_60fps.mp4 & _120fps.mp4
+│   ├── video_05_insar_split_slider_comparison_60fps.mp4 & _120fps.mp4
+│   ├── video_06_stac_tasking_modal_inspection_60fps.mp4 & _120fps.mp4
+│   ├── video_07_all_11_regions_grand_tour_60fps.mp4 & _120fps.mp4
+│   └── video_08_precision_city_targets_beacons_60fps.mp4 & _120fps.mp4
 ├── 05_Video_and_Animated_GIFs/            <- 6 pure browser screen-recorded GIFs (<5MB, 0% synthetic graphics)
 │   ├── gif_01_globe_orbit_swath_flyto.gif
 │   ├── gif_02_insar_split_slider_wipe.gif

@@ -1,6 +1,6 @@
 {
   "campaign_name": "Earth-2 X-Band SAR & InSAR Mission Twin - B2B LinkedIn Campaign",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "date_created": "2026-11-19",
   "target_url": "https://viewerapp.vercel.app",
   "repository": "https://github.com/zrt219/earth2studio",
@@ -161,75 +161,95 @@
       ]
     },
     "05_High_Framerate_Videos_60fps_120fps": {
-      "description": "Full HD 1080p (1920x1080) MP4 videos at silky-smooth 60 fps and 120 fps for LinkedIn Video Ads and high-refresh displays. 0% synthetic graphics, 100% authentic live WebGL 3D Mission Control captures.",
+      "description": "Full HD 1080p (1920x1080) MP4 videos at silky-smooth 60 fps and 120 fps for LinkedIn Video Ads and high-refresh displays. 0% synthetic graphics, 100% authentic live WebGL 3D Mission Control captures showcasing all surfaces, temperatures, kinematics, previews, and regions.",
       "formats": [
         "60 fps (universal LinkedIn Sponsored Video standard)",
         "120 fps (ProMotion / 120Hz high-refresh displays)"
       ],
       "videos": [
         {
-          "id": "video_01_globe_orbit_swath_flyto",
-          "title": "3D Globe Rotation & Swath Fly-To",
+          "id": "video_01_all_surfaces_relief",
+          "title": "All Surfaces, Sentinel-2 131K LOD & 3D Topographic Relief",
           "files": {
-            "60fps": "video_01_globe_orbit_swath_flyto_60fps.mp4",
-            "120fps": "video_01_globe_orbit_swath_flyto_120fps.mp4"
+            "60fps": "video_01_all_surfaces_relief_60fps.mp4",
+            "120fps": "video_01_all_surfaces_relief_120fps.mp4"
           },
           "resolution": "1920x1080",
-          "focus": "Free-look 3D Earth orbit dynamics, selecting Run 02 in HUD, camera fly-to, and 50 km swath projection activation."
+          "focus": "Base Satellite 8K PBR terrain, activating Sentinel-2 131K LOD, toggling 3D elevation relief displacement, optical cloud layer, and orbital solar terminator lighting."
         },
         {
-          "id": "video_02_insar_split_slider_wipe",
-          "title": "InSAR Split Comparison Slider",
+          "id": "video_02_surface_temps_tendency_wind",
+          "title": "NOAA GFS Surface Temperatures (T2m), 24h Tendency, Wind Streamlines & Hazards",
           "files": {
-            "60fps": "video_02_insar_split_slider_wipe_60fps.mp4",
-            "120fps": "video_02_insar_split_slider_wipe_120fps.mp4"
+            "60fps": "video_02_surface_temps_tendency_wind_60fps.mp4",
+            "120fps": "video_02_surface_temps_tendency_wind_120fps.mp4"
           },
           "resolution": "1920x1080",
-          "focus": "Curtain wipe comparison slider dragging from 10% to 100% showing raw fringes vs. corrected ground displacement."
+          "focus": "Continuous 0.25\u00b0 thermal colormap (-40\u00b0C to +45\u00b0C), 24h temperature tendency gradient, 3,500 dynamic GPU wind particle streamlines, and tropical cyclone storm tracks."
         },
         {
-          "id": "video_03_run_gallery_filter_browse",
-          "title": "Run Gallery Browsing & Filter Search",
+          "id": "video_03_sar_incidence_kinematics",
+          "title": "SAR Kinematics, 50km Swaths & Incidence Angle Geometry",
           "files": {
-            "60fps": "video_03_run_gallery_filter_browse_60fps.mp4",
-            "120fps": "video_03_run_gallery_filter_browse_120fps.mp4"
+            "60fps": "video_03_sar_incidence_kinematics_60fps.mp4",
+            "120fps": "video_03_sar_incidence_kinematics_120fps.mp4"
           },
           "resolution": "1920x1080",
-          "focus": "Browsing the 11-study portfolio catalog, filtering by search keywords ('Mexico', 'Permafrost'), and inspecting detail modals."
+          "focus": "Orbital ground tracks, 50 km imaging swaths, look-angle calculations, Doppler centroid, and SAR Intensity vs InSAR Wrapped Phase mode toggling."
         },
         {
-          "id": "video_04_stac_tasking_modal_inspect",
-          "title": "OGC STAC Tasking Modal Inspection",
+          "id": "video_04_weather_hazards_forecast_playback",
+          "title": "24h Forecast Lead-Time Playback & Extreme Weather Hazard Simulation",
           "files": {
-            "60fps": "video_04_stac_tasking_modal_inspect_60fps.mp4",
-            "120fps": "video_04_stac_tasking_modal_inspect_120fps.mp4"
+            "60fps": "video_04_weather_hazards_forecast_playback_60fps.mp4",
+            "120fps": "video_04_weather_hazards_forecast_playback_120fps.mp4"
           },
           "resolution": "1920x1080",
-          "focus": "Opening autonomous machine-readable STAC v1.0.0 order modal, scrolling sensor properties, and 1-click clipboard copy."
+          "focus": "Scrubbing 24h forecast simulation timeline (+00h, +06h, +12h, +18h, +24h), dynamic atmospheric hazard tracks, and live telemetry pressure/wind updates."
         },
         {
-          "id": "video_05_multitheater_quickjump_tour",
-          "title": "Multi-Theater Global Quick-Jumps",
+          "id": "video_05_insar_split_slider_comparison",
+          "title": "Interactive InSAR Split Curtain Comparison Slider (Raw vs Displaced)",
           "files": {
-            "60fps": "video_05_multitheater_quickjump_tour_60fps.mp4",
-            "120fps": "video_05_multitheater_quickjump_tour_120fps.mp4"
+            "60fps": "video_05_insar_split_slider_comparison_60fps.mp4",
+            "120fps": "video_05_insar_split_slider_comparison_120fps.mp4"
           },
           "resolution": "1920x1080",
-          "focus": "High-speed orbital teleportation across Europe (Italy Alps), Arctic Siberia (Norilsk), Japan, Brazil (Pantanal), and Cascadia."
+          "focus": "Curtain wipe comparison slider dragging from 10% to 100% showing raw interferometric fringes vs. corrected ground displacement field."
         },
         {
-          "id": "video_06_hud_telemetry_orbit_scrub",
-          "title": "HUD Telemetry & Mode Toggles",
+          "id": "video_06_stac_tasking_modal_inspection",
+          "title": "OGC STAC v1.0.0 Tasking Order Modal Inspection & API Payload",
           "files": {
-            "60fps": "video_06_hud_telemetry_orbit_scrub_60fps.mp4",
-            "120fps": "video_06_hud_telemetry_orbit_scrub_120fps.mp4"
+            "60fps": "video_06_stac_tasking_modal_inspection_60fps.mp4",
+            "120fps": "video_06_stac_tasking_modal_inspection_120fps.mp4"
           },
           "resolution": "1920x1080",
-          "focus": "Tactical Mission Control telemetry tracking, mode switches, sub-satellite coordinates, and solar terminator line."
+          "focus": "Opening autonomous machine-readable STAC v1.0.0 order modal, scrolling sensor properties, and 1-click clipboard copy with verification toast."
+        },
+        {
+          "id": "video_07_all_11_regions_grand_tour",
+          "title": "All 11 Global Research Theaters Orbital Grand Tour",
+          "files": {
+            "60fps": "video_07_all_11_regions_grand_tour_60fps.mp4",
+            "120fps": "video_07_all_11_regions_grand_tour_120fps.mp4"
+          },
+          "resolution": "1920x1080",
+          "focus": "Cinematic orbital grand tour across Italy Alps, Mexico City, Norilsk Siberia, Gauteng, Campi Flegrei Naples, Finland, Hokkaido, Brazil Pantanal, Vancouver Cascadia, Arctic Pass, and Global Overview."
+        },
+        {
+          "id": "video_08_precision_city_targets_beacons",
+          "title": "Precision Urban Targets, Volcano Beacons & High-Res Geology",
+          "files": {
+            "60fps": "video_08_precision_city_targets_beacons_60fps.mp4",
+            "120fps": "video_08_precision_city_targets_beacons_120fps.mp4"
+          },
+          "resolution": "1920x1080",
+          "focus": "Urban target panel navigation, Tokyo camera fly-to, Mexico City lacustrine clay basin inspection, Popocat\u00e9petl Volcano telemetry, and Mount Fuji 3D surface beacons."
         }
       ]
     }
   },
   "last_updated": "2026-11-20",
-  "redesign_notes": "Full B2B visual redesign: Aspect-ratio preserved contain mode on carousel cards (0% cropping), minimalist 85% dominance hero square ads, and 5 brand new showcase animated GIFs."
+  "redesign_notes": "v5.0.0: Comprehensive feature video showcase suite featuring 8 dedicated 60/120fps 1080p MP4 videos covering all surfaces & relief, surface temps & winds, SAR incidence kinematics, weather hazard simulations, InSAR curtain slider wiping, STAC tasking modal, all 11 global theaters grand tour, and precision urban target beacons."
 }
