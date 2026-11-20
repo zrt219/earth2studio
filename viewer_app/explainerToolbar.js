@@ -370,6 +370,17 @@ export function initExplainerToolbar(callbacks = {}) {
     if (el) el.addEventListener('click', () => setTimeout(syncToolbarStates, 0));
   });
 
+  // Enable smooth horizontal wheel scrolling on quick-toolbar without visible scrollbar
+  const quickToolbar = document.getElementById('quick-toolbar');
+  if (quickToolbar) {
+    quickToolbar.addEventListener('wheel', (e) => {
+      if (e.deltaY !== 0 && !e.shiftKey) {
+        e.preventDefault();
+        quickToolbar.scrollLeft += e.deltaY;
+      }
+    }, { passive: false });
+  }
+
   syncToolbarStates();
   renderTopicContent('overview');
 }

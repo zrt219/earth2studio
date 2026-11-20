@@ -1667,6 +1667,14 @@
       max-width: calc(100vw - 440px);
       overflow-x: auto;
       white-space: nowrap;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+
+    #quick-toolbar::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
     }
 
     .toolbar-btn {
