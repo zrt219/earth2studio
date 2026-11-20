@@ -1,0 +1,146 @@
+{
+  "campaign_name": "Earth-2 X-Band SAR & InSAR Mission Twin - B2B LinkedIn Campaign",
+  "version": "1.0.0",
+  "date_created": "2026-11-19",
+  "target_url": "https://viewerapp.vercel.app",
+  "repository": "https://github.com/zrt219/earth2studio",
+  "asset_categories": {
+    "01_Strategy_and_Targeting": {
+      "description": "Executive campaign strategy, 11-persona copy matrix, LinkedIn Campaign Manager targeting queries, and 4 carousel storyboards.",
+      "files": [
+        {
+          "name": "CAMPAIGN_STRATEGY.md",
+          "purpose": "Full 3-stage funnel, KPIs, flighting schedules, and competitor battlecards."
+        },
+        {
+          "name": "AUDIENCE_TARGETING.md",
+          "purpose": "Matched accounts, boolean job titles, geos, seniority filters, and exclusions."
+        },
+        {
+          "name": "AD_COPY_VARIANTS.md",
+          "purpose": "11 persona-specific copy variants with intro texts, headlines, and UTM links."
+        },
+        {
+          "name": "CAROUSEL_STORYBOARDS.md",
+          "purpose": "4 full carousel storyboards with mobile-optimized text (<=45 char headlines)."
+        }
+      ]
+    },
+    "02_Single_Image_Ads_Landscape_1200x627": {
+      "description": "Sponsored Content Landscape Image Ads (1.91:1 ratio, 1200x627 px). Best for desktop feed awareness.",
+      "files": [
+        {
+          "name": "ad_01_aps_reduction_1200x627.png",
+          "dimensions": "1200x627",
+          "focus": "Atmospheric Phase Screen 84.2% reduction"
+        },
+        {
+          "name": "ad_02_global_mission_twin_1200x627.png",
+          "dimensions": "1200x627",
+          "focus": "3D Orbit & Mission Twin interface"
+        },
+        {
+          "name": "ad_03_deep_hazards_infrastructure_1200x627.png",
+          "dimensions": "1200x627",
+          "focus": "Critical infrastructure & ground deformation"
+        },
+        {
+          "name": "ad_04_ogc_stac_tasking_1200x627.png",
+          "dimensions": "1200x627",
+          "focus": "OGC STAC v1.0.0 autonomous API tasking"
+        },
+        {
+          "name": "ad_05_scientific_integrity_1200x627.png",
+          "dimensions": "1200x627",
+          "focus": "Scientific integrity & 0% synthetic random noise"
+        }
+      ]
+    },
+    "03_Single_Image_Ads_Square_1080x1080": {
+      "description": "Sponsored Content Square Image Ads (1:1 ratio, 1080x1080 px). Highest CTR on mobile devices.",
+      "files": [
+        {
+          "name": "ad_01_aps_hero_1080x1080.png",
+          "dimensions": "1080x1080",
+          "focus": "Atmospheric delay elimination"
+        },
+        {
+          "name": "ad_02_global_constellation_1080x1080.png",
+          "dimensions": "1080x1080",
+          "focus": "Autonomous constellation digital twin"
+        },
+        {
+          "name": "ad_03_cascadia_subsidence_1080x1080.png",
+          "dimensions": "1080x1080",
+          "focus": "Cascadia subduction zone deformation"
+        },
+        {
+          "name": "ad_04_stac_api_dispatch_1080x1080.png",
+          "dimensions": "1080x1080",
+          "focus": "Direct STAC API payload dispatch"
+        },
+        {
+          "name": "ad_05_multiband_sar_physics_1080x1080.png",
+          "dimensions": "1080x1080",
+          "focus": "Multi-band X, C, L-band penetration physics"
+        }
+      ]
+    },
+    "04_Carousel_Ad_Cards_1080x1080": {
+      "description": "10 sequential cards for LinkedIn Document / Carousel Ads (1080x1080 px).",
+      "cards": [
+        "card_01_mission_overview.png",
+        "card_02_run01_tropospheric_aps.png",
+        "card_03_run02_mexico_city.png",
+        "card_04_run03_norilsk_permafrost.png",
+        "card_05_run04_south_africa_karst.png",
+        "card_06_run05_multiband_physics.png",
+        "card_07_run06_07_volcanotectonics.png",
+        "card_08_run08_09_wetlands_farmland.png",
+        "card_09_run10_11_tropical_cascadia.png",
+        "card_10_stac_constellation_dispatch.png"
+      ]
+    },
+    "05_Video_and_Animated_GIFs": {
+      "description": "Optimized looping GIFs under 5MB for direct LinkedIn feed posting.",
+      "files": [
+        {
+          "name": "gif_01_global_mission_twin.gif",
+          "size_kb": 943,
+          "dimensions": "640x360",
+          "frames": 36
+        },
+        {
+          "name": "gif_02_insar_phase_split_slider.gif",
+          "size_kb": 1587,
+          "dimensions": "640x400",
+          "frames": 36
+        },
+        {
+          "name": "gif_03_swath_activation_theater_hop.gif",
+          "size_kb": 1087,
+          "dimensions": "640x400",
+          "frames": 40
+        },
+        {
+          "name": "gif_04_stac_tasking_order.gif",
+          "size_kb": 36,
+          "dimensions": "640x400",
+          "frames": 19
+        }
+      ]
+    },
+    "06_App_Showcase_Screenshots": {
+      "description": "High-resolution UI captures of the running 3D WebGL Digital Twin.",
+      "files": [
+        "01_mission_control_overview.png",
+        "02_run_gallery_catalog.png",
+        "03_search_filtering_mexico.png",
+        "04_swath_orbit_activation_mexico.png",
+        "05_stac_tasking_inspector.png",
+        "06_insar_split_slider_comparison.png",
+        "07_hud_quick_runs_vancouver.png"
+      ]
+    }
+  }
+}
